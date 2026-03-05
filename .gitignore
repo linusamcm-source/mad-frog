@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Generated native directories (Expo managed workflow)
+/ios/
+/android/
+
+# Metro bundler
+.metro-health-check*
+
+# Native build artifacts
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+credentials.json
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+logs/
+
+# Environment files
+.env
+.env*.local
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Claude Code tooling
+.claude-trace/
+.claude-logs/
+
+# Device logs
+.logs/
+logs
+# Design token sync snapshots
+design_template/pen-snapshot.json
+design_template/logs/
+
+.gemini
