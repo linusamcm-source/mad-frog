@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # ── System packages ──────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl wget unzip git \
+    ca-certificates curl wget unzip git xclip fontconfig \
     build-essential software-properties-common \
     sudo locales \
     usbutils \
@@ -22,21 +22,27 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
-# ── Python 3.13 ──────────────────────────────────────────────────────
+# ── Python 3.14 ──────────────────────────────────────────────────────
 RUN add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    python3.13 \
-    python3.13-dev \
-    python3.13-venv \
+    python3.14 \
+    python3.14-dev \
+    python3.14-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+# Bootstrap pip for 3.14 (deadsnakes does not ship pip packages)
+RUN curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3.14
 
-# Make python3.13 the default python
-RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 && \
-    ln -sf /usr/bin/python3.13 /usr/bin/python
+
+
+# Make python3.14 the default python
+RUN ln -sf /usr/bin/python3.14 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3.14 /usr/bin/python
+
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # ── OpenJDK ──────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -71,16 +77,9 @@ RUN yes | sdkmanager --licenses > /dev/null 2>&1 \
        "ndk;${ANDROID_NDK_VERSION}" \
        "cmake;${CMAKE_VERSION}"
 
-# ── AWS CLI v2 ───────────────────────────────────────────────────────
-RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-       -o /tmp/awscliv2.zip \
-    && unzip -q /tmp/awscliv2.zip -d /tmp \
-    && /tmp/aws/install \
-    && rm -rf /tmp/aws /tmp/awscliv2.zip
 
 # ── Global npm tools ─────────────────────────────────────────────────
-RUN npm install -g eas-cli @google/gemini-cli
-
+RUN npm install -g eas-cli @google/gemini-cli &&  npm install -g repomix && npm install -g @zed-industries/claude-code-acp
 # ── Non-root user ────────────────────────────────────────────────────
 ARG USERNAME=vscode
 ARG USER_UID=1000

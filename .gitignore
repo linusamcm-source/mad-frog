@@ -58,3 +58,6 @@ design_template/pen-snapshot.json
 design_template/logs/
 
 .gemini
+.claude
+
+docs

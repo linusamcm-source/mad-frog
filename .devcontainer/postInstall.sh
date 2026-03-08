@@ -1,49 +1,78 @@
 #!/usr/bin/env bash
+
+
 set -euo pipefail
-curl -fsSL https://claude.ai/install.sh | bash
+
+# Ensure ~/.local/bin is on PATH for tools installed during this script
+export PATH="$HOME/.local/bin:$PATH"
+
 echo "──────────────────────────────────────────"
 echo " vibe_visualiser devcontainer — post-create setup"
 echo "──────────────────────────────────────────"
 
-# ── Desloppify ───────────────────────────────────────────────────────
-if [ ! -d "$HOME/desloppify" ]; then
-  git clone https://github.com/peteromallet/desloppify.git "$HOME/desloppify"
+# ── Git identity (fall back to env vars if host .gitconfig not mounted) ──
+if ! git config --global user.name &>/dev/null; then
+  if [ -n "${GIT_USER_NAME:-}" ]; then
+    git config --global user.name "$GIT_USER_NAME"
+  fi
 fi
-pip install --upgrade "desloppify[full]"
+if ! git config --global user.email &>/dev/null; then
+  if [ -n "${GIT_USER_EMAIL:-}" ]; then
+    git config --global user.email "$GIT_USER_EMAIL"
+  fi
+fi
+if ! git config --global user.name &>/dev/null || ! git config --global user.email &>/dev/null; then
+  echo "  WARNING: Git identity not configured."
+  echo "  Set GIT_USER_NAME and GIT_USER_EMAIL env vars, or ensure ~/.gitconfig exists on host."
+fi
 
-# ── Fix volume ownership ────────────────────────────────────────────
-# Docker creates named volumes as root — fix so 'vscode' user can write
-for vol_dir in /workspace/node_modules /workspace/android; do
-  if [ -d "$vol_dir" ] && [ "$(stat -c '%U' "$vol_dir")" != "vscode" ]; then
-    echo "[0/4] Fixing ownership: $vol_dir"
-    sudo chown vscode:vscode "$vol_dir"
+# ── Claude  ────────
+curl -fsSL https://claude.ai/install.sh | bash
+
+# ── Bun (needed by ccstatusline) ────────
+if ! command -v bun &>/dev/null; then
+  echo "Installing Bun..."
+  curl -fsSL https://bun.sh/install | bash
+  export PATH="$HOME/.bun/bin:$PATH"
+  for rc in "$HOME/.bashrc" "$HOME/.profile"; do
+    if ! grep -q '\.bun/bin' "$rc" 2>/dev/null; then
+      echo 'export PATH="$HOME/.bun/bin:$PATH"' >> "$rc"
+    fi
+  done
+fi
+
+# ---install ccstatusline-------
+echo "Installing ccstatusline..."
+mkdir -p "$HOME/.config/ccstatusline"
+cp "$(dirname "$0")/ccstatusline-settings.json" "$HOME/.config/ccstatusline/settings.json"
+
+# ── Toad  ──────── 
+echo "Installing Toad ..."
+curl -fsSL https://batrachian.ai/install | sh
+
+# ── Fancy-git shell integration  ────────
+echo "Installing Fancy-git..."
+curl -sS https://raw.githubusercontent.com/diogocavilha/fancy-git/master/install.sh | sh
+
+
+echo "Installing Python Packages with UV..."
+#uv init
+#uv add ruff bandit safety vulture pydantic desloppify[full] loguru pytest pytest-cov pre-commit
+#uv lock
+uv sync
+
+# Ensure ~/.local/bin is on PATH for uv-installed tools
+export PATH="$HOME/.local/bin:$PATH"
+for rc in "$HOME/.bashrc" "$HOME/.profile"; do
+  if ! grep -q '\.local/bin' "$rc" 2>/dev/null; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$rc"
   fi
 done
-
-# ── npm install ──────────────────────────────────────────────────────
-if [ ! -f "node_modules/.package-lock.json" ] || \
-   [ "package.json" -nt "node_modules/.package-lock.json" ]; then
-  echo "[1/4] Installing npm dependencies..."
-  npm install
-else
-  echo "[1/4] node_modules up to date, skipping install"
-fi
-
-# ── Expo prebuild (generates android/) ───────────────────────────────
-echo "[2/4] Running Expo prebuild..."
-npx expo prebuild --no-install 2>/dev/null || true
-
-# ── AWS secrets (optional — only if credentials are mounted) ─────────
-if [ -f "$HOME/.aws/credentials" ] || [ -f "$HOME/.aws/config" ]; then
-  if [ -f "scripts/sync-secrets.sh" ] && [ ! -f ".env.local" ]; then
-    echo "[3/4] Syncing secrets from AWS SSM..."
-    bash scripts/sync-secrets.sh dev || echo "  Secrets sync failed (non-fatal)"
-  else
-    echo "[3/4] .env.local exists or no sync script, skipping secrets"
-  fi
-else
-  echo "[3/4] No AWS credentials mounted, skipping secrets sync"
-fi
+# ── Desloppify ───────────────────────────────────────────────────────
+# if [ ! -d "$HOME/desloppify" ]; then
+#   git clone https://github.com/peteromallet/desloppify.git "$HOME/desloppify"
+# fi
+# echo "Installing Desloppify dependencies..."
 
 # ── Fancy-git shell integration (optional — only if mounted) ────────
 FANCY_GIT_DIR="$HOME/.fancy-git"
@@ -61,35 +90,49 @@ else
   echo "  fancy-git: not mounted, skipping"
 fi
 
+# ── BMAD ──────────────────────────────────────────────────────────
+echo "Installing BMAD..."
+if [ -d "$(pwd)/_bmad-output" ]; then
+  echo "  BMAD already installed, running quick-update..."
+  npx bmad-method install \
+    --directory "$(pwd)" \
+    --action quick-update
+else
+  npx bmad-method install \
+    --directory "$(pwd)" \
+    --modules bmm,bmb \
+    --tools claude-code,gemini  \
+    --user-name "$USER" \
+    --communication-language English \
+    --document-output-language English \
+    --output-folder _bmad-output \
+    --yes
+fi
+
+repomix --remote https://github.com/batrachianai/toad.git --compress -o _bmad-output/implementation-artifacts/repos/toad.xml 
+repomix --remote https://github.com/bmad-code-org/BMAD-METHOD.git --compress -o _bmad-output/implementation-artifacts/repos/bmad-method.xml 
 # ── Summary ──────────────────────────────────────────────────────────
-echo "[4/4] Verifying toolchain..."
+echo "Final - Verifying toolchain..."
 echo ""
 echo "  Node:       $(node --version)"
 echo "  npm:        $(npm --version)"
 echo "  Python:     $(python --version)"
 echo "  uv:         $(uv --version)"
+echo "  toad:       $(toad --version)"
 echo "  Java:       $(java -version 2>&1 | head -1)"
-echo "  Android SDK: ${ANDROID_HOME:-/opt/android-sdk}"
-echo "  AWS CLI:    $(aws --version 2>&1 | cut -d' ' -f1)"
-echo "  EAS CLI:    $(npx eas-cli --version 2>/dev/null || echo 'not found')"
 echo ""
+
+
+
+
+
 
 # ── ADB hint ─────────────────────────────────────────────────────────
 cat <<'MSG'
 ──────────────────────────────────────────
  Ready.
-
  Quick start:
-   npx expo start              # Metro bundler (scan QR from device)
-   npx expo run:android        # Build + install via ADB
-
- Connecting to host emulator/device:
-   1. On the HOST run:  adb -a nodaemon server
-   2. Container uses ADB_SERVER_SOCKET=tcp:host.docker.internal:5037
-   3. Verify:           adb devices
-
- AWS secrets:
-   make sync-secrets            # Pull .env.local from SSM
+   make start             # Start the development server
 
 ──────────────────────────────────────────
 MSG

@@ -1,0 +1,18 @@
+[project]
+name = "vibe-visualiser"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "bandit>=1.9.4",
+    "desloppify[full]>=0.9.1",
+    "loguru>=0.7.3",
+    "pre-commit>=4.5.1",
+    "pydantic>=2.12.5",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.15.5",
+    "safety>=3.7.0",
+    "vulture>=2.15",
+]
