@@ -369,8 +369,7 @@ src/
           workflow.yaml
         retrospective/
           bmad-skill-manifest.yaml
-          instructions.md
-          workflow.yaml
+          workflow.md
         sprint-planning/
           bmad-skill-manifest.yaml
           checklist.md
@@ -379,8 +378,7 @@ src/
           workflow.yaml
         sprint-status/
           bmad-skill-manifest.yaml
-          instructions.md
-          workflow.yaml
+          workflow.md
       bmad-quick-flow/
         quick-dev/
           steps/
@@ -439,8 +437,7 @@ src/
       qa-generate-e2e-tests/
         bmad-skill-manifest.yaml
         checklist.md
-        instructions.md
-        workflow.yaml
+        workflow.md
     module-help.csv
     module.yaml
   core/
@@ -654,12 +651,9 @@ tools/
             workflow-commander.md
           _base-ide.js
           _config-driven.js
-          github-copilot.js
-          kilo.js
           manager.js
           platform-codes.js
           platform-codes.yaml
-          rovodev.js
         modules/
           external-manager.js
           manager.js
@@ -3885,7 +3879,7 @@ Unlock your creativity through guided exploration.
 
 ## What is Brainstorming?
 
-Run `brainstorming` and you've got a creative facilitator pulling ideas out of you - not generating them for you. The AI acts as coach and guide, using proven techniques to create conditions where your best thinking emerges.
+Run `bmad-brainstorming` and you've got a creative facilitator pulling ideas out of you - not generating them for you. The AI acts as coach and guide, using proven techniques to create conditions where your best thinking emerges.
 
 **Good for:**
 
@@ -3974,7 +3968,7 @@ Get all your AI agents in one conversation.
 
 ## What is Party Mode?
 
-Run `party-mode` and you've got your whole AI team in one room - PM, Architect, Dev, UX Designer, whoever you need. BMad Master orchestrates, picking relevant agents per message. Agents respond in character, agree, disagree, and build on each other's ideas.
+Run `bmad-party-mode` and you've got your whole AI team in one room - PM, Architect, Dev, UX Designer, whoever you need. BMad Master orchestrates, picking relevant agents per message. Agents respond in character, agree, disagree, and build on each other's ideas.
 
 The conversation continues as long as you want. Ask follow-ups, push back on answers, redirect the discussion - it's a real back-and-forth with your agents until you're done.
 
@@ -4135,7 +4129,7 @@ Common decisions that prevent conflicts:
 - Document decisions that cross epic boundaries
 - Focus on conflict-prone areas
 - Update architecture as you learn
-- Use `correct-course` for significant changes
+- Use `bmad-correct-course` for significant changes
 :::
 </file>
 
@@ -4163,12 +4157,12 @@ The `project-context.md` file solves this by documenting what agents need to kno
 Every implementation workflow automatically loads `project-context.md` if it exists. The architect workflow also loads it to respect your technical preferences when designing the architecture.
 
 **Loaded by these workflows:**
-- `create-architecture` — respects technical preferences during solutioning
-- `create-story` — informs story creation with project patterns
-- `dev-story` — guides implementation decisions
-- `code-review` — validates against project standards
-- `quick-dev` — applies patterns when implementing tech-specs
-- `sprint-planning`, `retrospective`, `correct-course` — provides project-wide context
+- `bmad-create-architecture` — respects technical preferences during solutioning
+- `bmad-create-story` — informs story creation with project patterns
+- `bmad-dev-story` — guides implementation decisions
+- `bmad-code-review` — validates against project standards
+- `bmad-quick-dev` — applies patterns when implementing tech-specs
+- `bmad-sprint-planning`, `bmad-retrospective`, `bmad-correct-course` — provides project-wide context
 
 ## When to Create It
 
@@ -4176,10 +4170,10 @@ The `project-context.md` file is useful at any stage of a project:
 
 | Scenario | When to Create | Purpose |
 |----------|----------------|---------|
-| **New project, before architecture** | Manually, before `create-architecture` | Document your technical preferences so the architect respects them |
-| **New project, after architecture** | Via `generate-project-context` or manually | Capture architecture decisions for implementation agents |
-| **Existing project** | Via `generate-project-context` | Discover existing patterns so agents follow established conventions |
-| **Quick Flow project** | Before or during `quick-dev` | Ensure quick implementation respects your patterns |
+| **New project, before architecture** | Manually, before `bmad-create-architecture` | Document your technical preferences so the architect respects them |
+| **New project, after architecture** | Via `bmad-generate-project-context` or manually | Capture architecture decisions for implementation agents |
+| **Existing project** | Via `bmad-generate-project-context` | Discover existing patterns so agents follow established conventions |
+| **Quick Flow project** | Before or during `bmad-quick-dev` | Ensure quick implementation respects your patterns |
 
 :::tip[Recommended]
 For new projects, create it manually before architecture if you have strong technical preferences. Otherwise, generate it after architecture to capture those decisions.
@@ -4249,20 +4243,20 @@ Edit it with your technology stack and implementation rules. The architect and i
 
 ### Generate After Architecture
 
-Run the `generate-project-context` workflow after completing your architecture:
+Run the `bmad-generate-project-context` workflow after completing your architecture:
 
 ```bash
-/bmad-bmm-generate-project-context
+bmad-generate-project-context
 ```
 
 This scans your architecture document and project files to generate a context file capturing the decisions made.
 
 ### Generate for Existing Projects
 
-For existing projects, run `generate-project-context` to discover existing patterns:
+For existing projects, run `bmad-generate-project-context` to discover existing patterns:
 
 ```bash
-/bmad-bmm-generate-project-context
+bmad-generate-project-context
 ```
 
 The workflow analyzes your codebase to identify conventions, then generates a context file you can review and refine.
@@ -4292,7 +4286,7 @@ The `project-context.md` file is a living document. Update it when:
 - Patterns evolve during implementation
 - You identify gaps from agent behavior
 
-You can edit it manually at any time, or re-run `generate-project-context` to update it after significant changes.
+You can edit it manually at any time, or re-run `bmad-generate-project-context` to update it after significant changes.
 
 :::note[File Location]
 The default location is `_bmad-output/project-context.md`. Workflows search for it there, and also check `**/project-context.md` anywhere in your project.
@@ -4307,7 +4301,7 @@ sidebar:
   order: 1
 ---
 
-Skip the ceremony. Quick Flow takes you from idea to working code in two commands - no Product Brief, no PRD, no Architecture doc.
+Skip the ceremony. Quick Flow takes you from idea to working code in two skills - no Product Brief, no PRD, no Architecture doc.
 
 ## When to Use It
 
@@ -4325,16 +4319,16 @@ Skip the ceremony. Quick Flow takes you from idea to working code in two command
 - Anything where requirements are unclear or contested
 
 :::caution[Scope Creep]
-If you start a Quick Flow and realize the scope is bigger than expected, `quick-dev` will detect this and offer to escalate. You can switch to a full PRD workflow at any point without losing your work.
+If you start a Quick Flow and realize the scope is bigger than expected, `bmad-quick-dev` will detect this and offer to escalate. You can switch to a full PRD workflow at any point without losing your work.
 :::
 
 ## How It Works
 
-Quick Flow has two commands, each backed by a structured workflow. You can run them together or independently.
+Quick Flow has two skills, each backed by a structured workflow. You can run them together or independently.
 
 ### quick-spec: Plan
 
-Run `quick-spec` and Barry (the Quick Flow agent) walks you through a conversational discovery process:
+Run `bmad-quick-spec` and Barry (the Quick Flow agent) walks you through a conversational discovery process:
 
 1. **Understand** - You describe what you want to build. Barry scans the codebase to ask informed questions, then captures a problem statement, solution approach, and scope boundaries.
 2. **Investigate** - Barry reads relevant files, maps code patterns, identifies files to modify, and documents the technical context.
@@ -4345,15 +4339,15 @@ The output is a `tech-spec-{slug}.md` file saved to your project's implementatio
 
 ### quick-dev: Build
 
-Run `quick-dev` and Barry implements the work. It operates in two modes:
+Run `bmad-quick-dev` and Barry implements the work. It operates in two modes:
 
 - **Tech-spec mode** - Point it at a spec file (`quick-dev tech-spec-auth.md`) and it executes every task in order, writes tests, and verifies acceptance criteria.
 - **Direct mode** - Give it instructions directly (`quick-dev "refactor the auth middleware"`) and it gathers context, builds a mental plan, and executes.
 
-After implementation, `quick-dev` runs a self-check audit against all tasks and acceptance criteria, then triggers an adversarial code review of the diff. Findings are presented for you to resolve before wrapping up.
+After implementation, `bmad-quick-dev` runs a self-check audit against all tasks and acceptance criteria, then triggers an adversarial code review of the diff. Findings are presented for you to resolve before wrapping up.
 
 :::tip[Fresh Context]
-For best results, run `quick-dev` in a new conversation after finishing `quick-spec`. This gives the implementation agent clean context focused solely on building.
+For best results, run `bmad-quick-dev` in a new conversation after finishing `bmad-quick-spec`. This gives the implementation agent clean context focused solely on building.
 :::
 
 ## What Quick Flow Skips
@@ -4367,9 +4361,9 @@ The full BMad Method produces a Product Brief, PRD, Architecture doc, and Epic/S
 
 ## Escalating to Full BMad Method
 
-Quick Flow includes built-in guardrails for scope detection. When you run `quick-dev` with a direct request, it evaluates signals like multi-component mentions, system-level language, and uncertainty about approach. If it detects the work is bigger than a quick flow:
+Quick Flow includes built-in guardrails for scope detection. When you run `bmad-quick-dev` with a direct request, it evaluates signals like multi-component mentions, system-level language, and uncertainty about approach. If it detects the work is bigger than a quick flow:
 
-- **Light escalation** - Recommends running `quick-spec` first to create a plan
+- **Light escalation** - Recommends running `bmad-quick-spec` first to create a plan
 - **Heavy escalation** - Recommends switching to the full BMad Method PRD process
 
 You can also escalate manually at any time. Your tech-spec work carries forward - it becomes input for the broader planning process rather than being discarded.
@@ -4665,7 +4659,7 @@ Generate `project-context.md` to capture your existing codebase patterns and con
 Run the generate project context workflow:
 
 ```bash
-/bmad-bmm-generate-project-context
+bmad-generate-project-context
 ```
 
 This scans your codebase to identify:
@@ -4688,22 +4682,22 @@ Your `docs/` folder should contain succinct, well-organized documentation that a
 - Architecture
 - Any other relevant project information
 
-For complex projects, consider using the `document-project` workflow. It offers runtime variants that will scan your entire project and document its actual current state.
+For complex projects, consider using the `bmad-document-project` workflow. It offers runtime variants that will scan your entire project and document its actual current state.
 
 ## Step 3: Get Help
 
 ### BMad-Help: Your Starting Point
 
-**Run `/bmad-help` anytime you're unsure what to do next.** This intelligent guide:
+**Run `bmad-help` anytime you're unsure what to do next.** This intelligent guide:
 
 - Inspects your project to see what's already been done
 - Shows options based on your installed modules
 - Understands natural language queries
 
 ```
-/bmad-help I have an existing Rails app, where should I start?
-/bmad-help What's the difference between quick-flow and full method?
-/bmad-help Show me what workflows are available
+bmad-help I have an existing Rails app, where should I start?
+bmad-help What's the difference between quick-flow and full method?
+bmad-help Show me what workflows are available
 ```
 
 BMad-Help also **automatically runs at the end of every workflow**, providing clear guidance on exactly what to do next.
@@ -4714,7 +4708,7 @@ You have two primary options depending on the scope of changes:
 
 | Scope                          | Recommended Approach                                                                                                          |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Small updates or additions** | Use `quick-flow-solo-dev` to create a tech-spec and implement the change. The full four-phase BMad Method is likely overkill. |
+| **Small updates or additions** | Use `bmad-quick-flow-solo-dev` to create a tech-spec and implement the change. The full four-phase BMad Method is likely overkill. |
 | **Major changes or additions** | Start with the BMad Method, applying as much or as little rigor as needed.                                                    |
 
 ### During PRD Creation
@@ -4771,7 +4765,7 @@ BMad-Help is more than a lookup tool — it:
 
 ### How to Use BMad-Help
 
-Run it with just the slash command:
+Run it with just the skill name:
 
 ```
 /bmad-help
@@ -4834,7 +4828,7 @@ https://bmad-code-org.github.io/BMAD-METHOD/llms-full.txt
 :::note[Example]
 **Q:** "Tell me the fastest way to build something with BMad"
 
-**A:** Use Quick Flow: Run `quick-spec` to write a technical specification, then `quick-dev` to implement it—skipping the full planning phases.
+**A:** Use Quick Flow: Run `bmad-quick-spec` to write a technical specification, then `bmad-quick-dev` to implement it—skipping the full planning phases.
 :::
 
 ## What You Get
@@ -4941,7 +4935,11 @@ Pick which AI tools you use:
 - Cursor
 - Others
 
-Each tool has its own way of integrating commands. The installer creates tiny prompt files to activate workflows and agents — it just puts them where your tool expects to find them.
+Each tool has its own way of integrating skills. The installer creates tiny prompt files to activate workflows and agents — it just puts them where your tool expects to find them.
+
+:::note[Enabling Skills]
+Some platforms require skills to be explicitly enabled in settings before they appear. If you install BMad and don't see the skills, check your platform's settings or ask your AI assistant how to enable skills.
+:::
 
 ### 4. Choose Modules
 
@@ -4961,13 +4959,19 @@ your-project/
 │   ├── core/           # Required core module
 │   └── ...
 ├── _bmad-output/       # Generated artifacts
-├── .claude/            # Claude Code commands (if using Claude Code)
-└── .kiro/              # Kiro steering files (if using Kiro)
+├── .claude/            # Claude Code skills (if using Claude Code)
+│   └── skills/
+│       ├── bmad-help/
+│       ├── bmad-persona/
+│       └── ...
+└── .cursor/            # Cursor skills (if using Cursor)
+    └── skills/
+        └── ...
 ```
 
 ## Verify Installation
 
-Run `/bmad-help` to verify everything works and see what to do next.
+Run `bmad-help` to verify everything works and see what to do next.
 
 **BMad-Help is your intelligent guide** that will:
 - Confirm your installation is working
@@ -4976,8 +4980,8 @@ Run `/bmad-help` to verify everything works and see what to do next.
 
 You can also ask it questions:
 ```
-/bmad-help I just installed, what should I do first?
-/bmad-help What are my options for a SaaS project?
+bmad-help I just installed, what should I do first?
+bmad-help What are my options for a SaaS project?
 ```
 
 ## Troubleshooting
@@ -5241,7 +5245,7 @@ sections_completed: ['technology_stack', 'critical_rules']
 Run the workflow in a fresh chat:
 
 ```bash
-/bmad-bmm-generate-project-context
+bmad-generate-project-context
 ```
 
 The workflow scans your architecture document and project files to generate a context file capturing the decisions made.
@@ -5251,7 +5255,7 @@ The workflow scans your architecture document and project files to generate a co
 For existing projects, run:
 
 ```bash
-/bmad-bmm-generate-project-context
+bmad-generate-project-context
 ```
 
 The workflow analyzes your codebase to identify conventions, then generates a context file you can review and refine.
@@ -5333,18 +5337,18 @@ If you are unsure, start with the DEV agent. You can always escalate to Quick Fl
 
 ## Steps
 
-### 1. Load the DEV Agent
+### 1. Invoke the DEV Agent
 
-Start a **fresh chat** in your AI IDE and load the DEV agent with its slash command:
+Start a **fresh chat** in your AI IDE and invoke the DEV agent skill:
 
 ```text
-/bmad-agent-bmm-dev
+bmad-dev
 ```
 
-This loads the agent's persona and capabilities into the session. If you decide you need Quick Flow instead, load the **Quick Flow Solo Dev** agent in a fresh chat:
+This loads the agent's persona and capabilities into the session. If you decide you need Quick Flow instead, invoke the **Quick Flow Solo Dev** agent skill in a fresh chat:
 
 ```text
-/bmad-agent-bmm-quick-flow-solo-dev
+bmad-quick-flow-solo-dev
 ```
 
 Once the Solo Dev agent is loaded, describe your change and ask it to create a **quick-spec**. The agent drafts a lightweight spec capturing what you want to change and how. After you approve the quick-spec, tell the agent to start the **Quick Flow dev cycle** -- it will implement the change, run tests, and perform a self-review, all guided by the spec you just approved.
@@ -5434,7 +5438,7 @@ sidebar:
   order: 8
 ---
 
-Use the `shard-doc` tool if you need to split large markdown files into smaller, organized files for better context management.
+Use the `bmad-shard-doc` tool if you need to split large markdown files into smaller, organized files for better context management.
 
 :::caution[Deprecated]
 This is no longer recommended, and soon with updated workflows and most major LLMs and tools supporting subprocesses this will be unnecessary.
@@ -5543,12 +5547,15 @@ When v4 is detected, you can:
 
 If you named your bmad method folder something else - you will need to manually remove the folder yourself.
 
-### 3. Clean Up IDE Commands
+### 3. Clean Up IDE Skills
 
-Manually remove legacy v4 IDE commands - for example if you have claude, look for any nested folders that start with bmad and remove them:
+Manually remove legacy v4 IDE commands/skills - for example if you have Claude Code, look for any nested folders that start with bmad and remove them:
 
-- `.claude/commands/BMad/agents`
-- `.claude/commands/BMad/tasks`
+- `.claude/commands/`
+
+The new v6 skills are installed to:
+
+- `.claude/skills/`
 
 ### 4. Migrate Planning Artifacts
 
@@ -5568,7 +5575,7 @@ If you have stories created or implemented:
 
 1. Complete the v6 installation
 2. Place `epics.md` or `epics/epic*.md` in `_bmad-output/planning-artifacts/`
-3. Run the Scrum Master's `sprint-planning` workflow
+3. Run the Scrum Master's `bmad-sprint-planning` workflow
 4. Tell the SM which epics/stories are already complete
 
 ## What You Get
@@ -5610,143 +5617,145 @@ your-project/
 <file path="docs/reference/agents.md">
 ---
 title: Agents
-description: Default BMM agents with their menu triggers and primary workflows
+description: Default BMM agents with their skill IDs, menu triggers, and primary workflows
 sidebar:
   order: 2
 ---
 
 ## Default Agents
 
-This page lists the default BMM (Agile suite) agents that install with BMad Method, along with their menu triggers and primary workflows.
+This page lists the default BMM (Agile suite) agents that install with BMad Method, along with their skill IDs, menu triggers, and primary workflows. Each agent is invoked as a skill.
 
 ## Notes
 
+- Each agent is available as a skill, generated by the installer. The skill ID (e.g., `bmad-dev`) is used to invoke the agent.
 - Triggers are the short menu codes (e.g., `CP`) and fuzzy matches shown in each agent menu.
-- Slash commands are generated separately. See [Commands](./commands.md) for the slash command list and where they are defined.
 - QA (Quinn) is the lightweight test automation agent in BMM. The full Test Architect (TEA) lives in its own module.
 
-| Agent                       | Triggers                           | Primary workflows                                                                                   |
-| --------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Analyst (Mary)              | `BP`, `RS`, `CB`, `DP`             | Brainstorm Project, Research, Create Brief, Document Project                                        |
-| Product Manager (John)      | `CP`, `VP`, `EP`, `CE`, `IR`, `CC` | Create/Validate/Edit PRD, Create Epics and Stories, Implementation Readiness, Correct Course        |
-| Architect (Winston)         | `CA`, `IR`                         | Create Architecture, Implementation Readiness                                                       |
-| Scrum Master (Bob)          | `SP`, `CS`, `ER`, `CC`             | Sprint Planning, Create Story, Epic Retrospective, Correct Course                                   |
-| Developer (Amelia)          | `DS`, `CR`                         | Dev Story, Code Review                                                                              |
-| QA Engineer (Quinn)         | `QA`                               | Automate (generate tests for existing features)                                                     |
-| Quick Flow Solo Dev (Barry) | `QS`, `QD`, `CR`                   | Quick Spec, Quick Dev, Code Review                                                                  |
-| UX Designer (Sally)         | `CU`                               | Create UX Design                                                                                    |
-| Technical Writer (Paige)    | `DP`, `WD`, `US`, `MG`, `VD`, `EC` | Document Project, Write Document, Update Standards, Mermaid Generate, Validate Doc, Explain Concept |
+| Agent                       | Skill ID             | Triggers                           | Primary workflows                                                                                   |
+| --------------------------- | -------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Analyst (Mary)              | `bmad-analyst`       | `BP`, `RS`, `CB`, `DP`             | Brainstorm Project, Research, Create Brief, Document Project                                        |
+| Product Manager (John)      | `bmad-pm`            | `CP`, `VP`, `EP`, `CE`, `IR`, `CC` | Create/Validate/Edit PRD, Create Epics and Stories, Implementation Readiness, Correct Course        |
+| Architect (Winston)         | `bmad-architect`     | `CA`, `IR`                         | Create Architecture, Implementation Readiness                                                       |
+| Scrum Master (Bob)          | `bmad-sm`            | `SP`, `CS`, `ER`, `CC`             | Sprint Planning, Create Story, Epic Retrospective, Correct Course                                   |
+| Developer (Amelia)          | `bmad-dev`           | `DS`, `CR`                         | Dev Story, Code Review                                                                              |
+| QA Engineer (Quinn)         | `bmad-qa`            | `QA`                               | Automate (generate tests for existing features)                                                     |
+| Quick Flow Solo Dev (Barry) | `bmad-master`        | `QS`, `QD`, `CR`                   | Quick Spec, Quick Dev, Code Review                                                                  |
+| UX Designer (Sally)         | `bmad-ux-designer`   | `CU`                               | Create UX Design                                                                                    |
+| Technical Writer (Paige)    | `bmad-tech-writer`   | `DP`, `WD`, `US`, `MG`, `VD`, `EC` | Document Project, Write Document, Update Standards, Mermaid Generate, Validate Doc, Explain Concept |
 </file>
 
 <file path="docs/reference/commands.md">
 ---
-title: Commands
-description: Reference for BMad slash commands — what they are, how they work, and where to find them.
+title: Skills
+description: Reference for BMad skills — what they are, how they work, and where to find them.
 sidebar:
   order: 3
 ---
 
-Slash commands are pre-built prompts that load agents, run workflows, or execute tasks inside your IDE. The BMad installer generates them from your installed modules at install time. If you later add, remove, or change modules, re-run the installer to keep commands in sync (see [Troubleshooting](#troubleshooting)).
+Skills are pre-built prompts that load agents, run workflows, or execute tasks inside your IDE. The BMad installer generates them from your installed modules at install time. If you later add, remove, or change modules, re-run the installer to keep skills in sync (see [Troubleshooting](#troubleshooting)).
 
-## Commands vs. Agent Menu Triggers
+## Skills vs. Agent Menu Triggers
 
 BMad offers two ways to start work, and they serve different purposes.
 
 | Mechanism | How you invoke it | What happens |
 | --- | --- | --- |
-| **Slash command** | Type `/bmad-...` in your IDE | Directly loads an agent, runs a workflow, or executes a task |
+| **Skill** | Type the skill name (e.g. `bmad-help`) in your IDE | Directly loads an agent, runs a workflow, or executes a task |
 | **Agent menu trigger** | Load an agent first, then type a short code (e.g. `DS`) | The agent interprets the code and starts the matching workflow while staying in character |
 
-Agent menu triggers require an active agent session. Use slash commands when you know which workflow you want. Use triggers when you are already working with an agent and want to switch tasks without leaving the conversation.
+Agent menu triggers require an active agent session. Use skills when you know which workflow you want. Use triggers when you are already working with an agent and want to switch tasks without leaving the conversation.
 
-## How Commands Are Generated
+## How Skills Are Generated
 
-When you run `npx bmad-method install`, the installer reads the manifests for every selected module and writes one command file per agent, workflow, task, and tool. Each file is a short markdown prompt that instructs the AI to load the corresponding source file and follow its instructions.
+When you run `npx bmad-method install`, the installer reads the manifests for every selected module and writes one skill per agent, workflow, task, and tool. Each skill is a directory containing a `SKILL.md` file that instructs the AI to load the corresponding source file and follow its instructions.
 
-The installer uses templates for each command type:
+The installer uses templates for each skill type:
 
-| Command type | What the generated file does |
+| Skill type | What the generated file does |
 | --- | --- |
 | **Agent launcher** | Loads the agent persona file, activates its menu, and stays in character |
-| **Workflow command** | Loads the workflow engine (`workflow.xml`) and passes the workflow config |
-| **Task command** | Loads a standalone task file and follows its instructions |
-| **Tool command** | Loads a standalone tool file and follows its instructions |
+| **Workflow skill** | Loads the workflow engine (`workflow.xml`) and passes the workflow config |
+| **Task skill** | Loads a standalone task file and follows its instructions |
+| **Tool skill** | Loads a standalone tool file and follows its instructions |
 
 :::note[Re-running the installer]
-If you add or remove modules, run the installer again. It regenerates all command files to match your current module selection.
+If you add or remove modules, run the installer again. It regenerates all skill files to match your current module selection.
 :::
 
-## Where Command Files Live
+## Where Skill Files Live
 
-The installer writes command files into an IDE-specific directory inside your project. The exact path depends on which IDE you selected during installation.
+The installer writes skill files into an IDE-specific directory inside your project. The exact path depends on which IDE you selected during installation.
 
-| IDE / CLI | Command directory |
+| IDE / CLI | Skills directory |
 | --- | --- |
-| Claude Code | `.claude/commands/` |
-| Cursor | `.cursor/commands/` |
-| Windsurf | `.windsurf/workflows/` |
+| Claude Code | `.claude/skills/` |
+| Cursor | `.cursor/skills/` |
+| Windsurf | `.windsurf/skills/` |
 | Other IDEs | See the installer output for the target path |
 
-All IDEs receive a flat set of command files in their command directory. For example, a Claude Code installation looks like:
+Each skill is a directory containing a `SKILL.md` file. For example, a Claude Code installation looks like:
 
 ```text
-.claude/commands/
-├── bmad-agent-bmm-dev.md
-├── bmad-agent-bmm-pm.md
-├── bmad-bmm-create-prd.md
-├── bmad-editorial-review-prose.md
-├── bmad-help.md
+.claude/skills/
+├── bmad-help/
+│   └── SKILL.md
+├── bmad-create-prd/
+│   └── SKILL.md
+├── bmad-dev/
+│   └── SKILL.md
 └── ...
 ```
 
-The filename determines the slash command name in your IDE. For example, the file `bmad-agent-bmm-dev.md` registers the command `/bmad-agent-bmm-dev`.
+The directory name determines the skill name in your IDE. For example, the directory `bmad-dev/` registers the skill `bmad-dev`.
 
-## How to Discover Your Commands
+## How to Discover Your Skills
 
-Type `/bmad` in your IDE and use autocomplete to browse available commands.
+Type the skill name in your IDE to invoke it. Some platforms require you to enable skills in settings before they appear.
 
-Run `/bmad-help` for context-aware guidance on your next step.
+Run `bmad-help` for context-aware guidance on your next step.
 
 :::tip[Quick discovery]
-The generated command folders in your project are the canonical list. Open them in your file explorer to see every command with its description.
+The generated skill directories in your project are the canonical list. Open them in your file explorer to see every skill with its description.
 :::
 
-## Command Categories
+## Skill Categories
 
-### Agent Commands
+### Agent Skills
 
-Agent commands load a specialized AI persona with a defined role, communication style, and menu of workflows. Once loaded, the agent stays in character and responds to menu triggers.
+Agent skills load a specialized AI persona with a defined role, communication style, and menu of workflows. Once loaded, the agent stays in character and responds to menu triggers.
 
-| Example command | Agent | Role |
+| Example skill | Agent | Role |
 | --- | --- | --- |
-| `/bmad-agent-bmm-dev` | Amelia (Developer) | Implements stories with strict adherence to specs |
-| `/bmad-agent-bmm-pm` | John (Product Manager) | Creates and validates PRDs |
-| `/bmad-agent-bmm-architect` | Winston (Architect) | Designs system architecture |
-| `/bmad-agent-bmm-sm` | Bob (Scrum Master) | Manages sprints and stories |
+| `bmad-dev` | Amelia (Developer) | Implements stories with strict adherence to specs |
+| `bmad-pm` | John (Product Manager) | Creates and validates PRDs |
+| `bmad-architect` | Winston (Architect) | Designs system architecture |
+| `bmad-sm` | Bob (Scrum Master) | Manages sprints and stories |
 
 See [Agents](./agents.md) for the full list of default agents and their triggers.
 
-### Workflow Commands
+### Workflow Skills
 
-Workflow commands run a structured, multi-step process without loading an agent persona first. They load the workflow engine and pass a specific workflow configuration.
+Workflow skills run a structured, multi-step process without loading an agent persona first. They load the workflow engine and pass a specific workflow configuration.
 
-| Example command | Purpose |
+| Example skill | Purpose |
 | --- | --- |
-| `/bmad-bmm-create-prd` | Create a Product Requirements Document |
-| `/bmad-bmm-create-architecture` | Design system architecture |
-| `/bmad-bmm-dev-story` | Implement a story |
-| `/bmad-bmm-code-review` | Run a code review |
-| `/bmad-bmm-quick-spec` | Define an ad-hoc change (Quick Flow) |
+| `bmad-create-prd` | Create a Product Requirements Document |
+| `bmad-create-architecture` | Design system architecture |
+| `bmad-create-epics-and-stories` | Create epics and stories |
+| `bmad-dev-story` | Implement a story |
+| `bmad-code-review` | Run a code review |
+| `bmad-quick-spec` | Define an ad-hoc change (Quick Flow) |
 
 See [Workflow Map](./workflow-map.md) for the complete workflow reference organized by phase.
 
-### Task and Tool Commands
+### Task and Tool Skills
 
 Tasks and tools are standalone operations that do not require an agent or workflow context.
 
 #### BMad-Help: Your Intelligent Guide
 
-**`/bmad-help`** is your primary interface for discovering what to do next. It's not just a lookup tool — it's an intelligent assistant that:
+**`bmad-help`** is your primary interface for discovering what to do next. It's not just a lookup tool — it's an intelligent assistant that:
 
 - **Inspects your project** to see what's already been done
 - **Understands natural language queries** — ask questions in plain English
@@ -5757,39 +5766,31 @@ Tasks and tools are standalone operations that do not require an agent or workfl
 **Examples:**
 
 ```
-/bmad-help
-/bmad-help I have a SaaS idea and know all the features. Where do I start?
-/bmad-help What are my options for UX design?
-/bmad-help I'm stuck on the PRD workflow
+bmad-help
+bmad-help I have a SaaS idea and know all the features. Where do I start?
+bmad-help What are my options for UX design?
+bmad-help I'm stuck on the PRD workflow
 ```
 
 #### Other Tasks and Tools
 
-| Example command | Purpose |
+| Example skill | Purpose |
 | --- | --- |
-| `/bmad-shard-doc` | Split a large markdown file into smaller sections |
-| `/bmad-index-docs` | Index project documentation |
-| `/bmad-editorial-review-prose` | Review document prose quality |
+| `bmad-shard-doc` | Split a large markdown file into smaller sections |
+| `bmad-index-docs` | Index project documentation |
+| `bmad-editorial-review-prose` | Review document prose quality |
 
 ## Naming Convention
 
-Command names follow a predictable pattern.
-
-| Pattern | Meaning | Example |
-| --- | --- | --- |
-| `bmad-agent-<module>-<name>` | Agent launcher | `bmad-agent-bmm-dev` |
-| `bmad-<module>-<workflow>` | Workflow command | `bmad-bmm-create-prd` |
-| `bmad-<name>` | Core task or tool | `bmad-help` |
-
-Module codes: `bmm` (Agile suite), `bmb` (Builder), `tea` (Test Architect), `cis` (Creative Intelligence), `gds` (Game Dev Studio). See [Modules](./modules.md) for descriptions.
+All skills use the `bmad-` prefix followed by a descriptive name (e.g., `bmad-dev`, `bmad-create-prd`, `bmad-help`). See [Modules](./modules.md) for available modules.
 
 ## Troubleshooting
 
-**Commands not appearing after install.** Restart your IDE or reload the window. Some IDEs cache the command list and require a refresh to pick up new files.
+**Skills not appearing after install.** Some platforms require skills to be explicitly enabled in settings. Check your IDE's documentation or ask your AI assistant how to enable skills. You may also need to restart your IDE or reload the window.
 
-**Expected commands are missing.** The installer only generates commands for modules you selected. Run `npx bmad-method install` again and verify your module selection. Check that the command files exist in the expected directory.
+**Expected skills are missing.** The installer only generates skills for modules you selected. Run `npx bmad-method install` again and verify your module selection. Check that the skill files exist in the expected directory.
 
-**Commands from a removed module still appear.** The installer does not delete old command files automatically. Remove the stale files from your IDE's command directory, or delete the entire command directory and re-run the installer for a clean set.
+**Skills from a removed module still appear.** The installer does not delete old skill files automatically. Remove the stale directories from your IDE's skills directory, or delete the entire skills directory and re-run the installer for a clean set.
 </file>
 
 <file path="docs/reference/modules.md">
@@ -5900,7 +5901,7 @@ Most projects should start with Quinn. If you later need test strategy, quality 
 
 Quinn is the built-in QA agent in the BMM (Agile suite) module. It generates working tests quickly using your project's existing test framework -- no configuration or additional installation required.
 
-**Trigger:** `QA` or `bmad-bmm-qa-automate`
+**Trigger:** `QA` or `bmad-qa-generate-e2e-tests`
 
 ### What Quinn Does
 
@@ -5992,9 +5993,9 @@ The BMad Method (BMM) is a module in the BMad Ecosystem, targeted at following t
 
 The rationale and concepts come from agile methodologies that have been used across the industry with great success as a mental framework.
 
-If at any time you are unsure what to do, the `/bmad-help` command will help you stay on track or know what to do next. You can always refer to this for reference also - but /bmad-help is fully interactive and much quicker if you have already installed the BMad Method. Additionally, if you are using different modules that have extended the BMad Method or added other complementary non-extension modules - the /bmad-help evolves to know all that is available to give you the best in-the-moment advice.
+If at any time you are unsure what to do, the `bmad-help` skill will help you stay on track or know what to do next. You can always refer to this for reference also - but `bmad-help` is fully interactive and much quicker if you have already installed the BMad Method. Additionally, if you are using different modules that have extended the BMad Method or added other complementary non-extension modules - `bmad-help` evolves to know all that is available to give you the best in-the-moment advice.
 
-Final important note: Every workflow below can be run directly with your tool of choice via slash command or by loading an agent first and using the entry from the agents menu.
+Final important note: Every workflow below can be run directly with your tool of choice via skill or by loading an agent first and using the entry from the agents menu.
 
 <iframe src="/workflow-map-diagram.html" title="BMad Method Workflow Map Diagram" width="100%" height="100%" style="border-radius: 8px; border: 1px solid #334155; min-height: 900px;"></iframe>
 
@@ -6009,8 +6010,8 @@ Explore the problem space and validate ideas before committing to planning.
 | Workflow                        | Purpose                                                                    | Produces                  |
 | ------------------------------- | -------------------------------------------------------------------------- | ------------------------- |
 | `bmad-brainstorming`            | Brainstorm Project Ideas with guided facilitation of a brainstorming coach | `brainstorming-report.md` |
-| `bmad-bmm-research`             | Validate market, technical, or domain assumptions                          | Research findings         |
-| `bmad-bmm-create-product-brief` | Capture strategic vision                                                   | `product-brief.md`        |
+| `bmad-domain-research`, `bmad-market-research`, `bmad-technical-research` | Validate market, technical, or domain assumptions | Research findings |
+| `bmad-create-product-brief`     | Capture strategic vision                                                   | `product-brief.md`        |
 
 ## Phase 2: Planning
 
@@ -6018,8 +6019,8 @@ Define what to build and for whom.
 
 | Workflow                    | Purpose                                  | Produces     |
 | --------------------------- | ---------------------------------------- | ------------ |
-| `bmad-bmm-create-prd`       | Define requirements (FRs/NFRs)           | `PRD.md`     |
-| `bmad-bmm-create-ux-design` | Design user experience (when UX matters) | `ux-spec.md` |
+| `bmad-create-prd`    | Define requirements (FRs/NFRs)           | `PRD.md`     |
+| `bmad-create-ux-design`  | Design user experience (when UX matters) | `ux-spec.md` |
 
 ## Phase 3: Solutioning
 
@@ -6027,9 +6028,9 @@ Decide how to build it and break work into stories.
 
 | Workflow                                  | Purpose                                    | Produces                    |
 | ----------------------------------------- | ------------------------------------------ | --------------------------- |
-| `bmad-bmm-create-architecture`            | Make technical decisions explicit          | `architecture.md` with ADRs |
-| `bmad-bmm-create-epics-and-stories`       | Break requirements into implementable work | Epic files with stories     |
-| `bmad-bmm-check-implementation-readiness` | Gate check before implementation           | PASS/CONCERNS/FAIL decision |
+| `bmad-create-architecture`            | Make technical decisions explicit          | `architecture.md` with ADRs |
+| `bmad-create-epics-and-stories`       | Break requirements into implementable work | Epic files with stories     |
+| `bmad-check-implementation-readiness` | Gate check before implementation           | PASS/CONCERNS/FAIL decision |
 
 ## Phase 4: Implementation
 
@@ -6037,13 +6038,13 @@ Build it, one story at a time. Coming soon, full phase 4 automation!
 
 | Workflow                   | Purpose                                                                  | Produces                         |
 | -------------------------- | ------------------------------------------------------------------------ | -------------------------------- |
-| `bmad-bmm-sprint-planning` | Initialize tracking (once per project to sequence the dev cycle)         | `sprint-status.yaml`             |
-| `bmad-bmm-create-story`    | Prepare next story for implementation                                    | `story-[slug].md`                |
-| `bmad-bmm-dev-story`       | Implement the story                                                      | Working code + tests             |
-| `bmad-bmm-code-review`     | Validate implementation quality                                          | Approved or changes requested    |
-| `bmad-bmm-correct-course`  | Handle significant mid-sprint changes                                    | Updated plan or re-routing       |
-| `bmad-bmm-automate`        | Generate tests for existing features - Use after a full epic is complete | End to End UI Focused Test suite |
-| `bmad-bmm-retrospective`   | Review after epic completion                                             | Lessons learned                  |
+| `bmad-sprint-planning` | Initialize tracking (once per project to sequence the dev cycle)         | `sprint-status.yaml`          |
+| `bmad-create-story`    | Prepare next story for implementation                                    | `story-[slug].md`             |
+| `bmad-dev-story`       | Implement the story                                                      | Working code + tests          |
+| `bmad-code-review`     | Validate implementation quality                                          | Approved or changes requested |
+| `bmad-correct-course`  | Handle significant mid-sprint changes                                    | Updated plan or re-routing    |
+| `bmad-sprint-status`   | Track sprint progress and story status                                   | Sprint status update          |
+| `bmad-retrospective`   | Review after epic completion                                             | Lessons learned               |
 
 ## Quick Flow (Parallel Track)
 
@@ -6051,8 +6052,8 @@ Skip phases 1-3 for small, well-understood work.
 
 | Workflow              | Purpose                                    | Produces                                      |
 | --------------------- | ------------------------------------------ | --------------------------------------------- |
-| `bmad-bmm-quick-spec` | Define an ad-hoc change                    | `tech-spec.md` (story file for small changes) |
-| `bmad-bmm-quick-dev`  | Implement from spec or direct instructions | Working code + tests                          |
+| `bmad-quick-spec` | Define an ad-hoc change                    | `tech-spec.md` (story file for small changes) |
+| `bmad-quick-dev`  | Implement from spec or direct instructions | Working code + tests                          |
 
 ## Context Management
 
@@ -6067,7 +6068,7 @@ Create `project-context.md` to ensure AI agents follow your project's rules and 
 **How to create it:**
 
 - **Manually** — Create `_bmad-output/project-context.md` with your technology stack and implementation rules
-- **Generate it** — Run `/bmad-bmm-generate-project-context` to auto-generate from your architecture or codebase
+- **Generate it** — Run `bmad-generate-project-context` to auto-generate from your architecture or codebase
 
 [**Learn more about project-context.md**](../explanation/project-context.md)
 </file>
@@ -6112,16 +6113,16 @@ Build software faster using AI-powered workflows with specialized agents that gu
 
 ### How to Use BMad-Help
 
-Run it in your AI IDE with just the slash command:
+Run it in your AI IDE by invoking the skill:
 
 ```
-/bmad-help
+bmad-help
 ```
 
 Or combine it with a question for context-aware guidance:
 
 ```
-/bmad-help I have an idea for a SaaS product, I already know all the features I want. where do I get started?
+bmad-help I have an idea for a SaaS product, I already know all the features I want. where do I get started?
 ```
 
 BMad-Help will respond with:
@@ -6187,7 +6188,7 @@ BMad-Help will detect what you've completed and recommend exactly what to do nex
 :::
 
 :::note[How to Load Agents and Run Workflows]
-Each workflow has a **slash command** you run in your IDE (e.g., `/bmad-bmm-create-prd`). Running a workflow command automatically loads the appropriate agent — you don't need to load agents separately. You can also load an agent directly for general conversation (e.g., `/bmad-agent-bmm-pm` for the PM agent).
+Each workflow has a **skill** you invoke in your IDE (e.g., `/bmad-create-prd`). Running a workflow skill automatically loads the appropriate agent — you don't need to load agents separately. You can also invoke an agent directly for general conversation (e.g., `/bmad-pm` for the PM agent).
 :::
 
 :::caution[Fresh Chats]
@@ -6201,35 +6202,35 @@ Work through phases 1-3. **Use fresh chats for each workflow.**
 :::tip[Project Context (Optional)]
 Before starting, consider creating `project-context.md` to document your technical preferences and implementation rules. This ensures all AI agents follow your conventions throughout the project.
 
-Create it manually at `_bmad-output/project-context.md` or generate it after architecture using `/bmad-bmm-generate-project-context`. [Learn more](../explanation/project-context.md).
+Create it manually at `_bmad-output/project-context.md` or generate it after architecture using `/bmad-generate-project-context`. [Learn more](../explanation/project-context.md).
 :::
 
 ### Phase 1: Analysis (Optional)
 
 All workflows in this phase are optional:
 - **brainstorming** (`/bmad-brainstorming`) — Guided ideation
-- **research** (`/bmad-bmm-research`) — Market and technical research
-- **create-product-brief** (`/bmad-bmm-create-product-brief`) — Recommended foundation document
+- **research** (`/bmad-research`) — Market and technical research
+- **create-product-brief** (`/bmad-create-product-brief`) — Recommended foundation document
 
 ### Phase 2: Planning (Required)
 
 **For BMad Method and Enterprise tracks:**
-1. Load the **PM agent** (`/bmad-agent-bmm-pm`) in a new chat
-2. Run the `prd` workflow (`/bmad-bmm-create-prd`)
+1. Invoke the **PM agent** (`/bmad-pm`) in a new chat
+2. Run the `bmad-create-prd` workflow (`/bmad-create-prd`)
 3. Output: `PRD.md`
 
 **For Quick Flow track:**
-- Use the `quick-spec` workflow (`/bmad-bmm-quick-spec`) instead of PRD, then skip to implementation
+- Use the `bmad-quick-spec` workflow (`/bmad-quick-spec`) instead of PRD, then skip to implementation
 
 :::note[UX Design (Optional)]
-If your project has a user interface, load the **UX-Designer agent** (`/bmad-agent-bmm-ux-designer`) and run the UX design workflow (`/bmad-bmm-create-ux-design`) after creating your PRD.
+If your project has a user interface, invoke the **UX-Designer agent** (`/bmad-ux-designer`) and run the UX design workflow (`/bmad-create-ux-design`) after creating your PRD.
 :::
 
 ### Phase 3: Solutioning (BMad Method/Enterprise)
 
 **Create Architecture**
-1. Load the **Architect agent** (`/bmad-agent-bmm-architect`) in a new chat
-2. Run `create-architecture` (`/bmad-bmm-create-architecture`)
+1. Invoke the **Architect agent** (`/bmad-architect`) in a new chat
+2. Run `bmad-create-architecture` (`/bmad-create-architecture`)
 3. Output: Architecture document with technical decisions
 
 **Create Epics and Stories**
@@ -6238,13 +6239,13 @@ If your project has a user interface, load the **UX-Designer agent** (`/bmad-age
 Epics and stories are now created *after* architecture. This produces better quality stories because architecture decisions (database, API patterns, tech stack) directly affect how work should be broken down.
 :::
 
-1. Load the **PM agent** (`/bmad-agent-bmm-pm`) in a new chat
-2. Run `create-epics-and-stories` (`/bmad-bmm-create-epics-and-stories`)
+1. Invoke the **PM agent** (`/bmad-pm`) in a new chat
+2. Run `bmad-create-epics-and-stories` (`/bmad-create-epics-and-stories`)
 3. The workflow uses both PRD and Architecture to create technically-informed stories
 
 **Implementation Readiness Check** *(Highly Recommended)*
-1. Load the **Architect agent** (`/bmad-agent-bmm-architect`) in a new chat
-2. Run `check-implementation-readiness` (`/bmad-bmm-check-implementation-readiness`)
+1. Invoke the **Architect agent** (`/bmad-architect`) in a new chat
+2. Run `bmad-check-implementation-readiness` (`/bmad-check-implementation-readiness`)
 3. Validates cohesion across all planning documents
 
 ## Step 2: Build Your Project
@@ -6253,7 +6254,7 @@ Once planning is complete, move to implementation. **Each workflow should run in
 
 ### Initialize Sprint Planning
 
-Load the **SM agent** (`/bmad-agent-bmm-sm`) and run `sprint-planning` (`/bmad-bmm-sprint-planning`). This creates `sprint-status.yaml` to track all epics and stories.
+Invoke the **SM agent** (`/bmad-sm`) and run `bmad-sprint-planning` (`/bmad-sprint-planning`). This creates `sprint-status.yaml` to track all epics and stories.
 
 ### The Build Cycle
 
@@ -6261,11 +6262,11 @@ For each story, repeat this cycle with fresh chats:
 
 | Step | Agent | Workflow       | Command                    | Purpose                            |
 | ---- | ----- | -------------- | -------------------------- | ---------------------------------- |
-| 1    | SM    | `create-story` | `/bmad-bmm-create-story`  | Create story file from epic        |
-| 2    | DEV   | `dev-story`    | `/bmad-bmm-dev-story`     | Implement the story                |
-| 3    | DEV   | `code-review`  | `/bmad-bmm-code-review`   | Quality validation *(recommended)* |
+| 1    | SM    | `bmad-create-story` | `/bmad-create-story`  | Create story file from epic        |
+| 2    | DEV   | `bmad-dev-story`    | `/bmad-dev-story`     | Implement the story                |
+| 3    | DEV   | `bmad-code-review`  | `/bmad-code-review`   | Quality validation *(recommended)* |
 
-After completing all stories in an epic, load the **SM agent** (`/bmad-agent-bmm-sm`) and run `retrospective` (`/bmad-bmm-retrospective`).
+After completing all stories in an epic, invoke the **SM agent** (`/bmad-sm`) and run `bmad-retrospective` (`/bmad-retrospective`).
 
 ## What You've Accomplished
 
@@ -6296,16 +6297,16 @@ your-project/
 
 | Workflow                              | Command                                    | Agent     | Purpose                                         |
 | ------------------------------------- | ------------------------------------------ | --------- | ----------------------------------------------- |
-| **`help`** ⭐                         | `/bmad-help`                               | Any       | **Your intelligent guide — ask anything!**      |
-| `prd`                                 | `/bmad-bmm-create-prd`                     | PM        | Create Product Requirements Document            |
-| `create-architecture`                 | `/bmad-bmm-create-architecture`            | Architect | Create architecture document                     |
-| `generate-project-context`            | `/bmad-bmm-generate-project-context`       | Analyst   | Create project context file                     |
-| `create-epics-and-stories`       | `/bmad-bmm-create-epics-and-stories`       | PM        | Break down PRD into epics            |
-| `check-implementation-readiness` | `/bmad-bmm-check-implementation-readiness` | Architect | Validate planning cohesion           |
-| `sprint-planning`                | `/bmad-bmm-sprint-planning`                | SM        | Initialize sprint tracking           |
-| `create-story`                   | `/bmad-bmm-create-story`                   | SM        | Create a story file                  |
-| `dev-story`                      | `/bmad-bmm-dev-story`                      | DEV       | Implement a story                    |
-| `code-review`                    | `/bmad-bmm-code-review`                    | DEV       | Review implemented code              |
+| **`bmad-help`** ⭐                    | `/bmad-help`                               | Any       | **Your intelligent guide — ask anything!**      |
+| `bmad-create-prd`                | `/bmad-create-prd`                     | PM        | Create Product Requirements Document            |
+| `bmad-create-architecture`            | `/bmad-create-architecture`            | Architect | Create architecture document                     |
+| `bmad-generate-project-context`       | `/bmad-generate-project-context`           | Analyst   | Create project context file                     |
+| `bmad-create-epics-and-stories`       | `/bmad-create-epics-and-stories`       | PM        | Break down PRD into epics            |
+| `bmad-check-implementation-readiness` | `/bmad-check-implementation-readiness` | Architect | Validate planning cohesion           |
+| `bmad-sprint-planning`                | `/bmad-sprint-planning`                | SM        | Initialize sprint tracking           |
+| `bmad-create-story`                   | `/bmad-create-story`                   | SM        | Create a story file                  |
+| `bmad-dev-story`                      | `/bmad-dev-story`                      | DEV       | Implement a story                    |
+| `bmad-code-review`                    | `/bmad-code-review`                    | DEV       | Review implemented code              |
 
 ## Common Questions
 
@@ -6313,10 +6314,10 @@ your-project/
 Only for BMad Method and Enterprise tracks. Quick Flow skips from tech-spec to implementation.
 
 **Can I change my plan later?**
-Yes. The SM agent has a `correct-course` workflow (`/bmad-bmm-correct-course`) for handling scope changes.
+Yes. The SM agent has a `bmad-correct-course` workflow (`/bmad-correct-course`) for handling scope changes.
 
 **What if I want to brainstorm first?**
-Load the Analyst agent (`/bmad-agent-bmm-analyst`) and run `brainstorming` (`/bmad-brainstorming`) before starting your PRD.
+Invoke the Analyst agent (`/bmad-analyst`) and run `bmad-brainstorming` (`/bmad-brainstorming`) before starting your PRD.
 
 **Do I need to follow a strict order?**
 Not strictly. Once you learn the flow, you can run workflows directly using the Quick Reference above.
@@ -6999,13 +7000,13 @@ touch _bmad-output/project-context.md
 
 <file path="docs/zh-cn/explanation/quick-flow.md">
 ---
-title: "Quick Flow"
+title: "快速流程"
 description: 小型变更的快速通道 - 跳过完整方法论
 sidebar:
   order: 1
 ---
 
-跳过繁琐流程。Quick Flow 通过两条命令将你从想法带到可运行的代码 - 无需产品简报、无需 PRD、无需架构文档。
+跳过繁琐流程。快速流程通过两条命令将你从想法带到可运行的代码 - 无需产品简报、无需 PRD、无需架构文档。
 
 ## 何时使用
 
@@ -7023,12 +7024,12 @@ sidebar:
 - 需求不明确或有争议的任何工作
 
 :::caution[Scope Creep]
-如果你启动 Quick Flow 后发现范围超出预期，`quick-dev` 会检测到并提供升级选项。你可以在任何时间切换到完整的 PRD 工作流程，而不会丢失你的工作。
+如果你启动快速流程后发现范围超出预期，`quick-dev` 会检测到并提供升级选项。你可以在任何时间切换到完整的 PRD 工作流程，而不会丢失你的工作。
 :::
 
 ## 工作原理
 
-Quick Flow 有两条命令，每条都由结构化的工作流程支持。你可以一起运行它们，也可以独立运行。
+快速流程有两条命令，每条都由结构化的工作流程支持。你可以一起运行它们，也可以独立运行。
 
 ### quick-spec：规划
 
@@ -7054,7 +7055,7 @@ Quick Flow 有两条命令，每条都由结构化的工作流程支持。你可
 为获得最佳效果，在完成 `quick-spec` 后，在新对话中运行 `quick-dev`。这为实现智能体提供了专注于构建的干净上下文。
 :::
 
-## Quick Flow 跳过的内容
+## 快速流程跳过的内容
 
 完整的 BMad 方法在编写任何代码之前会生成产品简报、PRD、架构文档和 Epic/Story 分解。Quick Flow 用单个技术规范替代所有这些。这之所以有效，是因为 Quick Flow 针对以下变更：
 
@@ -7065,7 +7066,7 @@ Quick Flow 有两条命令，每条都由结构化的工作流程支持。你可
 
 ## 升级到完整 BMad 方法
 
-Quick Flow 包含内置的范围检测护栏。当你使用直接请求运行 `quick-dev` 时，它会评估多组件提及、系统级语言和方法不确定性等信号。如果检测到工作超出快速流程范围：
+快速流程包含内置的范围检测护栏。当你使用直接请求运行 `quick-dev` 时，它会评估多组件提及、系统级语言和方法不确定性等信号。如果检测到工作超出快速流程范围：
 
 - **轻度升级** - 建议先运行 `quick-spec` 创建计划
 - **重度升级** - 建议切换到完整的 BMad 方法 PRD 流程
@@ -7765,7 +7766,7 @@ your-project/
 
 <file path="docs/zh-cn/how-to/non-interactive-installation.md">
 ---
-title: 非交互式安装
+title: "非交互式安装"
 description: 使用命令行标志安装 BMad，适用于 CI/CD 流水线和自动化部署
 sidebar:
   order: 2
@@ -8459,7 +8460,7 @@ your-project/
 
 <file path="docs/zh-cn/reference/agents.md">
 ---
-title: 智能体
+title: "智能体"
 description: 默认 BMM 智能体及其菜单触发器和主要工作流
 sidebar:
   order: 2
@@ -8503,7 +8504,7 @@ sidebar:
 
 <file path="docs/zh-cn/reference/commands.md">
 ---
-title: 命令
+title: "命令"
 description: BMad 斜杠命令参考——它们是什么、如何工作以及在哪里找到它们。
 sidebar:
   order: 3
@@ -8672,7 +8673,7 @@ BMad 提供两种开始工作的方式，它们服务于不同的目的。
 
 <file path="docs/zh-cn/reference/modules.md">
 ---
-title: 官方模块
+title: "官方模块"
 description: 用于构建自定义智能体、创意智能、游戏开发和测试的附加模块
 sidebar:
   order: 4
@@ -8769,7 +8770,7 @@ BMad 通过您在安装期间选择的官方模块进行扩展。这些附加模
 
 <file path="docs/zh-cn/reference/testing.md">
 ---
-title: 测试选项
+title: "测试选项"
 description: 比较内置 QA 智能体（Quinn）与测试架构师（TEA）模块的测试自动化。
 sidebar:
   order: 5
@@ -9976,13 +9977,13 @@ Critical warnings only — data loss, security issues
 | 2     | Planning | Requirements — PRD or tech-spec *(required)* |
 ```
 
-**Commands:**
+**Skills:**
 
 ```md
-| Command      | Agent   | Purpose                              |
+| Skill        | Agent   | Purpose                              |
 | ------------ | ------- | ------------------------------------ |
-| `brainstorm` | Analyst | Brainstorm a new project             |
-| `prd`        | PM      | Create Product Requirements Document |
+| `bmad-brainstorming` | Analyst | Brainstorm a new project             |
+| `bmad-create-prd`        | PM      | Create Product Requirements Document |
 ```
 
 ## Folder Structure Blocks
@@ -10016,7 +10017,7 @@ your-project/
 9. Step 2: [Second Major Task]
 10. Step 3: [Third Major Task]
 11. What You've Accomplished (summary + folder structure)
-12. Quick Reference (commands table)
+12. Quick Reference (skills table)
 13. Common Questions (FAQ format)
 14. Getting Help (community links)
 15. Key Takeaways (tip admonition)
@@ -10028,7 +10029,7 @@ your-project/
 - [ ] "What You'll Learn" section present
 - [ ] Prerequisites in admonition
 - [ ] Quick Path TL;DR admonition at top
-- [ ] Tables for phases, commands, agents
+- [ ] Tables for phases, skills, agents
 - [ ] "What You've Accomplished" section present
 - [ ] Quick Reference table present
 - [ ] Common Questions section present
@@ -10160,7 +10161,7 @@ your-project/
 1. Title + Hook
 2. Items (## for each item)
    - Brief description (one sentence)
-   - **Commands:** or **Key Info:** as flat list
+   - **Skills:** or **Key Info:** as flat list
 3. Universal/Shared (## section) (optional)
 ```
 
@@ -10169,7 +10170,7 @@ your-project/
 ```text
 1. Title + Hook (one sentence purpose)
 2. Quick Facts (optional note admonition)
-   - Module, Command, Input, Output as list
+   - Module, Skill, Input, Output as list
 3. Purpose/Overview (## section)
 4. How to Invoke (code block)
 5. Key Sections (## for each aspect)
@@ -10197,7 +10198,7 @@ your-project/
    - Diagram or table showing organization
 3. Major Sections (## for each phase/category)
    - Items (### for each item)
-   - Standardized fields: Command, Agent, Input, Output, Description
+   - Standardized fields: Skill, Agent, Input, Output, Description
 4. Next Steps (optional)
 ```
 
@@ -10270,7 +10271,7 @@ Only for BMad Method and Enterprise tracks. Quick Flow skips to implementation.
 
 ### Can I change my plan later?
 
-Yes. The SM agent has a `correct-course` workflow for handling scope changes.
+Yes. The SM agent has a `bmad-correct-course` workflow for handling scope changes.
 
 **Have a question not answered here?** [Open an issue](...) or ask in [Discord](...).
 ```
@@ -10321,7 +10322,7 @@ The fastest way to understand BMad is to try it.
 - **[Workflow Map](./reference/workflow-map.md)** — Visual overview of BMM phases, workflows, and context management
 
 :::tip[Just Want to Dive In?]
-Install BMad and run `/bmad-help` — it will guide you through everything based on your project and installed modules.
+Install BMad and use the `bmad-help` skill — it will guide you through everything based on your project and installed modules.
 :::
 
 ## How to Use These Docs
@@ -11023,7 +11024,7 @@ agent:
 
   menu:
     - trigger: QA or fuzzy match on qa-automate
-      workflow: "{project-root}/_bmad/bmm/workflows/qa-generate-e2e-tests/workflow.yaml"
+      workflow: "{project-root}/_bmad/bmm/workflows/qa-generate-e2e-tests/workflow.md"
       description: "[QA] Automate - Generate tests for existing features (simplified)"
 
   prompts:
@@ -11122,7 +11123,7 @@ agent:
       description: "[CS] Context Story: Prepare a story with all required context for implementation for the developer agent"
 
     - trigger: ER or fuzzy match on epic-retrospective
-      workflow: "{project-root}/_bmad/bmm/workflows/4-implementation/retrospective/workflow.yaml"
+      workflow: "{project-root}/_bmad/bmm/workflows/4-implementation/retrospective/workflow.md"
       data: "{project-root}/_bmad/_config/agent-manifest.csv"
       description: "[ER] Epic Retrospective: Party Mode review of all work completed across an epic."
 
@@ -17322,19 +17323,19 @@ Congratulations on completing comprehensive technical research with professional
 
 <file path="src/bmm/workflows/1-analysis/research/bmad-skill-manifest.yaml">
 workflow-domain-research.md:
-  canonicalId: bmad-bmm-domain-research
+  canonicalId: bmad-domain-research
   type: workflow
-  description: "Conduct domain and industry research"
+  description: "Conduct domain and industry research. Use when the user says 'lets create a research report on [domain or industry]'"
 
 workflow-market-research.md:
-  canonicalId: bmad-bmm-market-research
+  canonicalId: bmad-market-research
   type: workflow
-  description: "Conduct market research on competition and customers"
+  description: "Conduct market research on competition and customers. Use when the user says 'create a market research report about [business idea]'"
 
 workflow-technical-research.md:
-  canonicalId: bmad-bmm-technical-research
+  canonicalId: bmad-technical-research
   type: workflow
-  description: "Conduct technical research on technologies and architecture"
+  description: "Conduct technical research on technologies and architecture. Use when the user says 'create a technical research report on [topic]'"
 </file>
 
 <file path="src/bmm/workflows/1-analysis/research/research.template.md">
@@ -25172,19 +25173,19 @@ workflowType: 'prd'
 
 <file path="src/bmm/workflows/2-plan-workflows/create-prd/bmad-skill-manifest.yaml">
 workflow-create-prd.md:
-  canonicalId: bmad-bmm-create-prd
+  canonicalId: bmad-create-prd
   type: workflow
-  description: "Create a PRD from scratch"
+  description: "Create a PRD from scratch. Use when the user says 'lets create a product requirements document' or 'I want to create a new PRD'"
 
 workflow-edit-prd.md:
-  canonicalId: bmad-bmm-edit-prd
+  canonicalId: bmad-edit-prd
   type: workflow
-  description: "Edit an existing PRD"
+  description: "Edit an existing PRD. Use when the user says 'edit this PRD'"
 
 workflow-validate-prd.md:
-  canonicalId: bmad-bmm-validate-prd
+  canonicalId: bmad-validate-prd
   type: workflow
-  description: "Validate a PRD against standards"
+  description: "Validate a PRD against standards. Use when the user says 'validate this PRD' or 'run PRD validation'"
 </file>
 
 <file path="src/bmm/workflows/2-plan-workflows/create-prd/workflow-create-prd.md">
@@ -35637,35 +35638,75 @@ type: workflow
 description: "Post-epic review to extract lessons and assess success"
 </file>
 
-<file path="src/bmm/workflows/4-implementation/retrospective/instructions.md">
-# Retrospective - Epic Completion Review Instructions
+<file path="src/bmm/workflows/4-implementation/retrospective/workflow.md">
+---
+name: retrospective
+description: 'Post-epic review to extract lessons and assess success. Use when the user says "run a retrospective" or "lets retro the epic [epic]"'
+---
 
-<critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
-<critical>You MUST have already loaded and processed: {project-root}/_bmad/bmm/workflows/4-implementation/retrospective/workflow.yaml</critical>
-<critical>Communicate all responses in {communication_language} and language MUST be tailored to {user_skill_level}</critical>
-<critical>Generate all documents in {document_output_language}</critical>
-<critical>⚠️ ABSOLUTELY NO TIME ESTIMATES - NEVER mention hours, days, weeks, months, or ANY time-based predictions. AI has fundamentally changed development speed - what once took teams weeks/months can now be done by one person in hours. DO NOT give ANY time estimates whatsoever.</critical>
+# Retrospective Workflow
 
-<critical>
-  DOCUMENT OUTPUT: Retrospective analysis. Concise insights, lessons learned, action items. User skill level ({user_skill_level}) affects conversation style ONLY, not retrospective content.
+**Goal:** Post-epic review to extract lessons and assess success.
 
-FACILITATION NOTES:
+**Your Role:** Scrum Master facilitating retrospective.
+- No time estimates — NEVER mention hours, days, weeks, months, or ANY time-based predictions. AI has fundamentally changed development speed.
+- Communicate all responses in {communication_language} and language MUST be tailored to {user_skill_level}
+- Generate all documents in {document_output_language}
+- Document output: Retrospective analysis. Concise insights, lessons learned, action items. User skill level ({user_skill_level}) affects conversation style ONLY, not retrospective content.
+- Facilitation notes:
+  - Psychological safety is paramount - NO BLAME
+  - Focus on systems, processes, and learning
+  - Everyone contributes with specific examples preferred
+  - Action items must be achievable with clear ownership
+  - Two-part format: (1) Epic Review + (2) Next Epic Preparation
+- Party mode protocol:
+  - ALL agent dialogue MUST use format: "Name (Role): dialogue"
+  - Example: Bob (Scrum Master): "Let's begin..."
+  - Example: {user_name} (Project Lead): [User responds]
+  - Create natural back-and-forth with user actively participating
+  - Show disagreements, diverse perspectives, authentic team dynamics
 
-- Scrum Master facilitates this retrospective
-- Psychological safety is paramount - NO BLAME
-- Focus on systems, processes, and learning
-- Everyone contributes with specific examples preferred
-- Action items must be achievable with clear ownership
-- Two-part format: (1) Epic Review + (2) Next Epic Preparation
+---
 
-PARTY MODE PROTOCOL:
+## INITIALIZATION
 
-- ALL agent dialogue MUST use format: "Name (Role): dialogue"
-- Example: Bob (Scrum Master): "Let's begin..."
-- Example: {user_name} (Project Lead): [User responds]
-- Create natural back-and-forth with user actively participating
-- Show disagreements, diverse perspectives, authentic team dynamics
-  </critical>
+### Configuration Loading
+
+Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+
+- `project_name`, `user_name`
+- `communication_language`, `document_output_language`
+- `user_skill_level`
+- `planning_artifacts`, `implementation_artifacts`
+- `date` as system-generated current datetime
+- YOU MUST ALWAYS SPEAK OUTPUT in your Agent communication style with the config `{communication_language}`
+
+### Paths
+
+- `installed_path` = `{project-root}/_bmad/bmm/workflows/4-implementation/retrospective`
+- `sprint_status_file` = `{implementation_artifacts}/sprint-status.yaml`
+
+### Input Files
+
+| Input | Description | Path Pattern(s) | Load Strategy |
+|-------|-------------|------------------|---------------|
+| epics | The completed epic for retrospective | whole: `{planning_artifacts}/*epic*.md`, sharded_index: `{planning_artifacts}/*epic*/index.md`, sharded_single: `{planning_artifacts}/*epic*/epic-{{epic_num}}.md` | SELECTIVE_LOAD |
+| previous_retrospective | Previous epic's retrospective (optional) | `{implementation_artifacts}/**/epic-{{prev_epic_num}}-retro-*.md` | SELECTIVE_LOAD |
+| architecture | System architecture for context | whole: `{planning_artifacts}/*architecture*.md`, sharded: `{planning_artifacts}/*architecture*/*.md` | FULL_LOAD |
+| prd | Product requirements for context | whole: `{planning_artifacts}/*prd*.md`, sharded: `{planning_artifacts}/*prd*/*.md` | FULL_LOAD |
+| document_project | Brownfield project documentation (optional) | sharded: `{planning_artifacts}/*.md` | INDEX_GUIDED |
+
+### Required Inputs
+
+- `agent_manifest` = `{project-root}/_bmad/_config/agent-manifest.csv`
+
+### Context
+
+- `project_context` = `**/project-context.md` (load if exists)
+
+---
+
+## EXECUTION
 
 <workflow>
 
@@ -35799,7 +35840,7 @@ Bob (Scrum Master): "Perfect. Epic {{epic_number}} is complete and ready for ret
 </step>
 
 <step n="0.5" goal="Discover and load project documents">
-  <invoke-protocol name="discover_inputs" />
+  <action>Load input files according to the Input Files table in INITIALIZATION. For SELECTIVE_LOAD inputs, load only the epic matching {{epic_number}}. For FULL_LOAD inputs, load the complete document. For INDEX_GUIDED inputs, check the index first and load relevant sections. After discovery, these content variables are available: {epics_content} (selective load for this epic), {architecture_content}, {prd_content}, {document_project_content}</action>
   <note>After discovery, these content variables are available: {epics_content} (selective load for this epic), {architecture_content}, {prd_content}, {document_project_content}</note>
 </step>
 
@@ -37085,61 +37126,6 @@ Charlie (Senior Dev): "Time to knock out that prep work."
 </facilitation-guidelines>
 </file>
 
-<file path="src/bmm/workflows/4-implementation/retrospective/workflow.yaml">
-# Retrospective - Epic Completion Review Workflow
-name: "retrospective"
-description: 'Post-epic review to extract lessons and assess success. Use when the user says "run a retrospective" or "lets retro the epic [epic]"'
-
-config_source: "{project-root}/_bmad/bmm/config.yaml"
-user_name: "{config_source}:user_name"
-communication_language: "{config_source}:communication_language"
-user_skill_level: "{config_source}:user_skill_level"
-document_output_language: "{config_source}:document_output_language"
-date: system-generated
-planning_artifacts: "{config_source}:planning_artifacts"
-implementation_artifacts: "{config_source}:implementation_artifacts"
-project_context: "**/project-context.md"
-
-installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/retrospective"
-template: false
-instructions: "{installed_path}/instructions.md"
-
-required_inputs:
-  - agent_manifest: "{project-root}/_bmad/_config/agent-manifest.csv"
-
-# Smart input file references - handles both whole docs and sharded docs
-# Priority: Whole document first, then sharded version
-# Strategy: SELECTIVE LOAD - only load the completed epic and relevant retrospectives
-input_file_patterns:
-  epics:
-    description: "The completed epic for retrospective"
-    whole: "{planning_artifacts}/*epic*.md"
-    sharded_index: "{planning_artifacts}/*epic*/index.md"
-    sharded_single: "{planning_artifacts}/*epic*/epic-{{epic_num}}.md"
-    load_strategy: "SELECTIVE_LOAD"
-  previous_retrospective:
-    description: "Previous epic's retrospective (optional)"
-    pattern: "{implementation_artifacts}/**/epic-{{prev_epic_num}}-retro-*.md"
-    load_strategy: "SELECTIVE_LOAD"
-  architecture:
-    description: "System architecture for context"
-    whole: "{planning_artifacts}/*architecture*.md"
-    sharded: "{planning_artifacts}/*architecture*/*.md"
-    load_strategy: "FULL_LOAD"
-  prd:
-    description: "Product requirements for context"
-    whole: "{planning_artifacts}/*prd*.md"
-    sharded: "{planning_artifacts}/*prd*/*.md"
-    load_strategy: "FULL_LOAD"
-  document_project:
-    description: "Brownfield project documentation (optional)"
-    sharded: "{planning_artifacts}/*.md"
-    load_strategy: "INDEX_GUIDED"
-
-# Required files
-sprint_status_file: "{implementation_artifacts}/sprint-status.yaml"
-</file>
-
 <file path="src/bmm/workflows/4-implementation/sprint-planning/bmad-skill-manifest.yaml">
 canonicalId: bmad-sprint-planning
 type: workflow
@@ -37528,13 +37514,50 @@ type: workflow
 description: "Summarize sprint status and surface risks"
 </file>
 
-<file path="src/bmm/workflows/4-implementation/sprint-status/instructions.md">
-# Sprint Status - Multi-Mode Service
+<file path="src/bmm/workflows/4-implementation/sprint-status/workflow.md">
+---
+name: sprint-status
+description: 'Summarize sprint status and surface risks. Use when the user says "check sprint status" or "show sprint status"'
+---
 
-<critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
-<critical>You MUST have already loaded and processed: {project-root}/_bmad/bmm/workflows/4-implementation/sprint-status/workflow.yaml</critical>
-<critical>Modes: interactive (default), validate, data</critical>
-<critical>⚠️ ABSOLUTELY NO TIME ESTIMATES. Do NOT mention hours, days, weeks, or timelines.</critical>
+# Sprint Status Workflow
+
+**Goal:** Summarize sprint status, surface risks, and recommend the next workflow action.
+
+**Your Role:** You are a Scrum Master providing clear, actionable sprint visibility. No time estimates — focus on status, risks, and next steps.
+
+---
+
+## INITIALIZATION
+
+### Configuration Loading
+
+Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+
+- `project_name`, `user_name`
+- `communication_language`, `document_output_language`
+- `implementation_artifacts`
+- `date` as system-generated current datetime
+- YOU MUST ALWAYS SPEAK OUTPUT in your Agent communication style with the config `{communication_language}`
+
+### Paths
+
+- `installed_path` = `{project-root}/_bmad/bmm/workflows/4-implementation/sprint-status`
+- `sprint_status_file` = `{implementation_artifacts}/sprint-status.yaml`
+
+### Input Files
+
+| Input | Path | Load Strategy |
+|-------|------|---------------|
+| Sprint status | `{sprint_status_file}` | FULL_LOAD |
+
+### Context
+
+- `project_context` = `**/project-context.md` (load if exists)
+
+---
+
+## EXECUTION
 
 <workflow>
 
@@ -37759,34 +37782,6 @@ If the command targets a story, set `story_key={{next_story_id}}` when prompted.
 </step>
 
 </workflow>
-</file>
-
-<file path="src/bmm/workflows/4-implementation/sprint-status/workflow.yaml">
-# Sprint Status - Implementation Tracker
-name: sprint-status
-description: 'Summarize sprint status and surface risks. Use when the user says "check sprint status" or "show sprint status"'
-author: "BMad"
-
-# Critical variables from config
-config_source: "{project-root}/_bmad/bmm/config.yaml"
-user_name: "{config_source}:user_name"
-communication_language: "{config_source}:communication_language"
-document_output_language: "{config_source}:document_output_language"
-implementation_artifacts: "{config_source}:implementation_artifacts"
-
-# Workflow components
-installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/sprint-status"
-instructions: "{installed_path}/instructions.md"
-
-# Inputs
-sprint_status_file: "{implementation_artifacts}/sprint-status.yaml"
-
-# Smart input file references
-input_file_patterns:
-  sprint_status:
-    description: "Sprint status file generated by sprint-planning"
-    whole: "{implementation_artifacts}/sprint-status.yaml"
-    load_strategy: "FULL_LOAD"
 </file>
 
 <file path="src/bmm/workflows/bmad-quick-flow/quick-dev/steps/step-01-mode-detection.md">
@@ -43619,14 +43614,47 @@ Run the tests using your project's test command.
 **Need more comprehensive testing?** Install [Test Architect (TEA)](https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/) for advanced workflows.
 </file>
 
-<file path="src/bmm/workflows/qa-generate-e2e-tests/instructions.md">
-# Quinn QA - Automate
+<file path="src/bmm/workflows/qa-generate-e2e-tests/workflow.md">
+---
+name: qa-generate-e2e-tests
+description: 'Generate end to end automated tests for existing features. Use when the user says "create qa automated tests for [feature]"'
+---
 
-**Goal**: Generate automated API and E2E tests for implemented code.
+# QA Generate E2E Tests Workflow
 
-**Scope**: This workflow generates tests ONLY. It does **not** perform code review or story validation (use Code Review `CR` for that).
+**Goal:** Generate automated API and E2E tests for implemented code.
 
-## Instructions
+**Your Role:** You are a QA automation engineer. You generate tests ONLY — no code review or story validation (use Code Review `CR` for that).
+
+---
+
+## INITIALIZATION
+
+### Configuration Loading
+
+Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+
+- `project_name`, `user_name`
+- `communication_language`, `document_output_language`
+- `implementation_artifacts`
+- `date` as system-generated current datetime
+- YOU MUST ALWAYS SPEAK OUTPUT in your Agent communication style with the config `{communication_language}`
+
+### Paths
+
+- `installed_path` = `{project-root}/_bmad/bmm/workflows/qa-generate-e2e-tests`
+- `checklist` = `{installed_path}/checklist.md`
+- `test_dir` = `{project-root}/tests`
+- `source_dir` = `{project-root}`
+- `default_output_file` = `{implementation_artifacts}/tests/test-summary.md`
+
+### Context
+
+- `project_context` = `**/project-context.md` (load if exists)
+
+---
+
+## EXECUTION
 
 ### Step 0: Detect Test Framework
 
@@ -43723,58 +43751,13 @@ If the project needs:
 - Comprehensive coverage analysis
 - Advanced testing patterns and utilities
 
-→ **Install Test Architect (TEA) module**: <https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/>
+> **Install Test Architect (TEA) module**: <https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/>
 
 ## Output
 
-Save summary to: `{implementation_artifacts}/tests/test-summary.md`
+Save summary to: `{default_output_file}`
 
-**Done!** Tests generated and verified.
-</file>
-
-<file path="src/bmm/workflows/qa-generate-e2e-tests/workflow.yaml">
-name: qa-generate-e2e-tests
-description: 'Generate end to end automated tests for existing features. Use when the user says "create qa automated tests for [feature]"'
-
-# Critical variables from config
-config_source: "{project-root}/_bmad/bmm/config.yaml"
-implementation_artifacts: "{config_source}:implementation_artifacts"
-user_name: "{config_source}:user_name"
-communication_language: "{config_source}:communication_language"
-document_output_language: "{config_source}:document_output_language"
-date: system-generated
-
-# Workflow components
-installed_path: "{project-root}/_bmad/bmm/workflows/qa-generate-e2e-tests"
-instructions: "{installed_path}/instructions.md"
-validation: "{installed_path}/checklist.md"
-template: false
-
-# Variables and inputs
-test_dir: "{project-root}/tests" # Root test directory
-source_dir: "{project-root}" # Source code directory
-
-# Output configuration
-default_output_file: "{implementation_artifacts}/tests/test-summary.md"
-
-# Required tools
-required_tools:
-  - read_file # Read source code and existing tests
-  - write_file # Create test files
-  - create_directory # Create test directories
-  - list_files # Discover features
-  - search_repo # Find patterns
-  - glob # Find files
-
-tags:
-  - qa
-  - automation
-  - testing
-
-execution_hints:
-  interactive: false
-  autonomous: true
-  iterative: false
+**Done!** Tests generated and verified. Validate against `{checklist}`.
 </file>
 
 <file path="src/bmm/module-help.csv">
@@ -43803,13 +43786,13 @@ bmm,3-solutioning,Create Architecture,CA,10,_bmad/bmm/workflows/3-solutioning/cr
 bmm,3-solutioning,Create Epics and Stories,CE,30,_bmad/bmm/workflows/3-solutioning/create-epics-and-stories/workflow.md,bmad-bmm-create-epics-and-stories,true,pm,Create Mode,"Create the Epics and Stories Listing",planning_artifacts,"epics and stories",
 bmm,3-solutioning,Check Implementation Readiness,IR,70,_bmad/bmm/workflows/3-solutioning/check-implementation-readiness/workflow.md,bmad-bmm-check-implementation-readiness,true,architect,Validate Mode,"Ensure PRD UX Architecture and Epics Stories are aligned",planning_artifacts,"readiness report",
 bmm,4-implementation,Sprint Planning,SP,10,_bmad/bmm/workflows/4-implementation/sprint-planning/workflow.yaml,bmad-bmm-sprint-planning,true,sm,Create Mode,"Generate sprint plan for development tasks - this kicks off the implementation phase by producing a plan the implementation agents will follow in sequence for every story in the plan.",implementation_artifacts,"sprint status",
-bmm,4-implementation,Sprint Status,SS,20,_bmad/bmm/workflows/4-implementation/sprint-status/workflow.yaml,bmad-bmm-sprint-status,false,sm,Create Mode,"Anytime: Summarize sprint status and route to next workflow",,,
+bmm,4-implementation,Sprint Status,SS,20,_bmad/bmm/workflows/4-implementation/sprint-status/workflow.md,bmad-bmm-sprint-status,false,sm,Create Mode,"Anytime: Summarize sprint status and route to next workflow",,,
 bmm,4-implementation,Validate Story,VS,35,_bmad/bmm/workflows/4-implementation/create-story/workflow.yaml,bmad-bmm-create-story,false,sm,Validate Mode,"Validates story readiness and completeness before development work begins",implementation_artifacts,"story validation report",
 bmm,4-implementation,Create Story,CS,30,_bmad/bmm/workflows/4-implementation/create-story/workflow.yaml,bmad-bmm-create-story,true,sm,Create Mode,"Story cycle start: Prepare first found story in the sprint plan that is next, or if the command is run with a specific epic and story designation with context. Once complete, then VS then DS then CR then back to DS if needed or next CS or ER",implementation_artifacts,story,
 bmm,4-implementation,Dev Story,DS,40,_bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml,bmad-bmm-dev-story,true,dev,Create Mode,"Story cycle: Execute story implementation tasks and tests then CR then back to DS if fixes needed",,,
 bmm,4-implementation,Code Review,CR,50,_bmad/bmm/workflows/4-implementation/code-review/workflow.yaml,bmad-bmm-code-review,false,dev,Create Mode,"Story cycle: If issues back to DS if approved then next CS or ER if epic complete",,,
-bmm,4-implementation,QA Automation Test,QA,45,_bmad/bmm/workflows/qa-generate-e2e-tests/workflow.yaml,bmad-bmm-qa-automate,false,qa,Create Mode,"Generate automated API and E2E tests for implemented code using the project's existing test framework (detects existing well known in use test frameworks). Use after implementation to add test coverage. NOT for code review or story validation - use CR for that.",implementation_artifacts,"test suite",
-bmm,4-implementation,Retrospective,ER,60,_bmad/bmm/workflows/4-implementation/retrospective/workflow.yaml,bmad-bmm-retrospective,false,sm,Create Mode,"Optional at epic end: Review completed work lessons learned and next epic or if major issues consider CC",implementation_artifacts,retrospective,
+bmm,4-implementation,QA Automation Test,QA,45,_bmad/bmm/workflows/qa-generate-e2e-tests/workflow.md,bmad-bmm-qa-automate,false,qa,Create Mode,"Generate automated API and E2E tests for implemented code using the project's existing test framework (detects existing well known in use test frameworks). Use after implementation to add test coverage. NOT for code review or story validation - use CR for that.",implementation_artifacts,"test suite",
+bmm,4-implementation,Retrospective,ER,60,_bmad/bmm/workflows/4-implementation/retrospective/workflow.md,bmad-bmm-retrospective,false,sm,Create Mode,"Optional at epic end: Review completed work lessons learned and next epic or if major issues consider CC",implementation_artifacts,retrospective,
 </file>
 
 <file path="src/bmm/module.yaml">
@@ -50485,14 +50468,138 @@ true, // Placeholder - would test actual resolution
 // ============================================================
 ⋮----
 // ============================================================
-// Test 9: OpenCode Ancestor Conflict
+// Test 9: Claude Code Native Skills Install
+// ============================================================
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// ============================================================
+// Test 10: Claude Code Ancestor Conflict
 // ============================================================
 ⋮----
 // ============================================================
-// Test 10: QA Agent Compilation
+// Test 11: Codex Native Skills Install
+// ============================================================
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// ============================================================
+// Test 12: Codex Ancestor Conflict
+// ============================================================
+⋮----
+// ============================================================
+// Test 13: Cursor Native Skills Install
+// ============================================================
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// ============================================================
+// Test 14: Roo Code Native Skills Install
+// ============================================================
+⋮----
+// Verify name frontmatter matches directory name (Roo constraint: lowercase alphanumeric + hyphens)
+⋮----
+// Reinstall/upgrade: run setup again over existing skills output
+⋮----
+// ============================================================
+// Test 15: OpenCode Ancestor Conflict
+// ============================================================
+⋮----
+// ============================================================
+// Test 16: QA Agent Compilation
 // ============================================================
 ⋮----
 // Cleanup
+⋮----
+// ============================================================
+// Test 17: GitHub Copilot Native Skills Install
+// ============================================================
+⋮----
+// Create legacy .github/agents/ and .github/prompts/ files
+⋮----
+// Create legacy copilot-instructions.md with BMAD markers
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// Verify copilot-instructions.md BMAD markers were stripped but user content preserved
+⋮----
+// ============================================================
+// Test 18: Cline Native Skills Install
+// ============================================================
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// Reinstall/upgrade: run setup again over existing skills output
+⋮----
+// ============================================================
+// Test 19: CodeBuddy Native Skills Install
+// ============================================================
+⋮----
+// ============================================================
+// Test 20: Crush Native Skills Install
+// ============================================================
+⋮----
+// ============================================================
+// Test 21: Trae Native Skills Install
+// ============================================================
+⋮----
+// ============================================================
+// Suite 22: KiloCoder Suspended
+// ============================================================
+⋮----
+// Should not appear in available IDEs
+⋮----
+// Setup should be blocked but legacy files should be cleaned up
+⋮----
+// Pre-populate legacy Kilo artifacts that should be cleaned up
+⋮----
+// Should not write new skill files
+⋮----
+// Legacy files should be cleaned up
+⋮----
+// ============================================================
+// Suite 23: Gemini CLI Native Skills
+// ============================================================
+⋮----
+// ============================================================
+// Suite 24: iFlow Native Skills
+// ============================================================
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// ============================================================
+// Suite 25: QwenCoder Native Skills
+// ============================================================
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// ============================================================
+// Suite 26: Rovo Dev Native Skills
+// ============================================================
+⋮----
+// Create a prompts.yml with BMAD entries and a user entry
+⋮----
+// Verify name frontmatter matches directory name
+⋮----
+// Verify prompts.yml cleanup: BMAD entries removed, user entry preserved
+⋮----
+// ============================================================
+// Suite 27: Cleanup preserves bmad-os-* skills
+// ============================================================
+⋮----
+// Pre-populate .claude/skills with bmad-os-* skills (version-controlled repo skills)
+⋮----
+// Also add a regular bmad skill that SHOULD be cleaned up
+⋮----
+// Run Claude Code setup (which triggers cleanup then install)
+⋮----
+// bmad-os-* skills must survive
+⋮----
+// bmad-os skill content must be untouched
+⋮----
+// Regular bmad skill should have been replaced by fresh install
+⋮----
+// Stale non-bmad-os skill must have been removed by cleanup
 ⋮----
 // ============================================================
 // Summary
@@ -51951,6 +52058,9 @@ cachedModule.cachePath && // Include if selected or if we should include all
 // Use config.ides if it's an array (even if empty), null means prompt
 ⋮----
 // Merge tool selection into config (for both quick update and regular flow)
+// Normalize IDE keys to lowercase so they match handler map keys consistently
+⋮----
+// Early check: fail fast if ALL selected IDEs are suspended
 ⋮----
 // Detect IDEs that were previously installed but are NOT in the new selection (to be removed)
 ⋮----
@@ -52075,6 +52185,10 @@ console.log = () =>
 // Render consolidated summary
 ⋮----
 // Ensure the original error is never swallowed by a logging failure
+⋮----
+// Clean up any temp backup directories that were created before the failure
+⋮----
+// Best-effort cleanup — don't mask the original error
 ⋮----
 /**
    * Render a consolidated install summary using prompts.note()
@@ -55127,6 +55241,12 @@ async cleanup(projectDir, options =
 ⋮----
 // Migrate legacy target directories (e.g. .opencode/agent → .opencode/agents)
 ⋮----
+// Strip BMAD markers from copilot-instructions.md if present
+⋮----
+// Strip BMAD modes from .kilocodemodes if present
+⋮----
+// Strip BMAD entries from .rovodev/prompts.yml if present
+⋮----
 // Clean all target directories
 ⋮----
 // Track parent directories for empty-dir cleanup
@@ -55167,6 +55287,28 @@ async cleanupTarget(projectDir, targetDir, options =
 // Directory may already be gone or in use — skip
 ⋮----
 /**
+   * Strip BMAD-owned content from .github/copilot-instructions.md.
+   * The old custom installer injected content between <!-- BMAD:START --> and <!-- BMAD:END --> markers.
+   * Deletes the file if nothing remains. Restores .bak backup if one exists.
+   */
+async cleanupCopilotInstructions(projectDir, options =
+⋮----
+/**
+   * Strip BMAD-owned modes from .kilocodemodes.
+   * The old custom kilo.js installer added modes with slug starting with 'bmad-'.
+   * Parses YAML, filters out BMAD modes, rewrites. Leaves file as-is on parse failure.
+   */
+async cleanupKiloModes(projectDir, options =
+⋮----
+/**
+   * Strip BMAD-owned entries from .rovodev/prompts.yml.
+   * The old custom rovodev.js installer registered workflows in prompts.yml.
+   * Parses YAML, filters out entries with name starting with 'bmad-', rewrites.
+   * Removes the file if no entries remain.
+   */
+async cleanupRovoDevPrompts(projectDir, options =
+⋮----
+/**
    * Check ancestor directories for existing BMAD files in the same target_dir.
    * IDEs like Claude Code inherit commands from parent directories, so an existing
    * installation in an ancestor would cause duplicate commands.
@@ -55195,340 +55337,13 @@ async removeEmptyParents(projectDir, relativeDir)
 break; // fatal error (e.g. EACCES) — stop upward walk
 </file>
 
-<file path="tools/cli/installers/lib/ide/github-copilot.js">
-/**
- * GitHub Copilot setup handler
- * Creates agents in .github/agents/, prompts in .github/prompts/,
- * copilot-instructions.md, and configures VS Code settings
- */
-class GitHubCopilotSetup extends BaseIdeSetup
-⋮----
-// Don't set configDir to '.github' — nearly every GitHub repo has that directory,
-// which would cause the base detect() to false-positive. Use detectionPaths instead.
-⋮----
-/**
-   * Setup GitHub Copilot configuration
-   * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
-   * @param {Object} options - Setup options
-   */
-async setup(projectDir, bmadDir, options =
-⋮----
-// Create .github/agents and .github/prompts directories
-⋮----
-// Preserve any customised tool permissions from existing files before cleanup
-⋮----
-// Clean up any existing BMAD files before reinstalling
-⋮----
-// Load agent manifest for enriched descriptions
-⋮----
-// Generate agent launchers
-⋮----
-// Create agent .agent.md files
-⋮----
-// Compute fileName first so we can look up any existing tool permissions
-⋮----
-// Generate prompt files from bmad-help.csv
-⋮----
-// Generate copilot-instructions.md
-⋮----
-/**
-   * Load agent manifest CSV into a Map keyed by agent name
-   * @param {string} bmadDir - BMAD installation directory
-   * @returns {Map} Agent metadata keyed by name
-   */
-async loadAgentManifest(bmadDir)
-⋮----
-// Gracefully degrade if manifest is unreadable/malformed
-⋮----
-/**
-   * Load bmad-help.csv to drive prompt generation
-   * @param {string} bmadDir - BMAD installation directory
-   * @returns {Array|null} Parsed CSV rows
-   */
-async loadBmadHelp(bmadDir)
-⋮----
-// Gracefully degrade if help CSV is unreadable/malformed
-⋮----
-/**
-   * Create agent .agent.md content with enriched description
-   * @param {Object} artifact - Agent artifact from AgentCommandGenerator
-   * @param {Object|undefined} manifestEntry - Agent manifest entry with metadata
-   * @returns {string} Agent file content
-   */
-createAgentContent(artifact, manifestEntry, toolsStr)
-⋮----
-// Build enriched description from manifest metadata
-⋮----
-// Build the agent file path for the activation block
-⋮----
-/**
-   * Generate .prompt.md files for workflows, tasks, tech-writer commands, and agent activators
-   * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
-   * @param {Array} agentArtifacts - Agent artifacts for activator generation
-   * @param {Map} agentManifest - Agent manifest data
-   * @returns {number} Count of prompts generated
-   */
-async generatePromptFiles(projectDir, bmadDir, agentArtifacts, agentManifest)
-⋮----
-// Load bmad-help.csv to drive workflow/task prompt generation
-⋮----
-if (!command) continue; // Skip entries without a command (tech-writer commands have no command column)
-⋮----
-if (!workflowFile) continue; // Skip entries with no workflow file path
-⋮----
-// Generate tech-writer command prompts (entries with no command column)
-⋮----
-if (entry.command) continue; // Already handled above
-⋮----
-// Generate agent activator prompts (Pattern D)
-⋮----
-/**
-   * Create prompt content for a workflow/task entry from bmad-help.csv
-   * Determines the pattern (A, B, or A for .xml tasks) based on file extension
-   * @param {Object} entry - bmad-help.csv row
-   * @param {string} workflowFile - Workflow file path
-   * @returns {string} Prompt file content
-   */
-createWorkflowPromptContent(entry, workflowFile, toolsStr)
-⋮----
-// bmm/config.yaml is safe to hardcode here: these prompts are only generated when
-// bmad-help.csv exists (bmm module data), so bmm is guaranteed to be installed.
-⋮----
-// Pattern B: YAML-based workflows — use workflow engine
-⋮----
-// Pattern A variant: XML tasks — load and execute directly
-⋮----
-// Pattern A: MD workflows — load and follow directly
-⋮----
-/**
-   * Create a short 2-5 word description for a prompt from the entry name
-   * @param {string} name - Entry name from bmad-help.csv
-   * @returns {string} Short description
-   */
-createPromptDescription(name)
-⋮----
-/**
-   * Create prompt content for tech-writer agent-only commands (Pattern C)
-   * @param {Object} entry - bmad-help.csv row
-   * @returns {Object|null} { fileName, content } or null if not a tech-writer command
-   */
-createTechWriterPromptContent(entry)
-⋮----
-/**
-   * Create agent activator prompt content (Pattern D)
-   * @param {Object} artifact - Agent artifact
-   * @param {Object|undefined} manifestEntry - Agent manifest entry
-   * @returns {string} Prompt file content
-   */
-createAgentActivatorPromptContent(artifact, manifestEntry, toolsStr)
-⋮----
-// bmm/config.yaml is safe to hardcode: agent activators are only generated from
-// bmm agent artifacts, so bmm is guaranteed to be installed.
-⋮----
-/**
-   * Generate copilot-instructions.md from module config
-   * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
-   * @param {Map} agentManifest - Agent manifest data
-   */
-async generateCopilotInstructions(projectDir, bmadDir, agentManifest, options =
-⋮----
-// Build the agents table from the manifest
-⋮----
-// Replace only the BMAD section between markers
-⋮----
-// Existing file without markers — back it up before overwriting
-⋮----
-// No existing file — create fresh with markers
-⋮----
-/**
-   * Load module config.yaml for template variables
-   * @param {string} bmadDir - BMAD installation directory
-   * @returns {Object} Config variables
-   */
-async loadModuleConfig(bmadDir)
-⋮----
-// Fall through to next config
-⋮----
-/**
-   * Escape a string for use inside YAML single-quoted values.
-   * In YAML, the only escape inside single quotes is '' for a literal '.
-   * @param {string} value - Raw string
-   * @returns {string} Escaped string safe for YAML single-quoted context
-   */
-escapeYamlSingleQuote(value)
-⋮----
-/**
-   * Scan existing agent and prompt files for customised tool permissions before cleanup.
-   * Returns a Map<filename, toolsArray> so permissions can be preserved across reinstalls.
-   * @param {string} projectDir - Project directory
-   * @returns {Map} Existing tool permissions keyed by filename
-   */
-async collectExistingToolPermissions(projectDir)
-⋮----
-// Skip unreadable files
-⋮----
-/**
-   * Get the tools array string for a file, preserving any existing customisation.
-   * Falls back to the default tools if no prior customisation exists.
-   * @param {string} fileName - Target filename (e.g. 'bmad-agent-bmm-pm.agent.md')
-   * @returns {string} YAML inline array string
-   */
-getToolsForFile(fileName)
-⋮----
-/**
-   * Format name as title
-   */
-formatTitle(name)
-⋮----
-/**
-   * Cleanup GitHub Copilot configuration - surgically remove only BMAD files
-   */
-async cleanup(projectDir, options =
-⋮----
-// Clean up agents directory
-⋮----
-// Clean up prompts directory
-⋮----
-// During uninstall, also strip BMAD markers from copilot-instructions.md.
-// During reinstall (default), this is skipped because generateCopilotInstructions()
-// handles marker-based replacement in a single read-modify-write pass,
-// which correctly preserves user content outside the markers.
-⋮----
-/**
-   * Strip BMAD marker section from copilot-instructions.md
-   * If file becomes empty after stripping, delete it.
-   * If a .bak backup exists and the main file was deleted, restore the backup.
-   * @param {string} projectDir - Project directory
-   * @param {Object} [options] - Options (e.g. { silent: true })
-   */
-async cleanupCopilotInstructions(projectDir, options =
-⋮----
-return; // No valid markers found
-⋮----
-// Strip the marker section (including markers)
-⋮----
-// File is empty after stripping — delete it
-⋮----
-// If backup exists, restore it
-⋮----
-// Write cleaned content back (preserve original whitespace)
-⋮----
-// If backup exists, it's stale now — remove it
-</file>
-
-<file path="tools/cli/installers/lib/ide/kilo.js">
-/**
- * KiloCode IDE setup handler
- * Creates custom modes in .kilocodemodes file (similar to Roo)
- */
-class KiloSetup extends BaseIdeSetup
-⋮----
-/**
-   * Setup KiloCode IDE configuration
-   * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
-   * @param {Object} options - Setup options
-   */
-async setup(projectDir, bmadDir, options =
-⋮----
-// Clean up any old BMAD installation first
-⋮----
-// Load existing config (may contain non-BMAD modes and other settings)
-⋮----
-// If parsing fails, start fresh but warn user
-⋮----
-// Ensure customModes array exists
-⋮----
-// Generate agent launchers
-⋮----
-// Create mode objects and add to config
-⋮----
-// Write .kilocodemodes file with proper YAML structure
-⋮----
-// Generate workflow commands
-⋮----
-// Write to .kilocode/workflows/ directory
-⋮----
-// Clear old BMAD workflows before writing new ones
-⋮----
-// Write workflow files
-⋮----
-// Generate task and tool commands
-⋮----
-// Write task/tool files to workflows directory (same location as workflows)
-⋮----
-/**
-   * Create a mode object for an agent
-   * @param {Object} artifact - Agent artifact
-   * @param {string} projectDir - Project directory
-   * @returns {Object} Mode object for YAML serialization
-   */
-async createModeObject(artifact, projectDir)
-⋮----
-// Extract metadata from launcher content
-⋮----
-// Get the activation header from central template (trim to avoid YAML formatting issues)
-⋮----
-// Get relative path
-⋮----
-// Build mode object (KiloCode uses same schema as Roo)
-⋮----
-/**
-   * Format name as title
-   */
-formatTitle(name)
-⋮----
-/**
-   * Clear old BMAD workflow files from workflows directory
-   * @param {string} workflowsDir - Workflows directory path
-   */
-async clearBmadWorkflows(workflowsDir)
-⋮----
-/**
-   * Cleanup KiloCode configuration
-   */
-async cleanup(projectDir, options =
-⋮----
-// Remove BMAD modes only (keep non-BMAD modes)
-⋮----
-// If parsing fails, leave file as-is
-⋮----
-// Clean up workflow files
-⋮----
-/**
-   * Install a custom agent launcher for Kilo
-   * @param {string} projectDir - Project directory
-   * @param {string} agentName - Agent name (e.g., "fred-commit-poet")
-   * @param {string} agentPath - Path to compiled agent (relative to project root)
-   * @param {Object} metadata - Agent metadata
-   * @returns {Object} Installation result
-   */
-async installCustomAgentLauncher(projectDir, agentName, agentPath, metadata)
-⋮----
-// Read existing .kilocodemodes file
-⋮----
-// Ensure customModes array exists
-⋮----
-// Create custom agent mode object
-⋮----
-// Check if mode already exists
-⋮----
-// Add custom mode object
-⋮----
-// Write .kilocodemodes file with proper YAML structure
-</file>
-
 <file path="tools/cli/installers/lib/ide/manager.js">
 /**
  * IDE Manager - handles IDE-specific setup
  * Dynamically discovers and loads IDE handlers
  *
  * Loading strategy:
- * 1. Custom installer files (github-copilot.js, kilo.js, rovodev.js) - for platforms with unique installation logic
- * 2. Config-driven handlers (from platform-codes.yaml) - for standard IDE installation patterns
+ * All platforms are config-driven from platform-codes.yaml.
  */
 class IdeManager
 ⋮----
@@ -55548,30 +55363,15 @@ setBmadFolderName(bmadFolderName)
 async ensureInitialized()
 ⋮----
 /**
-   * Dynamically load all IDE handlers
-   * 1. Load custom installer files first (github-copilot.js, kilo.js, rovodev.js)
-   * 2. Load config-driven handlers from platform-codes.yaml
+   * Dynamically load all IDE handlers from platform-codes.yaml
    */
 async loadHandlers()
-⋮----
-// Load custom installer files
-⋮----
-// Load config-driven handlers from platform-codes.yaml
-⋮----
-/**
-   * Load custom installer files (unique installation logic)
-   * These files have special installation patterns that don't fit the config-driven model
-   * Note: codex was migrated to config-driven (platform-codes.yaml) and no longer needs a custom installer
-   */
-async loadCustomInstallerFiles()
 ⋮----
 /**
    * Load config-driven handlers from platform-codes.yaml
    * This creates ConfigDrivenIdeSetup instances for platforms with installer config
    */
 async loadConfigDrivenHandlers()
-⋮----
-// Skip if already loaded by custom installer
 ⋮----
 // Skip if no installer config (platform may not need installation)
 ⋮----
@@ -55584,6 +55384,8 @@ getAvailableIdes()
 // Skip handlers without valid names
 ⋮----
 // Filter out invalid entries (undefined name, empty key, etc.)
+⋮----
+// Skip suspended platforms (e.g., IDE doesn't support skills yet)
 ⋮----
 // Sort: preferred first, then alphabetical
 ⋮----
@@ -55608,11 +55410,15 @@ getOtherIdes()
    */
 async setup(ideName, projectDir, bmadDir, options =
 ⋮----
+// Block suspended platforms — clean up legacy files but don't install
+⋮----
+// Still clean up legacy artifacts so old broken configs don't linger
+⋮----
+// Best-effort cleanup — don't let stale files block the suspended result
+⋮----
 // Build detail string from handler-returned data
 ⋮----
 // Config-driven handlers return { success, results: { agents, workflows, tasks, tools } }
-⋮----
-// Kilo handler returns { success, modes, workflows, tasks, tools }
 ⋮----
 // Propagate handler's success status (default true for backward compat)
 ⋮----
@@ -55772,8 +55578,11 @@ platforms:
     category: ide
     description: "AI coding assistant"
     installer:
-      target_dir: .clinerules/workflows
-      template_type: windsurf
+      legacy_targets:
+        - .clinerules/workflows
+      target_dir: .cline/skills
+      template_type: default
+      skill_format: true
 
   codex:
     name: "Codex"
@@ -55796,8 +55605,11 @@ platforms:
     category: ide
     description: "Tencent Cloud Code Assistant - AI-powered coding companion"
     installer:
-      target_dir: .codebuddy/commands
+      legacy_targets:
+        - .codebuddy/commands
+      target_dir: .codebuddy/skills
       template_type: default
+      skill_format: true
 
   crush:
     name: "Crush"
@@ -55805,8 +55617,11 @@ platforms:
     category: ide
     description: "AI development assistant"
     installer:
-      target_dir: .crush/commands
+      legacy_targets:
+        - .crush/commands
+      target_dir: .crush/skills
       template_type: default
+      skill_format: true
 
   cursor:
     name: "Cursor"
@@ -55826,15 +55641,24 @@ platforms:
     category: cli
     description: "Google's CLI for Gemini"
     installer:
-      target_dir: .gemini/commands
-      template_type: gemini
+      legacy_targets:
+        - .gemini/commands
+      target_dir: .gemini/skills
+      template_type: default
+      skill_format: true
 
   github-copilot:
     name: "GitHub Copilot"
     preferred: false
     category: ide
     description: "GitHub's AI pair programmer"
-    # No installer config - uses custom github-copilot.js
+    installer:
+      legacy_targets:
+        - .github/agents
+        - .github/prompts
+      target_dir: .github/skills
+      template_type: default
+      skill_format: true
 
   iflow:
     name: "iFlow"
@@ -55842,15 +55666,24 @@ platforms:
     category: ide
     description: "AI workflow automation"
     installer:
-      target_dir: .iflow/commands
+      legacy_targets:
+        - .iflow/commands
+      target_dir: .iflow/skills
       template_type: default
+      skill_format: true
 
   kilo:
     name: "KiloCoder"
     preferred: false
     category: ide
     description: "AI coding platform"
-    # No installer config - uses custom kilo.js (creates .kilocodemodes file)
+    suspended: "Kilo Code does not yet support the Agent Skills standard. Support is paused until they implement it. See https://github.com/kilocode/kilo-code/issues for updates."
+    installer:
+      legacy_targets:
+        - .kilocode/workflows
+      target_dir: .kilocode/skills
+      template_type: default
+      skill_format: true
 
   kiro:
     name: "Kiro"
@@ -55886,24 +55719,35 @@ platforms:
     category: ide
     description: "Qwen AI coding assistant"
     installer:
-      target_dir: .qwen/commands
+      legacy_targets:
+        - .qwen/commands
+      target_dir: .qwen/skills
       template_type: default
+      skill_format: true
 
   roo:
-    name: "Roo Cline"
+    name: "Roo Code"
     preferred: false
     category: ide
     description: "Enhanced Cline fork"
     installer:
-      target_dir: .roo/commands
+      legacy_targets:
+        - .roo/commands
+      target_dir: .roo/skills
       template_type: default
+      skill_format: true
 
   rovo-dev:
     name: "Rovo Dev"
     preferred: false
     category: ide
     description: "Atlassian's Rovo development environment"
-    # No installer config - uses custom rovodev.js (generates prompts.yml manifest)
+    installer:
+      legacy_targets:
+        - .rovodev/workflows
+      target_dir: .rovodev/skills
+      template_type: default
+      skill_format: true
 
   trae:
     name: "Trae"
@@ -55911,8 +55755,11 @@ platforms:
     category: ide
     description: "AI coding tool"
     installer:
-      target_dir: .trae/rules
-      template_type: trae
+      legacy_targets:
+        - .trae/rules
+      target_dir: .trae/skills
+      template_type: default
+      skill_format: true
 
   windsurf:
     name: "Windsurf"
@@ -55983,102 +55830,6 @@ conventions:
   name_format: "Title Case"
   max_code_length: 20
   allowed_characters: "a-z0-9-"
-</file>
-
-<file path="tools/cli/installers/lib/ide/rovodev.js">
-/**
- * Rovo Dev IDE setup handler
- *
- * Custom installer that writes .md workflow files to .rovodev/workflows/
- * and generates .rovodev/prompts.yml to register them with Rovo Dev's /prompts feature.
- *
- * prompts.yml format (per Rovo Dev docs):
- *   prompts:
- *     - name: bmad-bmm-create-prd
- *       description: "PRD workflow..."
- *       content_file: workflows/bmad-bmm-create-prd.md
- */
-class RovoDevSetup extends BaseIdeSetup
-⋮----
-/**
-   * Setup Rovo Dev configuration
-   * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
-   * @param {Object} options - Setup options
-   * @returns {Promise<Object>} Setup result with { success, results: { agents, workflows, tasks, tools } }
-   */
-async setup(projectDir, bmadDir, options =
-⋮----
-// Clean up any old BMAD installation first
-⋮----
-// Generate and write agent launchers
-⋮----
-// Generate and write workflow commands
-⋮----
-// Generate and write task/tool commands
-⋮----
-// Generate prompts.yml manifest (only if we have entries to write)
-⋮----
-/**
-   * Collect prompt entries from artifacts into writtenFiles array
-   * @param {Array} writtenFiles - Target array to push entries into
-   * @param {Array} artifacts - Artifacts from a generator's collect method
-   * @param {string[]} acceptedTypes - Artifact types to include (e.g., ['agent-launcher'])
-   * @param {string} [fallbackSuffix] - Suffix for fallback description; defaults to artifact.type
-   */
-_collectPromptEntries(writtenFiles, artifacts, acceptedTypes, fallbackSuffix)
-⋮----
-/**
-   * Generate .rovodev/prompts.yml manifest
-   * Merges with existing user entries -- strips entries with names starting 'bmad-',
-   * appends new BMAD entries, and writes back.
-   *
-   * @param {string} projectDir - Project directory
-   * @param {Array<Object>} writtenFiles - Array of { name, description, contentFile }
-   */
-async generatePromptsYml(projectDir, writtenFiles)
-⋮----
-// Read existing prompts.yml and preserve non-BMAD entries
-⋮----
-// Keep only non-BMAD entries (entries whose name does NOT start with bmad-)
-⋮----
-// If parsing fails, start fresh but preserve file safety
-⋮----
-// Build new BMAD entries (prefix description with name so /prompts list is scannable)
-⋮----
-// Merge: user entries first, then BMAD entries
-⋮----
-/**
-   * Cleanup Rovo Dev configuration
-   * Removes bmad-* files from .rovodev/workflows/ and strips BMAD entries from prompts.yml
-   * @param {string} projectDir - Project directory
-   * @param {Object} options - Cleanup options
-   */
-async cleanup(projectDir, options =
-⋮----
-// Remove all bmad-* entries from workflows dir (aligned with detect() predicate)
-⋮----
-// Clean BMAD entries from prompts.yml (preserve user entries)
-⋮----
-// If no entries remain, remove the file entirely
-⋮----
-// If parsing fails, leave file as-is
-⋮----
-// Remove empty .rovodev directories
-⋮----
-/**
-   * Detect whether Rovo Dev configuration exists in the project
-   * Checks for .rovodev/ dir with bmad files or bmad entries in prompts.yml
-   * @param {string} projectDir - Project directory
-   * @returns {boolean}
-   */
-async detect(projectDir)
-⋮----
-// Check for bmad files in workflows dir
-⋮----
-// Check for bmad entries in prompts.yml
-⋮----
-// If parsing fails, check raw content
 </file>
 
 <file path="tools/cli/installers/lib/modules/external-manager.js">
@@ -59617,25 +59368,27 @@ This checklist now includes those completed platforms plus the remaining full-su
 
 Support assumption: full Agent Skills support. BMAD has already migrated from `.claude/commands` to `.claude/skills`.
 
-- [ ] Confirm current implementation still matches Claude Code skills expectations
-- [ ] Confirm legacy cleanup for `.claude/commands`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy command output
-- [ ] Confirm ancestor conflict protection
-- [ ] Implement/extend automated tests as needed
-- [ ] Commit any follow-up fixes if required
+**Install:** `npm install -g @anthropic-ai/claude-code` or `brew install claude-code`
+
+- [x] Confirm current implementation still matches Claude Code skills expectations
+- [x] Confirm legacy cleanup for `.claude/commands`
+- [x] Test fresh install
+- [x] Test reinstall/upgrade from legacy command output
+- [x] Confirm ancestor conflict protection because Claude Code inherits skills from parent directories and `ancestor_conflict_check: true` is set in platform-codes.yaml
+- [x] Implement/extend automated tests as needed
 
 ## Codex CLI
 
 Support assumption: full Agent Skills support. BMAD has already migrated from `.codex/prompts` to `.agents/skills`.
 
-- [ ] Confirm current implementation still matches Codex CLI skills expectations
-- [ ] Confirm legacy cleanup for project and global `.codex/prompts`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy prompt output
+**Install:** `npm install -g @openai/codex`
+
+- [x] Confirm current implementation still matches Codex CLI skills expectations
+- [x] Confirm legacy cleanup for project and global `.codex/prompts`
+- [x] Test fresh install
+- [x] Test reinstall/upgrade from legacy prompt output
 - [x] Confirm ancestor conflict protection because Codex inherits parent-directory `.agents/skills`
-- [ ] Implement/extend automated tests as needed
-- [ ] Commit any follow-up fixes if required
+- [x] Implement/extend automated tests as needed
 
 ## Cursor
 
@@ -59647,7 +59400,7 @@ Support assumption: full Agent Skills support. BMAD currently installs legacy co
 - [x] Test fresh install
 - [x] Test reinstall/upgrade from legacy command output
 - [x] Confirm no ancestor conflict protection is needed because a child workspace surfaced child `.cursor/skills` entries but not a parent-only skill during manual verification
-- [ ] Implement/extend automated tests
+- [x] Implement/extend automated tests
 - [x] Commit
 
 ## Windsurf
@@ -59661,20 +59414,21 @@ Support assumption: full Agent Skills support. Windsurf docs confirm workspace s
 - [x] Test reinstall/upgrade from legacy workflow output
 - [x] Confirm no ancestor conflict protection is needed because manual Windsurf verification showed child-local `@` skills loaded while a parent-only skill was not inherited
 - [x] Implement/extend automated tests
-- [x] Commit
 
 ## Cline
 
-Support assumption: full Agent Skills support. BMAD currently installs workflow files to `.clinerules/workflows`; target should move to the platform's native skills directory.
+Support assumption: full Agent Skills support. Cline docs confirm workspace skills at `.cline/skills/<skill-name>/SKILL.md` and global skills at `~/.cline/skills/`. BMAD has now migrated from `.clinerules/workflows` to `.cline/skills`.
 
-- [ ] Confirm current Cline skills path and whether `.cline/skills` is the correct BMAD target
-- [ ] Implement installer migration to native skills output
-- [ ] Add legacy cleanup for `.clinerules/workflows`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy workflow output
-- [ ] Confirm ancestor conflict protection where applicable
-- [ ] Implement/extend automated tests
-- [ ] Commit
+**Install:** VS Code extension `saoudrizwan.claude-dev` — search "Cline" in Extensions or `code --install-extension saoudrizwan.claude-dev`
+
+- [x] Confirm current Cline skills path is `.cline/skills/{skill-name}/SKILL.md` with YAML frontmatter (name + description)
+- [x] Implement installer migration to native skills output
+- [x] Add legacy cleanup for `.clinerules/workflows`
+- [x] Test fresh install — 43 skills installed to `.cline/skills/`
+- [x] Test reinstall/upgrade from legacy workflow output
+- [x] Confirm no ancestor conflict protection is needed because Cline only scans workspace-local `.cline/skills/` and global `~/.cline/skills/`, with no ancestor directory inheritance
+- [x] Implement/extend automated tests — 9 assertions in test suite 18
+- [x] Commit
 
 ## Google Antigravity
 
@@ -59687,7 +59441,6 @@ Support assumption: full Agent Skills support. Antigravity docs confirm workspac
 - [x] Test reinstall/upgrade from legacy workflow output
 - [x] Confirm no ancestor conflict protection is needed because manual Antigravity verification in `/tmp/antigravity-ancestor-repro/parent/child` showed only the child-local `child-only` skill, with no inherited parent `.agent/skills` entry
 - [x] Implement/extend automated tests
-- [x] Commit
 
 ## Auggie
 
@@ -59700,33 +59453,38 @@ Support assumption: full Agent Skills support. BMAD currently installs commands 
 - [x] Test reinstall/upgrade from legacy command output
 - [x] Confirm no ancestor conflict protection is needed because local `auggie --workspace-root` repro showed child-local `.augment/skills` loading `child-only` but not parent `parent-only`
 - [x] Implement/extend automated tests
-- [ ] Commit
+- [x] Commit
 
 ## CodeBuddy
 
-Support assumption: full Agent Skills support. BMAD currently installs commands to `.codebuddy/commands`; target should move to `.codebuddy/skills`.
+Support assumption: full Agent Skills support. CodeBuddy docs confirm workspace skills at `.codebuddy/skills/<skill-name>/SKILL.md` and global skills at `~/.codebuddy/commands/`. BMAD has now migrated from `.codebuddy/commands` to `.codebuddy/skills`.
 
-- [ ] Confirm CodeBuddy native skills path and any naming/frontmatter requirements
-- [ ] Implement installer migration to native skills output
-- [ ] Add legacy cleanup for `.codebuddy/commands`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy command output
-- [ ] Confirm ancestor conflict protection where applicable
-- [ ] Implement/extend automated tests
-- [ ] Commit
+**Install:** Download [Tencent CodeBuddy IDE](https://codebuddyide.net/) or install as VS Code extension `CodebuddyAI.codebuddy-ai`
+
+- [x] Confirm CodeBuddy native skills path is `.codebuddy/skills/{skill-name}/SKILL.md` with YAML frontmatter (name + description) — per docs, not IDE-verified
+- [x] Implement installer migration to native skills output
+- [x] Add legacy cleanup for `.codebuddy/commands`
+- [x] Test fresh install — 43 skills installed to `.codebuddy/skills/` (installer output only)
+- [x] Test reinstall/upgrade from legacy command output
+- [ ] **NEEDS MANUAL IDE VERIFICATION** — requires Tencent Cloud account; confirm skills appear in UI and test ancestor inheritance
+- [x] Implement/extend automated tests — 9 assertions in test suite 19
+- [x] Commit
 
 ## Crush
 
-Support assumption: full Agent Skills support. BMAD currently installs commands to `.crush/commands`; target should move to the platform's native skills location.
+Support assumption: full Agent Skills support. Crush scans project-local `.crush/skills/` exclusively ([GitHub issue #2072](https://github.com/charmbracelet/crush/issues/2072) confirms this and requests adding `~/.agents/skills/`). BMAD has now migrated from `.crush/commands` to `.crush/skills`.
 
-- [ ] Confirm Crush project-local versus global skills path and BMAD's preferred install target
-- [ ] Implement installer migration to native skills output
-- [ ] Add legacy cleanup for `.crush/commands`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy command output
-- [ ] Confirm ancestor conflict protection where applicable
-- [ ] Implement/extend automated tests
-- [ ] Commit
+**Install:** `brew install charmbracelet/tap/crush` (macOS/Linux) or `winget install charmbracelet.crush` (Windows)
+
+- [x] Confirm Crush project-local skills path is `.crush/skills/{skill-name}/SKILL.md` — per GitHub issue #2072 confirming `.crush/skills/` is the only scan path
+- [x] Implement installer migration to native skills output
+- [x] Add legacy cleanup for `.crush/commands`
+- [x] Test fresh install — 43 skills installed to `.crush/skills/`
+- [x] Test reinstall/upgrade from legacy command output
+- [x] Confirm no ancestor conflict protection is needed because Crush only scans project-local `.crush/skills/`, no ancestor inheritance
+- [x] Manual CLI verification — `crush run` lists all 10 skills and successfully triggers bmad-help
+- [x] Implement/extend automated tests — 9 assertions in test suite 20
+- [x] Commit
 
 ## Kiro
 
@@ -59739,7 +59497,6 @@ Support assumption: full Agent Skills support. Kiro docs confirm project skills 
 - [x] Test reinstall/upgrade from legacy steering output
 - [x] Confirm no ancestor conflict protection is needed because manual Kiro verification showed Slash-visible skills from the current workspace only, with no ancestor `.kiro/skills` inheritance
 - [x] Implement/extend automated tests
-- [x] Commit
 
 ## OpenCode
 
@@ -59752,68 +59509,128 @@ Support assumption: full Agent Skills support. BMAD currently splits output betw
 - [x] Test reinstall/upgrade from split legacy output
 - [x] Confirm ancestor conflict protection is required because local `opencode run` repros loaded both child-local `child-only` and ancestor `parent-only`, matching the docs that project-local skill discovery walks upward to the git worktree
 - [x] Implement/extend automated tests
-- [ ] Commit
+- [x] Commit
 
 ## Roo Code
 
 Support assumption: full Agent Skills support. BMAD currently installs commands to `.roo/commands`; target should move to `.roo/skills` or the correct mode-aware skill directories.
 
-- [ ] Confirm Roo native skills path and whether BMAD should use generic or mode-specific skill directories
-- [ ] Implement installer migration to native skills output
-- [ ] Add legacy cleanup for `.roo/commands`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy command output
-- [ ] Confirm ancestor conflict protection where applicable
-- [ ] Implement/extend automated tests
-- [ ] Commit
+**Install:** VS Code extension `RooVeterinaryInc.roo-cline` — search "Roo Code" in Extensions or `code --install-extension RooVeterinaryInc.roo-cline`
+
+- [x] Confirm Roo native skills path is `.roo/skills/{skill-name}/SKILL.md` with `name` frontmatter matching directory exactly (lowercase, alphanumeric + hyphens only)
+- [x] Implement installer migration to native skills output
+- [x] Add legacy cleanup for `.roo/commands`
+- [x] Test fresh install — 43 skills installed, verified in Roo Code v3.51
+- [x] Test reinstall/upgrade from legacy command output
+- [x] Confirm no ancestor conflict protection is needed because manual Roo Code v3.51 verification showed child-local `child-only` skill loaded while parent-only skill was not inherited
+- [x] Implement/extend automated tests — 7 assertions in test suite 13
+- [x] Commit
 
 ## Trae
 
-Support assumption: full Agent Skills support. BMAD currently installs rule files to `.trae/rules`; target should move to the platform's native skills directory.
+Support assumption: full Agent Skills support. [Trae docs](https://docs.trae.ai/ide/skills) confirm workspace skills at `.trae/skills/<skill-name>/SKILL.md`. BMAD has now migrated from `.trae/rules` to `.trae/skills`.
 
-- [ ] Confirm Trae native skills path and whether the current `.trae/rules` path is still required for compatibility
-- [ ] Implement installer migration to native skills output
-- [ ] Add legacy cleanup for `.trae/rules`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy rules output
-- [ ] Confirm ancestor conflict protection where applicable
-- [ ] Implement/extend automated tests
-- [ ] Commit
+**Install:** Download [standalone IDE](https://www.trae.ai/download) (macOS/Windows/Linux) or `winget install -e --id ByteDance.Trae`
+
+- [x] Confirm Trae native skills path is `.trae/skills/{skill-name}/SKILL.md` — per official docs
+- [x] Implement installer migration to native skills output
+- [x] Add legacy cleanup for `.trae/rules`
+- [x] Test fresh install — 43 skills installed to `.trae/skills/`
+- [x] Test reinstall/upgrade from legacy rules output
+- [x] Confirm no ancestor conflict protection is needed — Trae docs describe project-local `.trae/skills/` only
+- [ ] **NEEDS MANUAL IDE VERIFICATION** — download Trae IDE and confirm skills appear in UI
+- [x] Implement/extend automated tests — 9 assertions in test suite 21
+- [x] Commit
 
 ## GitHub Copilot
 
 Support assumption: full Agent Skills support. BMAD currently uses a custom installer that generates `.github/agents`, `.github/prompts`, and `.github/copilot-instructions.md`; target should move to `.github/skills`.
 
-- [ ] Confirm GitHub Copilot native skills path and whether `.github/agents` remains necessary as a compatibility layer
-- [ ] Design the migration away from the custom prompt/agent installer model
-- [ ] Implement native skills output, ideally with shared config-driven code where practical
-- [ ] Add legacy cleanup for `.github/agents`, `.github/prompts`, and any BMAD-owned Copilot instruction file behavior that should be retired
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy custom installer output
-- [ ] Confirm ancestor conflict protection where applicable
-- [ ] Implement/extend automated tests
+**Install:** VS Code extension `GitHub.copilot` — search "GitHub Copilot" in Extensions or `code --install-extension GitHub.copilot`
+
+- [x] Confirm GitHub Copilot native skills path is `.github/skills/{skill-name}/SKILL.md` — also reads `.claude/skills/` automatically
+- [x] Design the migration away from the custom prompt/agent installer model — replaced 699-line custom installer with config-driven `skill_format: true`
+- [x] Implement native skills output, ideally with shared config-driven code where practical
+- [x] Add legacy cleanup for `.github/agents`, `.github/prompts`, and BMAD markers in `copilot-instructions.md`
+- [x] Test fresh install — 43 skills installed to `.github/skills/`
+- [x] Test reinstall/upgrade from legacy custom installer output — legacy dirs removed, BMAD markers stripped, user content preserved
+- [x] Confirm no ancestor conflict protection is needed because manual Copilot verification showed child-local `child-only` skill loaded while parent-only skill was not inherited
+- [x] Implement/extend automated tests — 11 assertions in test suite 17 including marker cleanup
+- [x] Commit
+
+## KiloCoder — SUSPENDED
+
+**Status: Kilo Code does not support the Agent Skills standard.** The original migration assumed skills support because Kilo forked from Roo Code, but manual IDE verification confirmed Kilo has not merged that feature. BMAD support is paused until Kilo implements skills.
+
+**Install:** VS Code extension `kilocode.kilo-code` — search "Kilo Code" in Extensions or `code --install-extension kilocode.kilo-code`
+
+- [x] ~~Confirm KiloCoder native skills path~~ — **FALSE**: assumed from Roo Code fork, not verified. Manual testing showed no skills support in the IDE
+- [x] Config and installer code retained in platform-codes.yaml with `suspended` flag — hidden from IDE picker, setup blocked with explanation
+- [x] Installer fails early (before writing `_bmad/`) if Kilo is the only selected IDE, protecting existing installations
+- [x] Legacy cleanup still runs for `.kilocode/workflows` and `.kilocodemodes` when users switch to a different IDE
+- [x] Automated tests — 7 assertions in suite 22 (suspended config, hidden from picker, setup blocked, no files written, legacy cleanup)
+
+## Gemini CLI
+
+Support assumption: full Agent Skills support. Gemini CLI docs confirm workspace skills at `.gemini/skills/` and user skills at `~/.gemini/skills/`. Also discovers `.agents/skills/` as an alias. BMAD previously installed TOML files to `.gemini/commands`.
+
+**Install:** `npm install -g @google/gemini-cli` or see [geminicli.com](https://geminicli.com)
+
+- [x] Confirm Gemini CLI native skills path is `.gemini/skills/{skill-name}/SKILL.md` (per [geminicli.com/docs/cli/skills](https://geminicli.com/docs/cli/skills/))
+- [x] Implement native skills output — target_dir `.gemini/skills`, skill_format true, template_type default (replaces TOML templates)
+- [x] Add legacy cleanup for `.gemini/commands` (via `legacy_targets`)
+- [x] Test fresh install — skills written to `.gemini/skills/bmad-master/SKILL.md` with correct frontmatter
+- [x] Test reinstall/upgrade from legacy TOML command output — legacy dir removed, skills installed
+- [x] Confirm no ancestor conflict protection is needed — Gemini CLI uses workspace > user > extension precedence, no ancestor directory inheritance
+- [x] Implement/extend automated tests — 9 assertions in test suite 23 (config, fresh install, legacy cleanup, reinstall)
+- [x] Manual CLI verification — `gemini` lists all 10 skills and successfully triggers bmad-help
 - [ ] Commit
 
-## KiloCoder
+## iFlow
 
-Support assumption: full Agent Skills support. BMAD currently uses a custom installer that writes `.kilocodemodes` and `.kilocode/workflows`; target should move to native skills output.
+Support assumption: full Agent Skills support. iFlow docs confirm workspace skills at `.iflow/skills/` and global skills at `~/.iflow/skills/`. BMAD previously installed flat files to `.iflow/commands`.
 
-- [ ] Confirm KiloCoder native skills path and whether `.kilocodemodes` should be removed entirely or retained temporarily for compatibility
-- [ ] Design the migration away from modes plus workflow markdown
-- [ ] Implement native skills output
-- [ ] Add legacy cleanup for `.kilocode/workflows` and BMAD-owned entries in `.kilocodemodes`
-- [ ] Test fresh install
-- [ ] Test reinstall/upgrade from legacy custom installer output
-- [ ] Confirm ancestor conflict protection where applicable
-- [ ] Implement/extend automated tests
+- [x] Confirm iFlow native skills path is `.iflow/skills/{skill-name}/SKILL.md`
+- [x] Implement native skills output — target_dir `.iflow/skills`, skill_format true, template_type default
+- [x] Add legacy cleanup for `.iflow/commands` (via `legacy_targets`)
+- [x] Test fresh install — skills written to `.iflow/skills/bmad-master/SKILL.md`
+- [x] Test legacy cleanup — legacy commands dir removed
+- [x] Implement/extend automated tests — 6 assertions in test suite 24
+- [ ] **NEEDS MANUAL IDE VERIFICATION** — install iFlow and confirm skills appear in UI and can be triggered
+- [ ] Commit
+
+## QwenCoder
+
+Support assumption: full Agent Skills support. Qwen Code supports workspace skills at `.qwen/skills/` and global skills at `~/.qwen/skills/`. BMAD previously installed flat files to `.qwen/commands`.
+
+- [x] Confirm QwenCoder native skills path is `.qwen/skills/{skill-name}/SKILL.md`
+- [x] Implement native skills output — target_dir `.qwen/skills`, skill_format true, template_type default
+- [x] Add legacy cleanup for `.qwen/commands` (via `legacy_targets`)
+- [x] Test fresh install — skills written to `.qwen/skills/bmad-master/SKILL.md`
+- [x] Test legacy cleanup — legacy commands dir removed
+- [x] Implement/extend automated tests — 6 assertions in test suite 25
+- [ ] **NEEDS MANUAL IDE VERIFICATION** — install QwenCoder and confirm skills appear in UI and can be triggered
+- [ ] Commit
+
+## Rovo Dev
+
+Support assumption: full Agent Skills support. Rovo Dev now supports workspace skills at `.rovodev/skills/` and user skills at `~/.rovodev/skills/`. BMAD previously used a custom 257-line installer that wrote `.rovodev/workflows/` and `prompts.yml`.
+
+- [x] Confirm Rovo Dev native skills path is `.rovodev/skills/{skill-name}/SKILL.md` (per Atlassian blog)
+- [x] Replace 257-line custom `rovodev.js` with config-driven entry in `platform-codes.yaml`
+- [x] Add legacy cleanup for `.rovodev/workflows` (via `legacy_targets`) and BMAD entries in `prompts.yml` (via `cleanupRovoDevPrompts()` in `_config-driven.js`)
+- [x] Test fresh install — skills written to `.rovodev/skills/bmad-master/SKILL.md`
+- [x] Test legacy cleanup — legacy workflows dir removed, `prompts.yml` BMAD entries stripped while preserving user entries
+- [x] Implement/extend automated tests — 8 assertions in test suite 26
+- [ ] **NEEDS MANUAL IDE VERIFICATION** — install Rovo Dev and confirm skills appear in UI and can be triggered
 - [ ] Commit
 
 ## Summary Gates
 
-- [ ] All full-support BMAD platforms install `SKILL.md` directory-based output
-- [ ] No full-support platform still emits BMAD command/workflow/rule files as its primary install format
-- [ ] Legacy cleanup paths are defined for every migrated platform
-- [ ] Automated coverage exists for config-driven and custom-installer migrations
+- [x] All full-support BMAD platforms install `SKILL.md` directory-based output
+- [x] No full-support platform still emits BMAD command/workflow/rule files as its primary install format
+- [x] Legacy cleanup paths are defined for every migrated platform
+- [x] Automated coverage exists for config-driven and custom-installer migrations
 - [ ] Installer docs and migration notes updated after code changes land
 </file>
 
@@ -60442,7 +60259,7 @@ platforms:
     description: "AI development tool"
 
   roo:
-    name: "Roo Cline"
+    name: "Roo Code"
     preferred: false
     category: ide
     description: "Enhanced Cline fork"

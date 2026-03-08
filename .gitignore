@@ -61,3 +61,22 @@ design_template/logs/
 .claude
 
 docs
+
+Claude configuration file not found at: /home/vscode/.claude.json
+A backup file exists at: /home/vscode/.claude/backups/.claude.json.backup.1772927500208
+You can manually restore it by running: cp "/home/vscode/.claude/backups/.claude.json.backup.1772927500208" "/home/vscode/.claude.json"
+
+
+Installing Python Packages with UV...
+Resolved 71 packages in 0.80ms
+Audited 68 packages in 6ms
+  fancy-git: sourced in .zshrc
+Installing BMAD...
+  BMAD already installed, running quick-update...
+Need to install the following packages:
+bmad-method@6.0.4
+Ok to proceed? (y)  source /workspaces/vibe_visualiser/.venv/bin/activate
+
+npm error canceled
+npm error A complete log of this run can be found in: /home/vscode/.npm/_logs/2026-03-08T00_05_09_403Z-debug-0.log
+[51210 ms] postCreateCommand from devcontainer.json failed with exit code 1. Skipping any further user-provided commands.

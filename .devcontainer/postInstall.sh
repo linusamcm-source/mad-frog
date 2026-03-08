@@ -78,7 +78,7 @@ done
 FANCY_GIT_DIR="$HOME/.fancy-git"
 if [ -d "$FANCY_GIT_DIR" ]; then
   FANCY_GIT_SOURCE='[ -f "$HOME/.fancy-git/prompt.sh" ] && source "$HOME/.fancy-git/prompt.sh"'
-  for rc_file in "$HOME/.bashrc" "$HOME/.zshrc"; do
+  for rc_file in "$HOME/.bashrc"; do
     if [ -f "$rc_file" ] && ! grep -qF '.fancy-git/prompt.sh' "$rc_file"; then
       echo "" >> "$rc_file"
       echo "# Fancy-git prompt" >> "$rc_file"
@@ -94,11 +94,11 @@ fi
 echo "Installing BMAD..."
 if [ -d "$(pwd)/_bmad-output" ]; then
   echo "  BMAD already installed, running quick-update..."
-  npx bmad-method install \
+  npx --yes bmad-method install \
     --directory "$(pwd)" \
     --action quick-update
 else
-  npx bmad-method install \
+  npx --yes bmad-method install \
     --directory "$(pwd)" \
     --modules bmm,bmb \
     --tools claude-code,gemini  \
