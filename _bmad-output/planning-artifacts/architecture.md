@@ -6,6 +6,11 @@ stepsCompleted:
   - 4
   - 5
   - 6
+  - 7
+  - 8
+lastStep: 8
+status: 'complete'
+completedAt: '2026-03-09'
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-vibe_visualiser-2026-03-06.md
   - _bmad-output/planning-artifacts/prd.md
@@ -43,6 +48,18 @@ partyModeInsights:
   - 'ToolResult is not a model: tool returns use MCP CallToolResult format directly (content + isError)'
   - 'Tool schemas are JSON Schema dicts in tools/list response — no Pydantic, no TypedDict for wire format'
   - 'Toad passes empty mcpServers[] in v0.6.8 — we override acp_new_session to inject ours'
+  - 'MCP server starts projectless — two-phase lifecycle: serverless (config, list projects) → project active (services, auto-save)'
+  - 'Workspace root collected via first-run modal in browser, stored in .vibe/config.yaml — no env vars for paths'
+  - 'bmad_detect_changes restored (FR56-60 coverage) + bmad_report_context added = 18 tools total'
+  - 'Silent context-aware pre-emptive save at 90% of context window — bmad_report_context gets real budget from agent'
+  - 'state.json expanded with checkpoint_history array — sidebar reads this, not MCP tools (cross-process boundary)'
+  - 'Tool handlers are free functions with signature (server, arguments) → dict — TOOL_HANDLERS registry in tools/__init__.py'
+  - 'Node.js required for npx bmad init — added to Dev Container features, guarded with shutil.which() check'
+  - 'bmad_get_step_prompt resolves template variables ({project-root} etc) via simple string replacement'
+  - 'Credential management is Toads responsibility — no CredentialSetupScreen, just env var passthrough in devcontainer.json'
+  - 'Session lock acquired in bmad_create_project/bmad_open_project, not a separate tool call — write tools assert lock held'
+  - 'Replace click with argparse for CLI — preserves single production dependency principle'
+  - 'Commit prefix registry: [checkpoint], [artifact], [session-auto], [context-save], [init], [bmad-update] — SQLite rebuild filters on these'
 ---
 
 # Architecture Decision Document
@@ -1805,3 +1822,487 @@ AUTO_SAVE_INTERVAL = int(os.environ.get("MAD_FROG_AUTO_SAVE", "120"))
 ```
 
 No `BMAD_SOURCE` — BMAD is installed via `npx bmad init`, not copied from the tool.
+
+## Architecture Validation Results
+
+### Coherence Validation ✅
+
+**Decision Compatibility:** All 10 core decisions are mutually compatible. MCP server + TypedDict + stdio JSON-RPC require no bridging layers. State sync (atomic file + watchdog) and auto-save (MCP timer) coexist via StateOperationQueue priority arbitration. Python 3.14, uv, hatchling, ruff — all version-compatible with Toad ecosystem.
+
+**Pattern Consistency:** `@traced` decorator, two-layer error contract, snake_case naming, absolute imports, and constructor injection are applied uniformly across all layers. No conflicting conventions detected.
+
+**Structure Alignment:** Three-process architecture cleanly maps to directory structure. No cross-boundary imports between ui/ and tools/services/. Test structure mirrors source 1:1.
+
+### Requirements Coverage Validation ✅
+
+**Functional Requirements (88 FRs across 10 domains):** All FR domains have architectural support. FR53-55 (Conversation & Transcript Management) explicitly deferred to post-MVP with documented rationale. FR56-60 (Bidirectional File Workspace) now covered by restored `bmad_detect_changes` tool.
+
+**Non-Functional Requirements (8 categories):** All addressed — performance (sub-500ms sidebar, 3s artifact ceiling), security (path sandboxing, no credential logging), reliability (auto-save, atomic ops, chaos tests, context-save), accessibility (Toad theme WCAG AA), integration (Obsidian-native), observability (@traced + structured logging), maintainability (85% coverage, state versioning).
+
+### Implementation Readiness Validation ✅
+
+**Decision Completeness:** All decisions include version numbers, rationale, and implementation code. @traced decorator is copy-pasteable. MCP server spec covers full lifecycle. Tool handler signature pattern documented.
+
+**Structure Completeness:** ~40 source files annotated with purpose and line estimates. pyproject.toml, devcontainer.json, CI, Makefile all provided. Test fixture hierarchy documented.
+
+**Pattern Completeness:** 12 anti-patterns forbidden. 10 enforcement rules. Naming table covers all identifier types. Tool dispatch registry pattern specified.
+
+### Validation Audit Findings (26 Items)
+
+The following items were identified through comprehensive Party Mode validation audit. Items are grouped by type. All items are refinements — no architectural redesign required, though item 23 is a critical lifecycle correction.
+
+#### Architecture Corrections (Critical)
+
+**Item 23 — MCP Server Starts Projectless (Two-Phase Lifecycle):**
+
+The MCP server is injected into the ACP session at startup via `mcpServers`, before the user has selected a project. Therefore `MadFrogMCPServer.__init__()` cannot take `project_path` as an argument.
+
+**Corrected lifecycle:**
+
+- **Phase 1 (serverless):** MCP server starts with no active project. Reads `.vibe/config.yaml` for workspace root on first `bmad_list_projects` call. Handles `initialize`, `tools/list`, and projectless tools (`bmad_list_projects`, `bmad_report_context`, `bmad_session_info`).
+- **Phase 2 (project active):** `bmad_create_project` or `bmad_open_project` creates `ProjectContext` — bundles `GitStateEngine`, `SessionLockManager`, `StateFileWriter`, `StateOperationQueue`, `AutoSaveService`. Auto-save timer starts. All project-scoped tools become available.
+
+```python
+class MadFrogMCPServer:
+    def __init__(self):
+        self.project: ProjectContext | None = None
+        self.context_window = DEFAULT_CONTEXT_WINDOW
+        self.session_tokens = 0
+
+    def _require_project(self) -> ProjectContext:
+        if self.project is None:
+            raise NoProjectOpen("Call bmad_create_project or bmad_open_project first.")
+        return self.project
+```
+
+**Ripple effects:**
+- Constructor injection pattern moves from `__init__()` to `bmad_open_project`/`bmad_create_project`
+- CLI entry point: MCP server takes zero args (`python -m mad_frog.mcp_server`)
+- Workspace root derived from `.vibe/config.yaml`, not CLI arg or env var
+- Auto-save timer starts on project open, not server start
+- Crash recovery: `__init__()` is idempotent — stale `.mad_frog/session.lock` from crashed instance detected and force-acquired on project open
+
+#### Tool Additions & Corrections
+
+**Item 7 — Restore `bmad_detect_changes`:**
+
+FR56-60 (Bidirectional File Workspace) requires detecting files dropped into the project since last checkpoint. Toad's built-in ACP `fs_read`/`fs_list` handle file reading but don't know about our git state. `bmad_detect_changes` compares current filesystem against last git commit via `git status --porcelain`. Added to `tools/project.py`.
+
+**Item 16 — Add `bmad_report_context` (Context-Aware Pre-emptive Save):**
+
+New tool allowing the AI agent to report its context window size in tokens. Called once at session start. MCP server uses this to calculate the 90% threshold for silent pre-emptive save.
+
+```python
+{
+    "name": "bmad_report_context",
+    "description": "Report your context window size in tokens. Call this once at the start of every session.",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "context_window_tokens": {"type": "integer", "description": "Your total context window size in tokens"}
+        },
+        "required": ["context_window_tokens"]
+    }
+}
+```
+
+**Fallback:** If agent never calls the tool, `DEFAULT_CONTEXT_WINDOW` from env var (200,000) is used.
+
+**Silent pre-emptive save at 90%:** MCP server tracks cumulative tool I/O tokens (`len(text) // 4` estimate). At 90% of context window: silent `[context-save]` git commit via StateOperationQueue. No warnings, no UI, no user notification. Just a safety net.
+
+```python
+CONTEXT_SAVE_RATIO = 0.90
+
+if self.session_tokens > self.context_save_at and not self._context_saved:
+    await self.state_queue.enqueue_and_wait(
+        priority=Priority.INTENTIONAL,
+        operation=lambda: self.git_engine.commit(
+            f"[context-save] ~{self.session_tokens} tokens"
+        ),
+    )
+    self._context_saved = True
+```
+
+**Item 1 — Updated Tool Count: 18 Tools**
+
+| Category | Tools |
+|----------|-------|
+| Project (6) | `bmad_create_project`, `bmad_open_project`, `bmad_list_projects`, `bmad_health_check`, `bmad_update_method`, `bmad_detect_changes` |
+| Artifact (3) | `bmad_write_artifact`, `bmad_read_artifact`, `bmad_list_artifacts` |
+| State (3) | `bmad_checkpoint`, `bmad_restore`, `bmad_history` |
+| Workflow (3) | `bmad_advance_workflow`, `bmad_get_workflow_state`, `bmad_get_step_prompt` |
+| Session (3) | `bmad_session_info`, `bmad_lock_session`, `bmad_unlock_session`, `bmad_get_agent_persona`, `bmad_list_agents`, `bmad_auto_save_status`, `bmad_report_context` |
+
+Note: Session category has 7 tools but 4 are lightweight metadata queries.
+
+#### Design Updates
+
+**Item 13 — Expanded `state.json` with `checkpoint_history`:**
+
+The sidebar (Process 1) cannot call MCP tools (Process 3). It reads `state.json` via watchdog. The original state file format lacked checkpoint history needed for Journey Map rendering.
+
+Expanded format:
+
+```json
+{
+    "current_phase": "analysis",
+    "workflows": { "...": "..." },
+    "last_checkpoint": { "git_sha": "abc123", "summary": "...", "timestamp": "..." },
+    "checkpoint_history": [
+        {"git_sha": "abc123", "summary": "Product brief complete", "phase": "analysis", "type": "checkpoint", "timestamp": "..."},
+        {"git_sha": "def456", "summary": "PRD draft saved", "phase": "planning", "type": "artifact", "timestamp": "..."}
+    ],
+    "auto_save": { "last_save": "...", "interval_seconds": 120, "enabled": true },
+    "session_lock": { "pid": 12345, "acquired_at": "..." },
+    "updated_at": "..."
+}
+```
+
+MCP server appends to `checkpoint_history` on every `bmad_checkpoint` and `bmad_write_artifact` call. Sidebar renders the tree from this array.
+
+**Item 22 — Session Lock Acquired in open/create, Not Separate Tool Call:**
+
+Write tools assert the lock is held via `_require_project()` (which implies lock). Lock acquired internally by `bmad_create_project` and `bmad_open_project`. Released on MCP server shutdown. `bmad_lock_session` and `bmad_unlock_session` remain for explicit lock management (takeover scenarios) but are not required for normal flow.
+
+**Item 24 — Awaitable Queue Operations:**
+
+`StateOperationQueue.enqueue_and_wait()` returns an awaitable result, allowing tool handlers to detect git commit failures and report them via `isError`. Uses `asyncio.Event` per enqueued operation. ~10 lines added to queue implementation.
+
+**Item 26 — First-Run Workspace Modal (Replaces CredentialSetupScreen):**
+
+Credential management is Toad's responsibility. `CredentialSetupScreen` removed entirely. Replaced with `WorkspaceSetupScreen` — a single modal shown on first launch asking "Where are your projects?" Path saved to `.vibe/config.yaml`.
+
+Updated `ui/` directory:
+
+```
+ui/
+├── __init__.py
+├── welcome_screen.py          # Project list, new/open/resume (~100 lines)
+├── journey_map.py             # BMADJourneyMap(Tree) sidebar (~150 lines)
+├── workspace_setup.py         # First-run modal: workspace path (~50 lines)
+```
+
+App lifecycle:
+1. Start → `.vibe/config.yaml` exists? → No → show workspace modal → save → Welcome Screen
+2. Start → config exists? → Yes → straight to Welcome Screen
+
+#### Decision Updates
+
+**Item 3 — Replace `click` with `argparse` (Decision 7 correction):**
+
+`click` is not a Toad transitive dependency. Using it would add a second production dependency, breaking the single-dep principle. `argparse` (stdlib) handles the CLI's one argument (`project_dir`) and one option (`--agent`) in 8 lines.
+
+**Item 5 — Decision #5 Fully Resolved: Local Docker Desktop Only:**
+
+Workspace path collected via first-run modal, stored in `.vibe/config.yaml`. No env vars needed for paths. Codespaces support dropped from scope — if someone uses Codespaces, they set `workspace_root` manually in config. Docker always runs Linux containers, so all paths are POSIX — no cross-platform path issues.
+
+`devcontainer.json` retains `ANTHROPIC_API_KEY` passthrough (forwarding, not managing).
+
+#### Pattern Additions
+
+**Item 12 — Tool Schema Example + Description Quality Pattern:**
+
+Tool descriptions are the UX for the AI agent. Quality standard:
+- Start with action verb: "Save", "List", "Read", "Advance", "Get"
+- Include when to use it: "Save current project state as a git checkpoint"
+- Include key context: "with phase and summary metadata"
+- Under 100 characters
+
+Example schema:
+
+```python
+TOOL_DEFINITIONS = [
+    {
+        "name": "bmad_checkpoint",
+        "description": "Save current project state as a git checkpoint with phase and summary metadata.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "phase": {"type": "string", "description": "Current BMAD phase"},
+                "summary": {"type": "string", "description": "Human-readable checkpoint summary"},
+            },
+            "required": ["summary"],
+        },
+    },
+]
+```
+
+**Item 15 — StateOperationQueue Boundary Clarification:**
+
+The queue serialises **git-mutating operations only**. File writes (e.g., writing an artifact to disk) happen outside the queue. Only the subsequent `git commit` is enqueued. This prevents unnecessary serialisation of all tool operations.
+
+**Item 18 — `bmad_get_step_prompt` Resolves Template Variables:**
+
+BMAD step files contain template variables (`{project-root}`, `{planning_artifacts}`, etc.). The tool resolves these via simple string replacement before returning content to the agent:
+
+```python
+@traced
+def resolve_step_content(raw: str, config: dict, project_path: Path) -> str:
+    replacements = {
+        "{project-root}": str(project_path),
+        "{planning_artifacts}": str(project_path / "_bmad-output" / "planning-artifacts"),
+        "{implementation_artifacts}": str(project_path / "_bmad-output" / "implementation-artifacts"),
+        "{communication_language}": config.get("communication_language", "English"),
+        "{project_knowledge}": str(project_path / "docs"),
+    }
+    result = raw
+    for token, value in replacements.items():
+        result = result.replace(token, value)
+    return result
+```
+
+Config values loaded once from project's `_bmad/bmm/config.yaml` (or `_bmad/core/config.yaml`) at project open.
+
+**Item 19 — Config Loading Pattern:**
+
+Project config loaded in `ProjectContext.__init__()` from the project's BMAD config YAML. Stored as a plain dict. Accessed by tools that need template resolution or project metadata. Single load, shared reference.
+
+**Item 21 — Tool Dispatch Registry Pattern:**
+
+```python
+# tools/__init__.py
+from mad_frog.tools.project import bmad_create_project, bmad_open_project, ...
+from mad_frog.tools.artifact import bmad_write_artifact, bmad_read_artifact, ...
+
+TOOL_HANDLERS: dict[str, Callable] = {
+    "bmad_create_project": bmad_create_project,
+    "bmad_open_project": bmad_open_project,
+    # ... all 18
+}
+```
+
+Tool handler signature (all tools follow this exactly):
+
+```python
+@traced
+async def bmad_<tool_name>(server: "MadFrogMCPServer", arguments: dict) -> dict:
+    """Docstring matches MCP schema description exactly."""
+    # 1. _require_project() if project-scoped
+    # 2. Validate arguments
+    # 3. Call services via server.project.<service>
+    # 4. Return CallToolResult dict
+```
+
+Consistency test:
+
+```python
+def test_all_tools_have_handlers():
+    from mad_frog.tools import TOOL_HANDLERS
+    from mad_frog.tools.definitions import TOOL_DEFINITIONS
+    assert {t["name"] for t in TOOL_DEFINITIONS} == set(TOOL_HANDLERS.keys())
+```
+
+**Item 25 — Commit Prefix Registry + SQLite Rebuild Filtering:**
+
+| Prefix | Source | Indexed | Journey Map |
+|--------|--------|---------|-------------|
+| `[checkpoint]` | `bmad_checkpoint` | Yes | Yes |
+| `[artifact]` | `bmad_write_artifact` | Yes | Yes |
+| `[session-auto]` | Auto-save timer | Yes | No (background) |
+| `[context-save]` | Context threshold | Yes | No (background) |
+| `[init]` | `bmad_create_project` | Yes | Yes |
+| `[bmad-update]` | `bmad_update_method` | Yes | Yes |
+| No prefix | Manual user commits | No | No |
+
+`SQLiteCheckpointIndex.rebuild()` only indexes commits with recognised prefixes. `BMADJourneyMap` only renders commits with user-visible types (`checkpoint`, `artifact`, `init`, `bmad-update`).
+
+#### Dependency & Infrastructure
+
+**Item 17 — Node.js in Dev Container + `npx` Guard:**
+
+`npx bmad init` requires Node.js. Added to Dev Container config:
+
+```json
+"features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/node:1": {}
+}
+```
+
+Guard in tool handler:
+
+```python
+if not shutil.which("npx"):
+    return {"content": [{"type": "text", "text": "Error: npx not found. Node.js required for BMAD installation."}], "isError": True}
+```
+
+Applied to both `bmad_create_project` and `bmad_update_method`.
+
+#### Spike Items (Story 1 Verification)
+
+**Item 6 — `acp_new_session` Parent Pattern:**
+
+The `MadFrogAgent.acp_new_session` override shows the mcpServers injection but uses `# ... rest follows parent pattern` for post-session-ID setup. The parent method's exact behaviour (attributes set, messages posted) must be verified by reading Toad source during story 1 spike.
+
+**Item 8 — App ↔ Agent Wiring:**
+
+How `MadFrogApp` tells Toad to use `MadFrogAgent` instead of the default `Agent` class is undetermined. Possible mechanisms: class attribute override, constructor parameter, agent resolution config. To be spiked in story 1.
+
+**Item 9 — Speculative Toad Imports:**
+
+- `from toad.agents import resolve_agent` — unverified, may not exist
+- `ToadApp.CSS_PATH` — expected via Textual inheritance but unverified on ToadApp specifically
+
+Both verified or corrected during story 1 spike.
+
+#### Doc Fixes
+
+**Item 2 — Method Version Management section** references "copies the current `_bmad/` directory from the tool." Should read "runs `npx bmad init`." Similarly "copies latest `_bmad/` from tool" → "runs `npx bmad update`."
+
+**Item 11 — MCP Server Crash Recovery:** `__init__()` is idempotent. On project open, detect stale `.mad_frog/session.lock` from crashed previous instance, force-acquire, rebuild state from git.
+
+#### Updated constants.py
+
+```python
+import os
+
+AUTO_SAVE_INTERVAL = int(os.environ.get("MAD_FROG_AUTO_SAVE", "120"))
+DEFAULT_CONTEXT_WINDOW = int(os.environ.get("MAD_FROG_CONTEXT_WINDOW", "200000"))
+CONTEXT_SAVE_RATIO = 0.90
+```
+
+No path constants. Workspace root from `.vibe/config.yaml`. Tool root from `__file__`.
+
+#### Updated Test Count (~90 Tests)
+
+| Test File | What | Count |
+|-----------|------|-------|
+| `test_mcp_server.py` | Protocol compliance + integration + tool registry sync | 9 |
+| `tools/test_project.py` | create, open, list, health_check, update_method, detect_changes + npx guard | 9 |
+| `tools/test_artifact.py` | write, read, list + validation errors + commit failure | 7 |
+| `tools/test_state.py` | checkpoint, restore, history | 5 |
+| `tools/test_workflow.py` | advance, get_state, get_step_prompt + template resolution | 6 |
+| `tools/test_session.py` | info, lock/unlock, agents, auto_save_status, report_context | 6 |
+| `services/test_decorators.py` | sync, async, re-raise, log format | 4 |
+| `services/test_git_state_engine.py` | commit, dirty check, tree_hash, log | 5 |
+| `services/test_sqlite_index.py` | create, query, rebuild, prefix filtering | 6 |
+| `services/test_state_operation_queue.py` | priority ordering, pre-emption, awaitable result | 4 |
+| `services/test_auto_save_service.py` | timer fires, skip when clean | 3 |
+| `services/test_session_lock_manager.py` | acquire, release, stale detection, crash recovery | 5 |
+| `services/test_vault_health_monitor.py` | detect, no vault, nested | 3 |
+| `services/test_artifact_validator.py` | frontmatter, wikilinks, structure | 4 |
+| `services/test_state_file.py` | atomic write, concurrent read, checkpoint_history | 4 |
+| `services/test_context_save.py` | threshold fire, fires once, uses queue, default fallback | 4 |
+| `ui/test_welcome_screen.py` | render, project list, actions | 3 |
+| `ui/test_journey_map.py` | render, state update, click events, excludes auto-saves | 4 |
+| `ui/test_workspace_setup.py` | saves config, rejects invalid path, skips when exists | 3 |
+| **Total** | | **~90** |
+
+#### Updated Build Sequence
+
+**Story 1 — Validation Spike:**
+
+Spike only. Verify Toad integration assumptions:
+- `MadFrogApp(ToadApp)` launches with `compose()` override
+- `MadFrogAgent(Agent)` overrides `acp_new_session` with mcpServers injection
+- MCP server starts, agent connects, `tools/list` returns tools, `tools/call` executes one tool
+- Verify `CSS_PATH`, agent wiring mechanism, `acp_new_session` parent behaviour
+
+Acceptance test: `MadFrogApp` runs → agent session starts → MCP server receives `initialize` → agent calls one tool → response received.
+
+Architecture assumptions marked "spike verification" are confirmed or corrected in this story.
+
+**Week 1 — Walking Skeleton (post-spike):**
+- 3 core tools: `bmad_create_project`, `bmad_write_artifact`, `bmad_checkpoint`
+- `GitStateEngine`, `StateOperationQueue`, `StateFileWriter`
+- `WorkspaceSetupScreen` modal
+- Acceptance test: workspace setup → create project → agent writes artifact → committed to Git
+
+**Week 2 — Persistence & Navigation:**
+- Remaining tools (18 total)
+- `SQLiteCheckpointIndex` + rebuild from git
+- `BMADJourneyMap` sidebar reading `state.json` checkpoint_history
+- `AutoSaveService` + context-save
+- `bmad_report_context` + token tracking
+
+**Week 3 — Polish & Safety:**
+- `WelcomeScreen` with `bmad_list_projects`
+- `VaultHealthMonitor` + vault-aware `bmad_write_artifact`
+- `ArtifactValidator` integrated into write pipeline
+- `SessionLockManager` crash recovery
+- Chaos tests (5 scenarios)
+- Template variable resolution in `bmad_get_step_prompt`
+
+### Architecture Completeness Checklist
+
+**✅ Requirements Analysis**
+
+- [x] Project context thoroughly analyzed
+- [x] Scale and complexity assessed (Medium-High requirements → Low implementation)
+- [x] Technical constraints identified (Python 3.14, Toad coupling, single dep)
+- [x] Cross-cutting concerns mapped (Obsidian integration, state sync, auto-save, context-save)
+
+**✅ Architectural Decisions**
+
+- [x] 10 core decisions documented with versions and rationale
+- [x] Technology stack fully specified (single production dep + Node.js for npx)
+- [x] Integration patterns defined (MCP server + ToadApp subclass + MadFrogAgent override)
+- [x] Performance considerations addressed (async I/O, atomic state file, SQLite cache)
+
+**✅ Implementation Patterns**
+
+- [x] Naming conventions established (snake_case, bmad_ prefix, BMAD prefix)
+- [x] Structure patterns defined (absolute imports, constructor injection, tool handler signature)
+- [x] Communication patterns specified (MCP JSON-RPC, Textual messages, state file + watchdog)
+- [x] Process patterns documented (@traced, two-layer error handling, atomic writes, commit prefix registry)
+
+**✅ Project Structure**
+
+- [x] Complete directory structure defined (~40 files with annotations)
+- [x] Component boundaries established (3 processes, no cross-boundary imports)
+- [x] Integration points mapped (Toad: 3 imports, MCP: stdio, state: file + watchdog)
+- [x] Requirements to structure mapping complete (10 FR domains → specific files)
+
+**✅ Validation & Audit**
+
+- [x] 26 audit items identified and documented
+- [x] 1 critical lifecycle correction (projectless MCP server)
+- [x] 2 tool additions (bmad_detect_changes, bmad_report_context)
+- [x] All logic paths traced end-to-end
+- [x] Race conditions analyzed (StateOperationQueue, atomic writes, watchdog)
+- [x] Failure modes documented (MCP crash recovery, git commit failure, npx missing)
+
+### Architecture Readiness Assessment
+
+**Overall Status:** READY FOR IMPLEMENTATION
+
+**Confidence Level:** HIGH — all critical decisions made, patterns concrete with code examples, audit findings documented. Story 1 spike will verify 3 Toad integration assumptions before full build begins.
+
+**Key Strengths:**
+- Single production dependency minimises supply chain risk
+- Three-process architecture provides clean separation and independent testability
+- MCP-based tool exposure is agent-agnostic and protocol-compliant
+- Silent context-save safety net closes the last data-loss risk
+- Two-phase server lifecycle cleanly separates config from project state
+- 90 tests mapped to specific files — test plan is implementation-ready
+- 26 audit items documented — implementing agents have answers before they have questions
+
+**Spike Verification Items (Story 1):**
+- `ToadApp.CSS_PATH` class attribute inheritance
+- `MadFrogApp` → `MadFrogAgent` wiring mechanism
+- `acp_new_session` parent method post-session-ID behaviour
+- `toad.agents.resolve_agent` import existence
+
+**Areas for Future Enhancement:**
+- Conversation transcript persistence (FR53-55) — post-MVP
+- Full vault indexing for cross-vault wikilinks — optimistic linking for now
+- No-GIL Python evaluation when ecosystem matures
+- Telemetry (FR85) — trivial addition via tool call logging
+- Dynamic context window detection from ACP session metadata (currently via tool call)
+
+### Implementation Handoff
+
+**AI Agent Guidelines:**
+
+- Follow all architectural decisions exactly as documented
+- Apply `@traced` to every function — no exceptions
+- Use implementation patterns consistently: absolute imports, constructor injection, snake_case JSON keys
+- Respect process boundaries: no imports between ui/ and tools/services/
+- All git-mutating operations through StateOperationQueue — no exceptions
+- Tool handlers follow exact signature: `async def bmad_*(server, arguments) -> dict`
+- Refer to this document for all architectural questions
+- Check the 26 audit items for edge cases and clarifications
+
+**First Implementation Priority:**
+
+Story 1: Validation spike — verify Toad integration assumptions (`CSS_PATH`, agent wiring, `acp_new_session` parent behaviour). Minimal code, maximum learning. Architecture assumptions confirmed or corrected before full build begins.

@@ -27,6 +27,47 @@ classification:
   domain: 'Workflow Automation / Agentic Tooling'
   complexity: 'medium-high'
   projectContext: 'greenfield'
+lastEdited: '2026-03-09'
+editHistory:
+  - date: '2026-03-09'
+    reason: 'Align PRD with architecture decisions'
+    inputDocument: '_bmad-output/planning-artifacts/architecture.md'
+    changes:
+      - 'CRITICAL: Rewrote Technical Architecture section for three-process model (MadFrogApp + AI Agent + MCP Server)'
+      - 'Removed Codespaces references throughout (local Docker Desktop only)'
+      - 'Updated all mad_frog serve / toad serve references to mad_frog'
+      - 'Replaced credential management UI with Toad delegation model'
+      - 'Added first-run workspace setup modal (FR49, user journey)'
+      - 'Updated tool count to 18 across 5 categories'
+      - 'Added bmad_detect_changes tool reference (FR59)'
+      - 'Updated Python version to 3.14, added Node.js dependency'
+      - 'Changed bmad rebuild-index from user command to automatic startup rebuild'
+  - date: '2026-03-09'
+    reason: 'Party Mode validation — 24 findings cross-referencing PRD against architecture'
+    inputDocument: '_bmad-output/planning-artifacts/architecture.md'
+    changes:
+      - 'CRITICAL: Marked FR53-54 as deferred (architecture explicitly defers conversation transcript persistence)'
+      - 'HIGH: Marked FR85 as deferred (architecture defers telemetry to post-MVP)'
+      - 'HIGH: Added FR8a-8d for 5 onboarding paths (method upgrade, existing git, version mismatch, brownfield)'
+      - 'HIGH: Added FR45a for context-aware pre-emptive save (bmad_report_context tool)'
+      - 'HIGH: Fixed startup command — removed ~/my-project path argument (workspace modal handles selection)'
+      - 'MEDIUM: Fixed service count 8→7 (removed phantom StateFileWriter)'
+      - 'MEDIUM: Moved FR55 from Conversation section to Obsidian section (artifact traceability, not transcripts)'
+      - 'MEDIUM: Added deployment model section (stateless peer tool)'
+      - 'MEDIUM: Added two-phase MCP server lifecycle description'
+      - 'MEDIUM: Added two-tier state model summary to State Persistence section'
+      - 'MEDIUM: Clarified npx bmad init delegated by project.create() tool'
+      - 'MEDIUM: Moved bmad validate-workflow to Post-MVP in Technical Architecture'
+      - 'MEDIUM: FR52 replaced with .obsidianignore proposal (original scenario impossible with one-time modal)'
+      - 'MEDIUM: FR48 qualified as optimistic wikilink resolution'
+      - 'MEDIUM: FR10 clarified as agent-enforced via BMAD workflow instructions'
+      - 'MEDIUM: Added FR84a for unwritten artifact detection safety net'
+      - 'LOW: Fixed partyModeInsight tool count 15→18 and added WorkspaceSetupScreen'
+      - 'LOW: Added WorkspaceSetupScreen to DD5 widget list'
+      - 'LOW: FR41 updated with session lock takeover option'
+      - 'LOW: Context window risk mitigation updated with bmad_report_context'
+      - 'LOW: Phase 2 MCP integration priorities moved from Technical Architecture to Post-MVP'
+      - 'LOW: Deferred FRs added to Post-MVP Phase 2 list'
 partyModeInsights:
   - 'Git-backed state engine replacing file-based checkpointing (commit per phase, branches for versioning, git-hash as checkpoint PK)'
   - 'SQLite checkpoint index with projects table (multi-project support) and checkpoints table (git SHA as PK, parent_hash foreign key chain)'
@@ -34,7 +75,7 @@ partyModeInsights:
   - 'Bind mount persistence (default for non-technical), git remote (opt-in for technical users)'
   - 'Obsidian-native artifact output (frontmatter + wikilinks baked into templates, zero extra code via agent write)'
   - 'Web-first delivery via toad serve (localhost:8000, browser-based, no terminal knowledge required)'
-  - 'Toad widget mapping: BMADJourneyMap (Tree-based sidebar), WelcomeScreen, ConversationPanel; 15 tool functions across project/artifact/state/workspace categories'
+  - 'Toad widget mapping: BMADJourneyMap (Tree-based sidebar), WelcomeScreen, WorkspaceSetupScreen, ConversationPanel; 18 tool functions across project/artifact/state/workflow/session categories'
   - 'MVP scope shift: click-back navigation and stale detection pulled into V1 (cheap with Git); auto-reprocessing deferred to V2'
 workflowType: 'prd'
 date: 2026-03-06
@@ -91,7 +132,7 @@ Planning is nonlinear — people backtrack, revise, and branch constantly. Every
 
 - **Data durability:** Zero data loss. Container is fully disposable — all project state persists on the bind mount. Rebuild, restart, or destroy the container with no impact on user data.
 - **Proven rebuild guarantee:** CI acceptance test on every PR — spin up container, create project, complete 2 phases, destroy container, rebuild, assert all checkpoints, artifacts, and Journey Map state are identical.
-- **Rebuildable index:** `bmad rebuild-index` command regenerates SQLite from Git history. SQLite is a cache, not a source of truth. Tested automatically.
+- **Rebuildable index:** SQLite checkpoint index is automatically rebuilt from Git history on every startup. SQLite is a cache, not a source of truth. Tested automatically.
 - **State integrity:** Git-backed checkpoints are always consistent. Git is the single source of truth.
 - **Sub-second navigation:** Journey Map click-back and artifact loading completes in under 1 second for projects with up to 50 checkpoints.
 - **Obsidian compatibility:** All output artifacts render correctly in Obsidian with working frontmatter, wikilinks, and graph view integration. No manual cleanup needed.
@@ -124,8 +165,7 @@ Planning is nonlinear — people backtrack, revise, and branch constantly. Every
 - Returning User (project resume with context recall)
 
 **Must-Have Capabilities:**
-- Dev Container with `make start` → `mad_frog serve` → browser at localhost:8000
-- GitHub Codespaces one-click setup for non-technical users
+- Dev Container with `make start` → `mad_frog` → browser at localhost:8000
 - Welcome screen (start new project / resume existing project)
 - Multi-project support (lightweight — project list on welcome screen, branch-prefix isolation in Git, `projects` table in SQLite)
 - Guided workflow mode: Analysis → Planning → Solutioning → Implementation
@@ -138,7 +178,7 @@ Planning is nonlinear — people backtrack, revise, and branch constantly. Every
 - Full Party Mode — complete agent roster, multi-persona facilitation at any phase
 - Full BMAD methodology — all workflows, all agents, no capability restrictions
 - Bind mount persistence (container-data separation)
-- First-launch credential pre-flight check with onboarding guidance
+- First-launch workspace setup modal (asks user for project directory path)
 - Structured commit metadata for session context recall
 
 **MVP Acceptance Tests (ship-blocking):**
@@ -157,13 +197,14 @@ Planning is nonlinear — people backtrack, revise, and branch constantly. Every
 - Freeform Journey Map (flat session list)
 - Freeform-to-BMAD upgrade path
 - Stale detection with warning indicators on downstream artifacts
-- `bmad rebuild-index` command
 - `bmad validate-workflow` command + CI validation
 - Non-software artifact templates
 - Git remote opt-in for cross-device portability
+- Conversation transcript persistence as Obsidian-native markdown (FR53-54)
+- Anonymous usage telemetry via tool call logging (FR85)
 
 **Phase 3 (Expansion):**
-- MCP integrations: GitHub Projects/Issues → Linear → Jira → Azure DevOps
+- MCP integrations (prioritised): GitHub Projects/Issues → Linear → Jira → Azure DevOps (output format adapts per target)
 - Automatic downstream reprocessing (revise Brief → PRD auto-regenerates)
 - Branch comparison / diff views between artifact versions
 - Mermaid-rendered full project visualisation (exportable)
@@ -189,7 +230,7 @@ See the detailed risk mitigation table in Innovation & Novel Patterns for compre
 
 **Opening Scene:** Sarah has just been given ownership of a new client initiative — a complex digital transformation project. She has a vague brief from the client, scattered notes from three discovery meetings, and a deadline to present a structured project plan in two weeks. She's staring at a blank Google Doc, unsure where to start.
 
-She finds Mad Frog on GitHub. The README has a "Non-Technical Setup" section at the top: one click to open in GitHub Codespaces, or a simple "Open in Dev Container" button for Docker Desktop. No git clone, no terminal commands. She clicks the Codespaces link, waits 30 seconds, and a browser tab opens with the Toad UI. Welcome screen: three options — "Start a guided project," "Launch a creative session," or "Resume a project." She picks "Start a guided project."
+She finds Mad Frog on GitHub. The README has a "Getting Started" section at the top: clone the repo and open in Dev Container with Docker Desktop. She clicks "Open in Dev Container," waits 30 seconds, and a browser tab opens with the Toad UI. On first launch, a modal asks "Where are your projects?" — she enters her Documents folder path. Then the welcome screen appears: three options — "Start a guided project," "Launch a creative session," or "Resume a project." She picks "Start a guided project."
 
 **Rising Action:** Sarah creates her project — "Acme Digital Transformation" — and the system asks which phase she'd like to begin. She starts with Analysis. A friendly agent greets her and begins asking about her client's situation. It feels like talking to a senior consultant.
 
@@ -205,7 +246,7 @@ She clicks back to the Product Brief in the Journey Map — she wants to revise 
 
 **Resolution:** Two weeks later, Sarah presents to the client. Her plan has Epics, User Stories with acceptance criteria, an architecture overview, and a risk analysis. When the client asks "why did you scope it this way?", she opens her Obsidian vault and walks them through the decision trail. The client has never seen this level of traceability from a PM. Sarah's new reality: she never starts a project without Mad Frog.
 
-**Requirements revealed:** One-click setup (Codespaces / Docker Desktop), browser-based access, welcome screen with three entry modes, bidirectional file workspace, real-time Obsidian output, Party Mode at any phase, click-back navigation, stale detection, version preservation, Journey Map sidebar.
+**Requirements revealed:** Dev Container setup (Docker Desktop), browser-based access, welcome screen with three entry modes, bidirectional file workspace, real-time Obsidian output, Party Mode at any phase, click-back navigation, stale detection, version preservation, Journey Map sidebar.
 
 ### Journey 2: Alex — The Technical Builder
 
@@ -301,13 +342,13 @@ This context recall works because every Git commit includes structured metadata 
 
 | Capability | Revealed By | Acceptance Test |
 |-----------|-------------|-----------------|
-| One-click setup (Codespaces / Docker Desktop) | Sarah | Non-technical user accesses via Codespaces link, reaches welcome screen in under 60 seconds |
+| Dev Container setup (Docker Desktop) | Sarah | User opens in Dev Container, reaches welcome screen in under 60 seconds |
 | Welcome screen with three entry modes | Sarah, River, Returning User | Welcome screen displays guided, creative, and resume options; each navigates to correct flow |
 | Full guided workflow mode | Sarah, Kai | User completes Analysis to Planning with all phase-gate prompts and CIS suggestions |
 | Adaptive pacing mode | Alex | Agent detects confident responses and reduces follow-ups; total session time under 3 hours for Brief + PRD |
 | Creative freeform mode | River | User launches CIS session without creating a BMAD project; artifacts checkpointed in Git |
 | Freeform-to-BMAD upgrade | River | Freeform project converts to guided mode; existing sessions become Analysis phase inputs |
-| Browser-based access (`toad serve`) | Sarah, Kai, River | `make start` launches browser; full UI functional with no terminal interaction |
+| Browser-based access (`mad_frog`) | Sarah, Kai, River | `make start` launches browser; full UI functional with no terminal interaction |
 | Bidirectional file workspace | Sarah, Kai | Drop markdown file into project folder; agent references file content within first 3 interactions of next session |
 | Real-time Obsidian output with wikilinks | Sarah, Kai, River | Artifact appears in vault within 10 seconds of phase completion; wikilinks resolve correctly |
 | Configurable bind mount to existing vault | Kai | Set vault path in config; artifacts appear in specified location with backlinks to existing vault notes |
@@ -347,7 +388,7 @@ Rather than building plugins, APIs, or sync layers, Mad Frog writes Obsidian-nat
 The three-mode welcome screen (guided project, creative session, resume) isn't just a UX pattern — it's a distribution strategy. Non-software users who would never adopt "BMAD methodology" enter through brainstorming and design thinking tools. Over time, they discover that their creative sessions can be upgraded into structured planning workflows. The methodology finds them, not the other way around. This inverts the typical adoption funnel for structured methodologies.
 
 **Experience — Multi-Persona Agentic Facilitation in a Browser**
-Party Mode — where distinct specialist agents with unique personalities debate, challenge, and build on each other's perspectives in real time — is a new interaction paradigm. It's not a chatbot. It's a simulated expert panel that stress-tests ideas from multiple angles simultaneously. Delivered via `toad serve` in a browser, accessible to non-technical users, with the full session checkpointed in Git.
+Party Mode — where distinct specialist agents with unique personalities debate, challenge, and build on each other's perspectives in real time — is a new interaction paradigm. It's not a chatbot. It's a simulated expert panel that stress-tests ideas from multiple angles simultaneously. Delivered via `mad_frog` in a browser, accessible to non-technical users, with the full session checkpointed in Git.
 
 ### Market Context & Competitive Landscape
 
@@ -382,7 +423,7 @@ Mad Frog occupies a new category: **agentic planning infrastructure** — a guid
 | Obsidian format changes break compatibility | Broken wikilinks, lost frontmatter | Obsidian's markdown format is stable and community-standard. Automated lint tests catch format issues on every artifact write |
 | Creative freeform users never upgrade to structured workflows | CIS becomes a toy, not a pipeline | Phase-contextual suggestions nudge toward structure. Freeform artifacts include "upgrade to full project" prompt after 3+ sessions. Track conversion funnel from day one |
 | LLM quality variance across providers | Inconsistent Party Mode quality | Document minimum model capability requirements. Default to most capable available model for Party Mode sessions |
-| Agent context window limits | Token exhaustion on large projects with rich history and bidirectional file ingestion | Selective context loading: only artifacts relevant to current phase. Commit metadata as compact JSON summaries, not full transcripts. RAG over project history for large projects — index and retrieve relevant chunks rather than loading everything |
+| Agent context window limits | Token exhaustion on large projects with rich history and bidirectional file ingestion | `bmad_report_context` tool queries agent for context window size; silent pre-emptive save at 90% capacity (`[context-save]` commit). Selective context loading: only artifacts relevant to current phase. Commit metadata as compact JSON summaries, not full transcripts |
 | Mid-operation container failure | Potential state corruption if container killed during Git write | Chaos testing as MVP acceptance criteria: mid-commit kill, restart, assert full state recovery. Atomic commit operations with rollback on failure |
 | Concurrent browser tab access | State corruption from parallel writes | MVP: Single-session enforcement. One active session per project. Second tab receives read-only Journey Map view with "Session active in another tab" indicator. Eliminates concurrency entirely. Post-MVP: evaluate if sequential write queue is needed for multi-user |
 
@@ -390,73 +431,71 @@ Mad Frog occupies a new category: **agentic planning infrastructure** — a guid
 
 ### Project-Type Overview
 
-Mad Frog is a browser-served Terminal UI application built on the Toad framework (Textual Web). It is an overlay/composition layer — not a fork. `MadFrogApp` subclasses `ToadApp`, adding BMAD workflow management, state engine, and Journey Map widgets while inheriting Toad's agent layer, settings system, and ACP protocol handling. The startup command is `mad_frog serve` (or `toad serve --app mad_frog`), wrapped by `make start`.
+Mad Frog is a browser-served Terminal UI application built on the Toad framework (Textual Web). It is an overlay/composition layer — not a fork. `MadFrogApp` subclasses `ToadApp`, adding BMAD workflow management, state engine, and Journey Map widgets while inheriting Toad's agent layer, settings system, and ACP protocol handling. The startup command is `mad_frog`, wrapped by `make start`. Project selection happens via the welcome screen.
+
+### Deployment Model
+
+Mad Frog is a stateless peer tool, not a container for projects. The tool repo (`mad_frog/`) sits alongside project repos as sibling directories within the user's workspace. Each project is an independent Git repo. All durable state lives in project repositories — the tool is independently upgradeable without affecting any project. Cross-project config is a lightweight path registry in `.vibe/config.yaml`.
+
+### Three-Process Architecture
+
+Mad Frog runs as three cooperating processes:
+
+1. **MadFrogApp** (Process 1) — `MadFrogApp(ToadApp)` subclass. Textual UI: sidebar navigation (Journey Map), welcome screen, workspace setup modal. Watches `.mad_frog/state.json` for MCP server state changes via `watchdog`.
+2. **AI Agent** (Process 2) — Claude or any ACP-compliant agent. Launched by Toad. Speaks ACP to Toad (file I/O, terminal) and MCP to our server (BMAD tools).
+3. **Mad Frog MCP Server** (Process 3) — stdio MCP server launched by the AI agent. Starts in projectless mode (can list projects, handle config). After `bmad_open_project` or `bmad_create_project`, transitions to project-active mode: exposes full 18 BMAD tools via `tools/list`, manages git state, auto-save timer, state file writer.
 
 ### Technical Architecture Considerations
 
 **Agent Provider Layer (Delegated to Toad)**
 - Toad manages all LLM provider connections via ACP (Agent Client Protocol)
-- Agents are defined as TOML files; each declares a `run_command` that launches the agent subprocess
-- Each agent handles its own authentication via environment variables (e.g., `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`)
-- Toad is the ACP client — it connects to agent servers spawned as subprocesses
-- Mad Frog is provider-agnostic by design; no direct LLM API calls
+- Toad manages all credential handling — API keys as environment variables, forwarded via `devcontainer.json` `remoteEnv`
+- Mad Frog makes no direct LLM API calls and has no credential UI
 
-**Credential Management**
-- API keys are standard environment variables — the containerised-app convention
-- **Codespaces:** API key set as a Codespace secret. Zero touch, auto-configured
-- **Local Dev Container:** API key set in `.env` file (gitignored) or `devcontainer.json` `remoteEnv`
-- **First-launch pre-flight check:** Before launching any BMAD workflow, verify the active agent's required env var exists. If missing, display onboarding guidance:
-  - "To use Mad Frog, you need an AI provider API key"
-  - Provider selection (Claude, OpenAI, Gemini, etc.)
-  - Step-by-step guide to obtain and set the key
-  - For Codespaces users: link to secrets configuration
-- No custom password manager — Toad delegates auth to agent subprocesses, which read env vars
+**Tool Exposure via MCP Server**
+- 18 BMAD tools exposed via a stdio MCP server (JSON-RPC over stdin/stdout)
+- AI agent discovers tools via standard MCP `tools/list` — no system prompt injection
+- MadFrogAgent overrides `acp_new_session` to inject MCP server via ACP's `mcpServers` parameter
+- Agent-agnostic: any ACP agent (Claude, Codex, Gemini, etc.) discovers tools automatically
+- Tools across 5 categories: project (6), artifact (3), state (3), workflow (3), session (3+)
+
+**First-Run Workspace Setup**
+- On first launch, a browser modal asks "Where are your projects?" — user enters their workspace root path
+- Path stored in `.vibe/config.yaml` — one-time setup, never asked again
+- Projects are sibling directories within the workspace root
+- BMAD method snapshot copied into target projects by `project.create()` tool (which delegates to `npx bmad init` for fresh projects or `npx bmad update` for existing)
 
 **Configuration & Settings**
-- Toad's schema-driven settings UI (`SettingsScreen`) extended with BMAD-specific settings:
-  - Obsidian vault path / bind mount target
-  - Default workflow mode (guided, fast-track, creative freeform)
-  - Telemetry opt-in
-  - Active project selection
-- Project-level configuration (project metadata, phase state) via YAML in the workspace
+- Workspace root: collected via first-run modal, stored in `.vibe/config.yaml`
+- Project-level configuration (project metadata, phase state) via state file in `.mad_frog/` directory
 - Container-level configuration (port, startup mode) via `devcontainer.json` and `Makefile`
 
 **Output Format Strategy**
-- **MVP:** Obsidian-native markdown only (frontmatter + wikilinks). All artifacts are markdown files written directly to the bind mount
-- **Phase 2 MCP integrations** (prioritised by audience fit):
-  1. GitHub Projects / Issues — primary audience is open source developers
-  2. Linear — modern dev team favourite
-  3. Jira — enterprise adoption
-  4. Azure DevOps — enterprise adoption
-  - Output format adapts per target (JSON for APIs, markdown for local)
+- **MVP:** Obsidian-native markdown only (frontmatter + wikilinks). All artifacts are markdown files written directly to the project directory
+- **Post-MVP:** MCP integrations for external project trackers (see Post-MVP Features Phase 3)
 
 **Extension Model**
 - Community-contributed workflow templates are markdown step-files dropped into a designated folder structure
 - Follows existing BMAD conventions: `step-XX-name.md` files, `workflow.md` entry point, `templates/` folder, `data/` CSVs
 - No plugin registry or build step — file-based discovery at runtime
-- `bmad validate-workflow` command validates structure:
-  - Every workflow must have `workflow.md` with required frontmatter fields
-  - Every step file must have `name`, `nextStepFile` in frontmatter
-  - Step sequence must be contiguous (no gaps)
-  - Template and data CSV references must resolve to existing files
-- Runs locally during development and in CI on PRs
+- Post-MVP: `bmad validate-workflow` command validates structure and runs in CI on PRs
 
 ### Implementation Considerations
 
 **Toad Integration Boundary**
 Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
-- Custom widgets: `BMADJourneyMap` (Tree-based sidebar), `WelcomeScreen`, `ConversationPanel` (Toad's + minimal enhancements)
-- 15 tool functions registered with Toad's agent system across 4 categories: `project.*`, `artifact.*`, `state.*`, `workspace.*`
-- Sidebar extension with Journey Map widget
+- Custom widgets: `BMADJourneyMap` (Tree-based sidebar), `WelcomeScreen`, `WorkspaceSetupScreen`
+- 18 tool functions exposed via MCP server across 5 categories: `project`, `artifact`, `state`, `workflow`, `session`
+- Sidebar extension with Journey Map widget (reads `state.json` via watchdog for cross-process state sync)
 - Welcome screen with three-mode entry (guided, creative, resume)
 - 7 infrastructure services: GitStateEngine, SQLiteCheckpointIndex, StateOperationQueue, AutoSaveService, SessionLockManager, VaultHealthMonitor, ArtifactValidator
-- Toad stays upstream; Mad Frog tracks it as a dependency. Upstream improvements flow in automatically
+- Toad stays upstream; Mad Frog tracks it as a pinned dependency. Upstream improvements flow in after validation
 
 **Container Architecture**
-- Dev Container based on Python 3.13+ with Toad, gitpython, and sqlite3
-- `make start` runs `mad_frog serve`, forwarding port 8000
-- Bind mount for persistent state (default: host filesystem)
-- GitHub Codespaces compatible for one-click non-technical setup
+- Dev Container based on Python 3.14 with Toad and Node.js (required for `npx bmad init`)
+- Single production dependency: `batrachian-toad>=0.5.35,<0.7` — GitPython, aiosqlite are transitive via Toad
+- `make start` runs `mad_frog`, forwarding port 8000
+- Bind mount for persistent state (default: host filesystem via Docker Desktop)
 - Agent subprocesses launched by Toad inherit container environment variables
 
 **Keyboard & Interaction Model**
@@ -477,11 +516,15 @@ Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
 - FR6: System creates a Git-backed state record for each new project with branch-prefix isolation
 - FR7: System maintains a SQLite checkpoint index with project and checkpoint tables (Git SHA as primary key)
 - FR8: System supports one active project session at a time — user switches projects via the welcome screen
+- FR8a: User can upgrade a project's BMAD method version to the tool's current version via explicit action. Upgrade copies the latest `_bmad/` snapshot and summarises changes
+- FR8b: When opening a directory with `.git/` but no `_bmad/`, system offers to set up BMAD planning in the existing repo
+- FR8c: When opening a project whose `_bmad/` method version differs from the tool's version, system prompts user to continue with the project's version or migrate
+- FR8d: When opening a directory with `_bmad-output/` artifacts but no structured Git state, system offers to validate existing artifacts and infer phase state (brownfield onboarding)
 
 ### Guided Workflow Engine
 
 - FR9: User can progress through BMAD phases sequentially (Analysis → Planning → Solutioning → Implementation)
-- FR10: Phases require validated artifacts to unlock — artifacts can be generated conversationally or imported with agent validation
+- FR10: Phases require validated artifacts to unlock — enforced by agent via BMAD workflow instructions, not by system-level phase gates. Artifacts can be generated conversationally or imported with agent validation
 - FR11: User can import existing artifacts and have the agent validate them to mark a phase complete
 - FR12: Agent adapts conversational approach based on user response patterns — probes deeper on vague inputs, moves faster with confident responses
 - FR13: User can invoke any BMAD workflow available in the installed module during the appropriate phase
@@ -517,38 +560,41 @@ Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
 
 ### State Persistence & Recovery
 
+State follows a two-tier model: **Tier 1 (durable)** — Git commits, artifact files, decision registry, `_bmad/` snapshot (survives container destruction). **Tier 1.5 (reconstructable)** — SQLite checkpoint index (rebuilt from Git on startup). **Tier 2 (session)** — conversation buffer, workflow position, in-progress drafts (lost on restart, rebuilt from Tier 1 on resume). Maximum data loss: last auto-save interval (~2 min) + uncommitted conversation.
+
 - FR37: System persists all project state to a bind-mounted directory on the host filesystem
 - FR38: System fully recovers all project state after container rebuild, restart, or destruction
 - FR39: System stores session context in Git commit metadata sufficient for agent context reconstruction
 - FR40: Agent greets returning users with context from their last session (last topic, pending decisions, next steps)
-- FR41: Single active session enforced per project — second browser tab receives read-only Journey Map view with artifact browsing
+- FR41: Single active session enforced per project — second browser tab receives read-only Journey Map view with artifact browsing, or the option to take over the session lock (gracefully degrading the original session)
 - FR42: System ensures artifact write and Git commit are atomic — both succeed or both roll back
 - FR43: System auto-saves uncommitted changes every 2 minutes via deterministic commit templates. Intentional checkpoints (phase completion or manual save) use structured metadata commits. Auto-save commits are filtered from the Journey Map display
 - FR44: System detects state format version on startup and performs any necessary migrations
 - FR45: System handles browser disconnection gracefully — user can reconnect and resume from last stable state
+- FR45a: System silently pre-empts context window exhaustion by querying agent context budget via `bmad_report_context` tool and triggering an automatic save (`[context-save]` commit) when usage exceeds 90% — no user notification required
 
 ### Obsidian Integration
 
 - FR46: System writes all artifacts as Obsidian-native markdown with YAML frontmatter and wikilinks
 - FR47: System generates wikilinks that reference other project artifacts (e.g., PRD links to Product Brief)
-- FR48: Agent generates wikilinks to pre-existing vault notes when referencing user-provided content (not just project artifacts)
-- FR49: User can configure the Obsidian vault path through the settings UI
+- FR48: Agent generates optimistic wikilinks to pre-existing vault notes when referencing user-provided content (best-effort resolution — full vault indexing deferred to post-MVP)
+- FR49: User configures workspace root via first-run modal. Projects within the workspace that are inside an Obsidian vault are auto-detected via `.obsidian/` parent walk
 - FR50: System generates artifacts that render correctly in Obsidian's graph view with working backlinks
 - FR51: Artifacts include Obsidian-compatible frontmatter (aliases, tags, phase, project, parent references)
-- FR52: System warns the user when changing vault path that existing artifacts will not be moved
-
-### Conversation & Transcript Management
-
-- FR53: System persists conversation transcripts as structured Obsidian-native markdown files linked to checkpoints via wikilinks
-- FR54: Conversation transcripts include frontmatter identifying phase, checkpoint, date, and participating agents
+- FR52: For vault-resident projects, system proposes `.obsidianignore` entries for `.git/`, `src/`, `_bmad/` during project setup
 - FR55: Any artifact can be traced through its full parent chain to the original requirement via wikilinks
+
+### Conversation & Transcript Management (Deferred — Post-MVP)
+
+- ~~FR53: System persists conversation transcripts as structured Obsidian-native markdown files linked to checkpoints via wikilinks~~ (Deferred: decision registry + Git metadata sufficient for MVP)
+- ~~FR54: Conversation transcripts include frontmatter identifying phase, checkpoint, date, and participating agents~~ (Deferred: decision registry + Git metadata sufficient for MVP)
 
 ### Bidirectional File Workspace
 
 - FR56: User can add markdown files to the project folder at any time
 - FR57: Agent automatically ingests user-added markdown files as context in subsequent sessions
 - FR58: Agent references content from user-added files accurately in conversation
-- FR59: System detects new, modified, or deleted files in the project folder between sessions and handles changes gracefully
+- FR59: System detects new, modified, or deleted files in the project folder via `bmad_detect_changes` tool (compares current filesystem against last git commit) and handles changes gracefully
 - FR60: System tracks markdown files in Git — binary files in the project folder are accessible to the agent but not version-tracked
 
 ### Multi-Agent Facilitation (Party Mode)
@@ -564,16 +610,16 @@ Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
 
 ### Credential & Provider Management
 
-- FR69: System performs a pre-flight check for required API credentials before launching any workflow
-- FR70: System displays onboarding guidance when credentials are missing (provider selection, setup steps, Codespaces secret link)
+- FR69: Toad manages all credential validation and provider setup — Mad Frog has no credential UI
+- FR70: API keys are forwarded from host environment via `devcontainer.json` `remoteEnv`
 - FR71: Toad manages all LLM provider connections — Mad Frog makes no direct LLM API calls
 
 ### Container & Access
 
-- FR72: User can launch the full application via `make start` which runs `mad_frog serve`
+- FR72: User can launch the full application via `make start` which runs `mad_frog`
 - FR73: System serves the complete UI to a browser at localhost:8000
-- FR74: User can access the application via GitHub Codespaces with one-click setup
-- FR75: System forwards the serve port automatically in Dev Container and Codespaces environments
+- FR74: On first launch, system displays a workspace setup modal asking user for their project directory path. Path is stored and never asked again
+- FR75: System forwards the serve port automatically in Dev Container environments
 - FR76: System performs health checks on startup (Git repo, SQLite index, bind mount) and reports issues with recovery guidance
 - FR77: System integrates project state management with Toad's existing session infrastructure rather than replacing it
 
@@ -586,10 +632,11 @@ Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
 - FR82: System handles agent response failures gracefully with clear feedback and option to retry
 - FR83: System displays clear error messages when state operations fail and offers recovery guidance
 - FR84: Keyboard navigation available for all primary interactions
+- FR84a: System detects artifact-like content in conversation (structured markdown with frontmatter) that was not saved via a tool call, and prompts the user to save it
 
-### Telemetry
+### Telemetry (Deferred — Post-MVP)
 
-- FR85: User can opt in to anonymous usage telemetry (project count, phase completion rates, session duration, feature usage)
+- ~~FR85: User can opt in to anonymous usage telemetry (project count, phase completion rates, session duration, feature usage)~~ (Deferred: trivial to add later via tool call logging)
 
 ### Extension & Community
 
@@ -614,7 +661,7 @@ Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
 - DD2: Search is delegated to Obsidian — Mad Frog does not duplicate search functionality
 - DD3: Agent introduces concepts naturally during conversation rather than a separate onboarding tutorial
 - DD4: Conversation transcripts stored as separate markdown files, not loaded into agent context by default — agent searches them on demand
-- DD5: Widget components (BMADJourneyMap, WelcomeScreen, ConversationPanel) are designed as independently testable units via Textual's pilot testing framework — this is an architectural constraint, not a runtime quality attribute
+- DD5: Widget components (BMADJourneyMap, WelcomeScreen, WorkspaceSetupScreen, ConversationPanel) are designed as independently testable units via Textual's pilot testing framework — this is an architectural constraint, not a runtime quality attribute
 
 ## Non-Functional Requirements
 
@@ -643,7 +690,7 @@ Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
 
 - NFR-REL-01: Zero data loss guarantee — all committed state survives container destruction and rebuild
 - NFR-REL-02: Atomic checkpoint operations — artifact write + Git commit succeed together or both roll back. No partial state
-- NFR-REL-03: `bmad rebuild-index` command deletes the existing SQLite database, reconstructs it from Git history, and produces a byte-identical database to the original (verified by checksum comparison). Test: create project, complete 3 phases, checksum DB, delete DB, rebuild, checksum again, assert match
+- NFR-REL-03: SQLite index rebuild (triggered automatically on startup) deletes the existing SQLite database, reconstructs it from Git history, and produces a byte-identical database to the original (verified by checksum comparison). Test: create project, complete 3 phases, checksum DB, delete DB, restart, checksum again, assert match
 - NFR-REL-04: System recovers gracefully from mid-operation container kill — startup detects and resolves incomplete Git operations
 - NFR-REL-05: Browser disconnection does not corrupt state — user reconnects to last stable checkpoint
 - NFR-REL-06: System startup health check validates: Git repo integrity (`git fsck`), SQLite index consistency (checksum verification against Git state), bind mount read/write accessibility, and state format version compatibility — completing within 10 seconds. If any check fails, system displays specific diagnosis (not generic errors) and recovery guidance referencing a concrete action. System does not accept user interaction until all health checks pass or user explicitly acknowledges degraded mode
@@ -665,7 +712,7 @@ Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
 - NFR-INT-02: System declares a pinned Toad version in dependency configuration. Upstream Toad updates are validated against the full test suite before version bump. No automatic upstream adoption
 - NFR-INT-03: Generated markdown is CommonMark-compliant and renders correctly in standard markdown viewers (not only Obsidian)
 - NFR-INT-04: Git operations use standard Git commands — no reliance on Git extensions or non-standard features
-- NFR-INT-05: System runs on Docker Desktop (macOS, Windows, Linux) and GitHub Codespaces without platform-specific configuration
+- NFR-INT-05: System runs on Docker Desktop (macOS, Windows, Linux) without platform-specific configuration
 - NFR-INT-06: System handles UTF-8 encoded markdown files with Unicode content, including emoji, CJK characters, and diacritics. File paths with spaces and standard special characters (parentheses, hyphens, underscores) are supported. Filenames with characters illegal on Windows (`<>:"/\|?*`) are rejected with clear error message
 
 ### Observability
