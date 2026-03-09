@@ -15,7 +15,7 @@ stepsCompleted:
   - step-11-polish
   - step-12-complete
 inputDocuments:
-  - _bmad-output/planning-artifacts/product-brief-vibe_visualiser-2026-03-06.md
+  - _bmad-output/planning-artifacts/product-brief-mad_frog-2026-03-06.md
   - docs/bmad-toad-integration-spec.md
 documentCounts:
   briefs: 1
@@ -34,21 +34,21 @@ partyModeInsights:
   - 'Bind mount persistence (default for non-technical), git remote (opt-in for technical users)'
   - 'Obsidian-native artifact output (frontmatter + wikilinks baked into templates, zero extra code via agent write)'
   - 'Web-first delivery via toad serve (localhost:8000, browser-based, no terminal knowledge required)'
-  - 'Toad widget mapping: BMADJourneyMap, BMADPhaseNode, BMADWizardMenu, BMADWorkspacePanel, BMADVersionModal, BMADStateManager'
+  - 'Toad widget mapping: BMADJourneyMap (Tree-based sidebar), WelcomeScreen, ConversationPanel; 15 tool functions across project/artifact/state/workspace categories'
   - 'MVP scope shift: click-back navigation and stale detection pulled into V1 (cheap with Git); auto-reprocessing deferred to V2'
 workflowType: 'prd'
 date: 2026-03-06
 author: Linus
 ---
 
-# Product Requirements Document - vibe_visualiser
+# Product Requirements Document - mad_frog
 
 **Author:** Linus
 **Date:** 2026-03-06
 
 ## Executive Summary
 
-Vibe Visualiser is an institutional memory engine that happens to produce planning artifacts. It guides users through the BMAD methodology — Analysis, Planning, Solutioning, Implementation — via a browser-based experience where conversational wizards turn vague ideas into actionable, fully-traced project plans.
+Mad Frog is an institutional memory engine that happens to produce planning artifacts. It guides users through the BMAD methodology — Analysis, Planning, Solutioning, Implementation — via a browser-based experience where conversational wizards turn vague ideas into actionable, fully-traced project plans.
 
 Users open a browser, see their projects, and step through structured phases. A visual Journey Map in the sidebar shows every milestone. Clicking any past decision reopens it for revision, automatically preserving all downstream work on a separate path. Nothing is ever lost. Six months after launch, a user can trace exactly why the project was scoped the way it was — every decision, every rejected path, every "let's rethink this" moment is preserved and navigable.
 
@@ -60,7 +60,7 @@ Primary users are non-technical planners who need rigorous project planning with
 
 ### What Makes This Special
 
-Planning is nonlinear — people backtrack, revise, and branch constantly. Every other planning tool produces a final document and discards the journey. Vibe Visualiser treats the complete decision history as a first-class deliverable. The branching agentic state machine maps directly onto Git's proven branching model, making nonlinear planning native rather than bolted on. The output isn't just a backlog — it's the full intellectual journey that produced it.
+Planning is nonlinear — people backtrack, revise, and branch constantly. Every other planning tool produces a final document and discards the journey. Mad Frog treats the complete decision history as a first-class deliverable. The branching agentic state machine maps directly onto Git's proven branching model, making nonlinear planning native rather than bolted on. The output isn't just a backlog — it's the full intellectual journey that produced it.
 
 ## Project Classification
 
@@ -77,7 +77,7 @@ Planning is nonlinear — people backtrack, revise, and branch constantly. Every
 - **Real-time documentation emergence:** Users watch structured artifacts appear in their Obsidian vault as they converse with the agent. The conversation IS the documentation — no separate write-up step.
 - **Bidirectional workspace:** Users drop markdown into the project folder — meeting notes, research, sketches — and the agent already knows. "I dropped my budget discussion notes in the folder and the agent referenced them in the next session." No import wizards, no upload flows.
 - **Total recall:** When users return days or weeks later, the full decision context is navigable via the Journey Map and Obsidian graph view. Every "why did we decide this?" has an answer.
-- **Zero learning curve for the tool itself:** Users comfortable in a browser and Obsidian can operate Vibe Visualiser without any terminal, Git, or methodology knowledge.
+- **Zero learning curve for the tool itself:** Users comfortable in a browser and Obsidian can operate Mad Frog without any terminal, Git, or methodology knowledge.
 
 ### Business Success
 
@@ -124,7 +124,7 @@ Planning is nonlinear — people backtrack, revise, and branch constantly. Every
 - Returning User (project resume with context recall)
 
 **Must-Have Capabilities:**
-- Dev Container with `make start` → `vibe serve` → browser at localhost:8000
+- Dev Container with `make start` → `mad_frog serve` → browser at localhost:8000
 - GitHub Codespaces one-click setup for non-technical users
 - Welcome screen (start new project / resume existing project)
 - Multi-project support (lightweight — project list on welcome screen, branch-prefix isolation in Git, `projects` table in SQLite)
@@ -189,7 +189,7 @@ See the detailed risk mitigation table in Innovation & Novel Patterns for compre
 
 **Opening Scene:** Sarah has just been given ownership of a new client initiative — a complex digital transformation project. She has a vague brief from the client, scattered notes from three discovery meetings, and a deadline to present a structured project plan in two weeks. She's staring at a blank Google Doc, unsure where to start.
 
-She finds Vibe Visualiser on GitHub. The README has a "Non-Technical Setup" section at the top: one click to open in GitHub Codespaces, or a simple "Open in Dev Container" button for Docker Desktop. No git clone, no terminal commands. She clicks the Codespaces link, waits 30 seconds, and a browser tab opens with the Toad UI. Welcome screen: three options — "Start a guided project," "Launch a creative session," or "Resume a project." She picks "Start a guided project."
+She finds Mad Frog on GitHub. The README has a "Non-Technical Setup" section at the top: one click to open in GitHub Codespaces, or a simple "Open in Dev Container" button for Docker Desktop. No git clone, no terminal commands. She clicks the Codespaces link, waits 30 seconds, and a browser tab opens with the Toad UI. Welcome screen: three options — "Start a guided project," "Launch a creative session," or "Resume a project." She picks "Start a guided project."
 
 **Rising Action:** Sarah creates her project — "Acme Digital Transformation" — and the system asks which phase she'd like to begin. She starts with Analysis. A friendly agent greets her and begins asking about her client's situation. It feels like talking to a senior consultant.
 
@@ -203,7 +203,7 @@ As they talk, she glances at her Obsidian vault. A new note has appeared: `Produ
 
 She clicks back to the Product Brief in the Journey Map — she wants to revise the scope based on what the architect said. The system says: "Going back will create a new version. Your current PRD progress is saved." She clicks confirm, revises the brief, and the PRD node flips to a yellow warning: "Based on an earlier version of your Product Brief." She clicks it, re-runs the Planning phase, and a new PRD emerges — incorporating her revision. The old version is still there if she needs it.
 
-**Resolution:** Two weeks later, Sarah presents to the client. Her plan has Epics, User Stories with acceptance criteria, an architecture overview, and a risk analysis. When the client asks "why did you scope it this way?", she opens her Obsidian vault and walks them through the decision trail. The client has never seen this level of traceability from a PM. Sarah's new reality: she never starts a project without Vibe Visualiser.
+**Resolution:** Two weeks later, Sarah presents to the client. Her plan has Epics, User Stories with acceptance criteria, an architecture overview, and a risk analysis. When the client asks "why did you scope it this way?", she opens her Obsidian vault and walks them through the decision trail. The client has never seen this level of traceability from a PM. Sarah's new reality: she never starts a project without Mad Frog.
 
 **Requirements revealed:** One-click setup (Codespaces / Docker Desktop), browser-based access, welcome screen with three entry modes, bidirectional file workspace, real-time Obsidian output, Party Mode at any phase, click-back navigation, stale detection, version preservation, Journey Map sidebar.
 
@@ -223,7 +223,7 @@ Within an hour, he has a Product Brief in his Obsidian vault. He moves to Planni
 
 "This would have taken me a week," he thinks. "And I would have skipped half of it."
 
-**Resolution:** Alex starts coding with a clear backlog. Three weeks in, he realises the architecture needs to change. He opens Vibe Visualiser, clicks back to the Architecture checkpoint in the Journey Map, revises it, and the downstream stories are flagged as stale. He re-runs Solutioning, and the stories update to reflect the new architecture. His Git history shows the exact moment and reason for the pivot. Alex's new reality: planning takes hours, not days, and he never throws away a plan — he evolves it.
+**Resolution:** Alex starts coding with a clear backlog. Three weeks in, he realises the architecture needs to change. He opens Mad Frog, clicks back to the Architecture checkpoint in the Journey Map, revises it, and the downstream stories are flagged as stale. He re-runs Solutioning, and the stories update to reflect the new architecture. His Git history shows the exact moment and reason for the pivot. Alex's new reality: planning takes hours, not days, and he never throws away a plan — he evolves it.
 
 **Requirements revealed:** Adaptive pacing (agent adjusts depth based on user confidence), agent pushback on vague answers, artifact interlinking with traceability, efficient session pacing, stale detection and re-run workflow.
 
@@ -233,7 +233,7 @@ Within an hour, he has a Product Brief in his Obsidian vault. He moves to Planni
 
 **Opening Scene:** Kai has been tasked with defining the product strategy for a new market vertical. They have research scattered across their vault — competitor analyses in one folder, customer interview notes in another, a half-formed thesis in a daily note from last Tuesday. They need to pull it all together into a coherent strategy document with actionable next steps.
 
-They hear about Vibe Visualiser's Obsidian integration. They configure the bind mount to point at their existing vault: `~/ObsidianVault/Projects/new-vertical/`. They run `make start`.
+They hear about Mad Frog's Obsidian integration. They configure the bind mount to point at their existing vault: `~/ObsidianVault/Projects/new-vertical/`. They run `make start`.
 
 **Rising Action:** Kai drops their existing research files into the project folder — competitor analyses, interview transcripts, market data. The agent loads all of it automatically. "I see you've done extensive competitor analysis. You've identified three main players. Let me build on this."
 
@@ -245,7 +245,7 @@ Kai invokes a Design Thinking session with Maya. They run through empathy mappin
 
 Their second brain didn't just gain planning artifacts. It gained *structure*.
 
-**Resolution:** Kai presents the strategy to the leadership team using their Obsidian vault as the presentation — clicking through the graph, showing the traceability from research to recommendations. The leadership team approves. Three months later, when priorities shift, Kai opens the Journey Map, clicks back to the strategic assumptions, revises them, and the downstream plan updates accordingly. The vault's graph view shows the fork point — old strategy and new strategy, both preserved. Kai's new reality: Vibe Visualiser isn't a separate tool. It's an extension of their vault.
+**Resolution:** Kai presents the strategy to the leadership team using their Obsidian vault as the presentation — clicking through the graph, showing the traceability from research to recommendations. The leadership team approves. Three months later, when priorities shift, Kai opens the Journey Map, clicks back to the strategic assumptions, revises them, and the downstream plan updates accordingly. The vault's graph view shows the fork point — old strategy and new strategy, both preserved. Kai's new reality: Mad Frog isn't a separate tool. It's an extension of their vault.
 
 **Requirements revealed:** Configurable bind mount to existing Obsidian vault, wikilink generation referencing existing vault notes, agent ingestion of pre-existing markdown, graph-view-optimised output structure, Design Thinking CIS integration.
 
@@ -255,7 +255,7 @@ Their second brain didn't just gain planning artifacts. It gained *structure*.
 
 **Opening Scene:** River has a new client — a sustainable fashion startup that needs a complete brand strategy. River has a mood board, some competitor screenshots, and a gut feeling about the positioning, but nothing structured. They usually free-write in Obsidian until a strategy emerges, but this client needs something rigorous and presentable.
 
-A friend mentions Vibe Visualiser's creative tools. River is sceptical — "isn't that a coding thing?" — but tries it because it works with Obsidian. They open the welcome screen and choose **"Launch a creative session"** — no phases, no methodology jargon. Just a project name and the CIS tools in the sidebar.
+A friend mentions Mad Frog's creative tools. River is sceptical — "isn't that a coding thing?" — but tries it because it works with Obsidian. They open the welcome screen and choose **"Launch a creative session"** — no phases, no methodology jargon. Just a project name and the CIS tools in the sidebar.
 
 **Rising Action:** River launches a brainstorming session with Carson. Carson's energy is infectious: "Let's generate 50 positioning ideas in 10 minutes. No filtering, no judgement. GO." River types fast. Carson builds on every idea: "YES AND — what if that sustainable angle wasn't about guilt but about luxury?" Ideas River would never have reached alone start flowing.
 
@@ -275,13 +275,13 @@ Brand Strategy (freeform)
 
 River watches their Obsidian vault fill with a structured brand strategy — and the complete creative journey that produced it. Every brainstorm, every reframe, every "what if" is preserved. This isn't just a strategy document. It's proof of creative rigour. When River presents to the client and walks them through the Obsidian graph — from raw brainstorm to final positioning through every twist and challenge — the client doesn't just see a recommendation. They see the depth of thinking behind it. For a freelancer, that's the difference between "here's my deliverable" and "here's why I'm worth what I charge."
 
-**Resolution:** River's client approves the strategy and asks them to extend the engagement. River uses Vibe Visualiser for every client now. Six months later, they upgrade one project from freeform to full BMAD mode — the creative sessions become inputs to a structured Analysis phase, and River discovers that the methodology they thought was "a coding thing" is actually how they've always wanted to think. They just needed a non-software door into it.
+**Resolution:** River's client approves the strategy and asks them to extend the engagement. River uses Mad Frog for every client now. Six months later, they upgrade one project from freeform to full BMAD mode — the creative sessions become inputs to a structured Analysis phase, and River discovers that the methodology they thought was "a coding thing" is actually how they've always wanted to think. They just needed a non-software door into it.
 
 **Requirements revealed:** Creative freeform mode (no phase-gates), CIS tools accessible without full BMAD workflow, freeform Journey Map (flat session list), upgrade path from freeform to full BMAD, non-software artifact templates, narrative quality in all outputs.
 
 ### Journey 5: Community Contributor (Light Journey)
 
-**Who they are:** Morgan is a developer who's been using Vibe Visualiser for their own projects and wants to contribute a new workflow template for data science projects.
+**Who they are:** Morgan is a developer who's been using Mad Frog for their own projects and wants to contribute a new workflow template for data science projects.
 
 **Journey:** Morgan forks the repo, studies the existing BMAD workflow structure (`step-XX.md` files, templates, CSV data), and creates a new "Data Science Project" workflow with domain-specific phases (Data Discovery → Feature Engineering → Model Design → Deployment). They submit a PR. The CI tests validate the workflow structure. The community reviews, iterates, and merges.
 
@@ -332,16 +332,16 @@ This context recall works because every Git commit includes structured metadata 
 
 ### Innovation Architecture
 
-Vibe Visualiser's innovations form a deliberate hierarchy — each layer building on the one below:
+Mad Frog's innovations form a deliberate hierarchy — each layer building on the one below:
 
 **Foundation — Git as an Invisible Planning State Machine**
-Git's branching model — designed for source code versioning — maps 1:1 to how planning actually works: nonlinear, iterative, with frequent backtracking. Vibe Visualiser repurposes Git's battle-tested infrastructure (commits, branches, tags, diffs) as the backbone of a planning workflow engine. The user never sees Git. They see a time machine — a Journey Map where they can "go back to Tuesday's version" or "see what the project looked like before the scope change." Underneath, every decision is a commit, every revision forks a branch, and every artifact maintains a traceable parent chain. Zero invention risk, maximum architectural leverage.
+Git's branching model — designed for source code versioning — maps 1:1 to how planning actually works: nonlinear, iterative, with frequent backtracking. Mad Frog repurposes Git's battle-tested infrastructure (commits, branches, tags, diffs) as the backbone of a planning workflow engine. The user never sees Git. They see a time machine — a Journey Map where they can "go back to Tuesday's version" or "see what the project looked like before the scope change." Underneath, every decision is a commit, every revision forks a branch, and every artifact maintains a traceable parent chain. Zero invention risk, maximum architectural leverage.
 
 **Value Proposition — The Decision Journey as a First-Class Deliverable**
-Existing planning tools produce final documents — a PRD, a backlog, a strategy deck. The process that created them is lost to Slack threads, meeting notes, and memory. Vibe Visualiser inverts this: the complete intellectual journey — every brainstorm, every rejected path, every "let's rethink this" moment — is preserved, navigable, and presentable. The history IS the product. This is institutional memory as a service.
+Existing planning tools produce final documents — a PRD, a backlog, a strategy deck. The process that created them is lost to Slack threads, meeting notes, and memory. Mad Frog inverts this: the complete intellectual journey — every brainstorm, every rejected path, every "let's rethink this" moment — is preserved, navigable, and presentable. The history IS the product. This is institutional memory as a service.
 
 **Distribution — Integration by Convention (Obsidian-Native Output)**
-Rather than building plugins, APIs, or sync layers, Vibe Visualiser writes Obsidian-native markdown (frontmatter + wikilinks) directly to the filesystem via bind mount. The agent's file-write capability IS the integration. Zero dependencies, zero integration code, full Obsidian compatibility including graph view, backlinks, and tag search. This pattern — "integration by convention" — is transferable to any markdown-based tool (Logseq, Dendron, plain filesystem). It reaches Obsidian's 1M+ users without a single line of plugin code.
+Rather than building plugins, APIs, or sync layers, Mad Frog writes Obsidian-native markdown (frontmatter + wikilinks) directly to the filesystem via bind mount. The agent's file-write capability IS the integration. Zero dependencies, zero integration code, full Obsidian compatibility including graph view, backlinks, and tag search. This pattern — "integration by convention" — is transferable to any markdown-based tool (Logseq, Dendron, plain filesystem). It reaches Obsidian's 1M+ users without a single line of plugin code.
 
 **Growth — Creative Freeform as a Methodology On-Ramp**
 The three-mode welcome screen (guided project, creative session, resume) isn't just a UX pattern — it's a distribution strategy. Non-software users who would never adopt "BMAD methodology" enter through brainstorming and design thinking tools. Over time, they discover that their creative sessions can be upgraded into structured planning workflows. The methodology finds them, not the other way around. This inverts the typical adoption funnel for structured methodologies.
@@ -351,7 +351,7 @@ Party Mode — where distinct specialist agents with unique personalities debate
 
 ### Market Context & Competitive Landscape
 
-**The real competitor is the status quo.** Today, 90% of AI-assisted planning looks like this: open ChatGPT in a browser, have a conversation, copy-paste the output into Google Docs, lose the context, start over next session. Vibe Visualiser's positioning: "You're already doing this. We make it structured, traceable, and permanent instead of ephemeral chat sessions you'll never find again."
+**The real competitor is the status quo.** Today, 90% of AI-assisted planning looks like this: open ChatGPT in a browser, have a conversation, copy-paste the output into Google Docs, lose the context, start over next session. Mad Frog's positioning: "You're already doing this. We make it structured, traceable, and permanent instead of ephemeral chat sessions you'll never find again."
 
 Adjacent products occupy partial overlap but none combine all five innovation layers:
 
@@ -361,7 +361,7 @@ Adjacent products occupy partial overlap but none combine all five innovation la
 - **Miro / FigJam** — brainstorming tools but no structured output, no state management, no methodology enforcement
 - **Obsidian plugins** — knowledge management but no guided workflows, no agentic interaction
 
-Vibe Visualiser occupies a new category: **agentic planning infrastructure** — a guided, state-managed, multi-agent system that produces traceable planning artifacts as knowledge-base-native markdown.
+Mad Frog occupies a new category: **agentic planning infrastructure** — a guided, state-managed, multi-agent system that produces traceable planning artifacts as knowledge-base-native markdown.
 
 ### Validation Approach
 
@@ -390,7 +390,7 @@ Vibe Visualiser occupies a new category: **agentic planning infrastructure** —
 
 ### Project-Type Overview
 
-Vibe Visualiser is a browser-served Terminal UI application built on the Toad framework (Textual Web). It is an overlay/composition layer — not a fork. `VibeApp` subclasses `ToadApp`, adding BMAD workflow management, state engine, and Journey Map widgets while inheriting Toad's agent layer, settings system, and ACP protocol handling. The startup command is `vibe serve` (or `toad serve --app vibe_visualiser`), wrapped by `make start`.
+Mad Frog is a browser-served Terminal UI application built on the Toad framework (Textual Web). It is an overlay/composition layer — not a fork. `MadFrogApp` subclasses `ToadApp`, adding BMAD workflow management, state engine, and Journey Map widgets while inheriting Toad's agent layer, settings system, and ACP protocol handling. The startup command is `mad_frog serve` (or `toad serve --app mad_frog`), wrapped by `make start`.
 
 ### Technical Architecture Considerations
 
@@ -399,14 +399,14 @@ Vibe Visualiser is a browser-served Terminal UI application built on the Toad fr
 - Agents are defined as TOML files; each declares a `run_command` that launches the agent subprocess
 - Each agent handles its own authentication via environment variables (e.g., `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`)
 - Toad is the ACP client — it connects to agent servers spawned as subprocesses
-- Vibe Visualiser is provider-agnostic by design; no direct LLM API calls
+- Mad Frog is provider-agnostic by design; no direct LLM API calls
 
 **Credential Management**
 - API keys are standard environment variables — the containerised-app convention
 - **Codespaces:** API key set as a Codespace secret. Zero touch, auto-configured
 - **Local Dev Container:** API key set in `.env` file (gitignored) or `devcontainer.json` `remoteEnv`
 - **First-launch pre-flight check:** Before launching any BMAD workflow, verify the active agent's required env var exists. If missing, display onboarding guidance:
-  - "To use Vibe Visualiser, you need an AI provider API key"
+  - "To use Mad Frog, you need an AI provider API key"
   - Provider selection (Claude, OpenAI, Gemini, etc.)
   - Step-by-step guide to obtain and set the key
   - For Codespaces users: link to secrets configuration
@@ -444,17 +444,17 @@ Vibe Visualiser is a browser-served Terminal UI application built on the Toad fr
 ### Implementation Considerations
 
 **Toad Integration Boundary**
-Vibe Visualiser is an overlay layer — `VibeApp(ToadApp)` subclass pattern:
-- Custom widgets: `BMADJourneyMap`, `BMADPhaseNode`, `BMADWizardMenu`, `BMADWorkspacePanel`, `BMADVersionModal`
-- `BMADStateManager` service class injected into Toad's app context
+Mad Frog is an overlay layer — `MadFrogApp(ToadApp)` subclass pattern:
+- Custom widgets: `BMADJourneyMap` (Tree-based sidebar), `WelcomeScreen`, `ConversationPanel` (Toad's + minimal enhancements)
+- 15 tool functions registered with Toad's agent system across 4 categories: `project.*`, `artifact.*`, `state.*`, `workspace.*`
 - Sidebar extension with Journey Map widget
 - Welcome screen with three-mode entry (guided, creative, resume)
-- Message handlers for `BMADNavigate`, `BMADWorkflowStart`, `BMADCheckpoint` events
-- Toad stays upstream; Vibe Visualiser tracks it as a dependency. Upstream improvements flow in automatically
+- 7 infrastructure services: GitStateEngine, SQLiteCheckpointIndex, StateOperationQueue, AutoSaveService, SessionLockManager, VaultHealthMonitor, ArtifactValidator
+- Toad stays upstream; Mad Frog tracks it as a dependency. Upstream improvements flow in automatically
 
 **Container Architecture**
 - Dev Container based on Python 3.13+ with Toad, gitpython, and sqlite3
-- `make start` runs `vibe serve`, forwarding port 8000
+- `make start` runs `mad_frog serve`, forwarding port 8000
 - Bind mount for persistent state (default: host filesystem)
 - GitHub Codespaces compatible for one-click non-technical setup
 - Agent subprocesses launched by Toad inherit container environment variables
@@ -523,7 +523,7 @@ Vibe Visualiser is an overlay layer — `VibeApp(ToadApp)` subclass pattern:
 - FR40: Agent greets returning users with context from their last session (last topic, pending decisions, next steps)
 - FR41: Single active session enforced per project — second browser tab receives read-only Journey Map view with artifact browsing
 - FR42: System ensures artifact write and Git commit are atomic — both succeed or both roll back
-- FR43: System only commits state at explicit checkpoints (phase completion or manual save) — graceful shutdown does not auto-commit
+- FR43: System auto-saves uncommitted changes every 2 minutes via deterministic commit templates. Intentional checkpoints (phase completion or manual save) use structured metadata commits. Auto-save commits are filtered from the Journey Map display
 - FR44: System detects state format version on startup and performs any necessary migrations
 - FR45: System handles browser disconnection gracefully — user can reconnect and resume from last stable state
 
@@ -566,11 +566,11 @@ Vibe Visualiser is an overlay layer — `VibeApp(ToadApp)` subclass pattern:
 
 - FR69: System performs a pre-flight check for required API credentials before launching any workflow
 - FR70: System displays onboarding guidance when credentials are missing (provider selection, setup steps, Codespaces secret link)
-- FR71: Toad manages all LLM provider connections — Vibe Visualiser makes no direct LLM API calls
+- FR71: Toad manages all LLM provider connections — Mad Frog makes no direct LLM API calls
 
 ### Container & Access
 
-- FR72: User can launch the full application via `make start` which runs `vibe serve`
+- FR72: User can launch the full application via `make start` which runs `mad_frog serve`
 - FR73: System serves the complete UI to a browser at localhost:8000
 - FR74: User can access the application via GitHub Codespaces with one-click setup
 - FR75: System forwards the serve port automatically in Dev Container and Codespaces environments
@@ -611,10 +611,10 @@ Vibe Visualiser is an overlay layer — `VibeApp(ToadApp)` subclass pattern:
 ### Design Decisions
 
 - DD1: Mental model is "time travel," not "branching" — all UX language uses temporal metaphors
-- DD2: Search is delegated to Obsidian — Vibe Visualiser does not duplicate search functionality
+- DD2: Search is delegated to Obsidian — Mad Frog does not duplicate search functionality
 - DD3: Agent introduces concepts naturally during conversation rather than a separate onboarding tutorial
 - DD4: Conversation transcripts stored as separate markdown files, not loaded into agent context by default — agent searches them on demand
-- DD5: Widget components (BMADJourneyMap, BMADWizardMenu, etc.) are designed as independently testable units via Textual's pilot testing framework — this is an architectural constraint, not a runtime quality attribute
+- DD5: Widget components (BMADJourneyMap, WelcomeScreen, ConversationPanel) are designed as independently testable units via Textual's pilot testing framework — this is an architectural constraint, not a runtime quality attribute
 
 ## Non-Functional Requirements
 

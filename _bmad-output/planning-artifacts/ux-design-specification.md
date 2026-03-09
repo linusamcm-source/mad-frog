@@ -15,7 +15,7 @@ stepsCompleted:
   - 13
   - 14
 inputDocuments:
-  - _bmad-output/planning-artifacts/product-brief-vibe_visualiser-2026-03-06.md
+  - _bmad-output/planning-artifacts/product-brief-mad_frog-2026-03-06.md
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/prd-validation-report.md
   - docs/bmad-toad-integration-spec.md
@@ -23,7 +23,7 @@ date: 2026-03-08
 author: Linus
 ---
 
-# UX Design Specification vibe_visualiser
+# UX Design Specification mad_frog
 
 **Author:** Linus
 **Date:** 2026-03-08
@@ -36,7 +36,7 @@ author: Linus
 
 ### Project Vision
 
-Vibe Visualiser is a browser-served guided experience that democratises the BMAD methodology by providing a conversational, agent-driven interface where users progress through structured planning phases — Analysis, Planning, Solutioning, Implementation — producing Obsidian-native markdown artifacts. Built on the Toad UI framework (Textual Web), the entire experience runs in the browser via `make start`, with a Git-backed state engine and SQLite index hidden behind a "time travel" mental model. Users never see a terminal, a Git command, or a branch name.
+Mad Frog is a browser-served guided experience that democratises the BMAD methodology by providing a conversational, agent-driven interface where users progress through structured planning phases — Analysis, Planning, Solutioning, Implementation — producing Obsidian-native markdown artifacts. Built on the Toad UI framework (Textual Web), the entire experience runs in the browser via `make start`, with a Git-backed state engine and SQLite index hidden behind a "time travel" mental model. Users never see a terminal, a Git command, or a branch name.
 
 ### Target Users
 
@@ -54,7 +54,7 @@ Vibe Visualiser is a browser-served guided experience that democratises the BMAD
 
 2. **Rich/Textual design constraint:** The UI is built on Textual (Rich rendering). This provides a strong component library (Panel, Tree, Table, Markdown, Rule, etc.) with full colour support — but it is still a character-grid renderer, not a DOM. All UX design must map to Rich/Textual primitives. The design system vocabulary IS the component catalogue.
 
-3. **Four personas, one interface:** Guided hand-holding (Sarah), speed (Alex), vault integration (Kai), and creative freedom (River) must coexist. The three-mode welcome screen splits entry points, but in-workflow adaptation happens through agent behaviour and progressive disclosure — not modal UI complexity.
+3. **Four personas, one interface:** Guided hand-holding (Sarah), speed (Alex), vault integration (Kai), and creative freedom (River) must coexist. The two-mode welcome screen (guided + resume; creative freeform post-MVP) splits entry points, but in-workflow adaptation happens through agent behaviour and progressive disclosure — not modal UI complexity.
 
 4. **Conversational UI as primary interaction:** Orientation is critical — where am I, what's decided, what's next. The Journey Map sidebar serves as the persistent spatial anchor. Conversation landmarks (visual dividers at topic transitions) provide micro-orientation within phases.
 
@@ -112,7 +112,7 @@ Vibe Visualiser is a browser-served guided experience that democratises the BMAD
 | Artifact preview | `Panel` + `Markdown` widget | Inline truncated preview of generated docs |
 | Stale indicators | `Text(style="yellow")` | Warning badges on Journey Map nodes |
 | Error states | `Panel(border_style="red")` | Warm, framed, recoverable error messages |
-| Welcome screen | `Button` grid / `Placeholder` | Three-mode entry (guided, creative, resume) |
+| Welcome screen | `Button` grid / `Placeholder` | Two-mode entry (guided, resume; creative freeform post-MVP) |
 | Status bar | `Header` / `Footer` | Always-visible project name + current phase |
 | Confirmation dialogs | `ModalScreen` | Irreversible actions only |
 | Decision counter | `Footer` or sidebar element | Momentum indicator: "12 decisions captured" |
@@ -121,7 +121,7 @@ Vibe Visualiser is a browser-served guided experience that democratises the BMAD
 
 | Mode | Layout | Visible Elements |
 |------|--------|-----------------|
-| Welcome | Full-width, no sidebar | Project list, three entry buttons |
+| Welcome | Full-width, no sidebar | Project list, two entry buttons (creative freeform post-MVP) |
 | Guided Conversation | Sidebar + main panel | Journey Map, conversation, input area, status bar |
 | Party Mode | Sidebar + main panel | Journey Map, agent roster indicator, coloured agent panels, input area |
 | Version Review | Modal over conversation | Confirmation dialog, before/after context |
@@ -137,7 +137,7 @@ Vibe Visualiser is a browser-served guided experience that democratises the BMAD
 
 ### Defining Experience
 
-The defining experience of Vibe Visualiser is the **artifact emergence moment** — the instant a user sees a structured, professional document appear in their Obsidian vault as a direct result of conversation. This is the "conversation IS documentation" promise made tangible. The user talks, the agent listens, and a real file appears in a real folder on their real filesystem. Everything else — the Journey Map, Party Mode, adaptive pacing — exists to support and amplify this core loop.
+The defining experience of Mad Frog is the **artifact emergence moment** — the instant a user sees a structured, professional document appear in their Obsidian vault as a direct result of conversation. This is the "conversation IS documentation" promise made tangible. The user talks, the agent listens, and a real file appears in a real folder on their real filesystem. Everything else — the Journey Map, Party Mode, adaptive pacing — exists to support and amplify this core loop.
 
 The core interaction cycle:
 1. User converses with agent (guided questions, natural discussion)
@@ -150,7 +150,7 @@ This cycle repeats at multiple scales: micro (a section of a document), medium (
 
 ### Platform Strategy
 
-**Primary deployment: Local Docker Desktop with Dev Container.** This is where most users will run Vibe Visualiser. The bind mount connects the container to the user's local filesystem, placing artifacts directly into their Obsidian vault.
+**Primary deployment: Local Docker Desktop with Dev Container.** This is where most users will run Mad Frog. The bind mount connects the container to the user's local filesystem, placing artifacts directly into their Obsidian vault.
 
 **Platform matrix:**
 
@@ -222,24 +222,22 @@ The UI must never display container-internal paths. All path references are tran
 
 ### Auto-Save Mechanism
 
-**AI-powered auto-save** runs as a background process during active sessions:
+**Auto-save** runs as a background process during active sessions:
 
 1. Timer fires every 2 minutes
 2. Stages all workspace changes (`git add .`)
-3. If changes exist, generates a commit message by piping the diff to a Haiku-tier agent model
-4. Commits with a `[session-auto]` marker prefix
-5. Falls back to timestamp message (`auto-save {ISO timestamp}`) if the AI model is unreachable
-6. Skips silently if no changes detected
-7. File lock prevents collision with intentional checkpoint commits
+3. Commits with deterministic message template: `[session-auto] {timestamp} | {files_changed} files | Step: {current_step}`
+4. Skips silently if no changes detected
+5. File lock prevents collision with intentional checkpoint commits
 
 **Two-tier commit model:**
 
 | Tier | Trigger | Message | Journey Map | Purpose |
 |------|---------|---------|-------------|---------|
-| Auto-save | Every 2 minutes | AI-generated from diff, `[session-auto]` prefix | Filtered out | Safety net — max 2 min data loss |
+| Auto-save | Every 2 minutes | Deterministic template: `[session-auto] {timestamp} \| {files_changed} files \| Step: {current_step}` | Filtered out | Safety net — max 2 min data loss |
 | Intentional checkpoint | Phase completion or user-requested | Structured metadata (discussion summary, decisions, next topic) | Displayed as nodes | Semantic milestones — Journey Map entries |
 
-Auto-save commits provide recovery context: the AI-generated messages describe what changed, enabling the agent to reconstruct conversational context from commit history during recovery.
+Auto-save commits provide recovery context: the deterministic template messages identify what changed and at which step, enabling the agent to reconstruct conversational context from commit history during recovery.
 
 Agent-suggested named checkpoints are **pacing devices, not safety devices.** The auto-save handles data protection. The agent suggests checkpoints for section closure: "We've covered user personas and success metrics. Want to save a named checkpoint before we move to functional requirements?" This creates natural breathing room in long sessions.
 
@@ -317,7 +315,7 @@ Sarah clicks a completed node in the Journey Map to revise a past decision. The 
 | **Trust** | Anxiety | Vault indicator always visible, auto-save timestamp, human-in-the-loop vault validation |
 | **Momentum** | Fatigue | Engagement cadence — tangible output every 10-15 minutes, phase ceremonies as energy resets |
 | **Energy** | Exhaustion | Pacing variation (open questions → structured choices → confirmation beats → surprises), session-end cliffhangers |
-| **Continuity** | Disorientation | Agent resumes with conversational context from AI-generated commit messages, not status reports |
+| **Continuity** | Disorientation | Agent resumes with conversational context from deterministic template commit messages, not status reports |
 | **Reassurance** | Panic | Error states lead with "saved" before "broken," never show raw errors or technical state |
 | **Accomplishment** | Tedium | Decision counter, Journey Map progression, session-end summary showing total output |
 
@@ -352,7 +350,7 @@ Sarah clicks a completed node in the Journey Map to revise a past decision. The 
 - Journey Map visual progression creates cumulative forward motion across sessions
 
 **Continuity → Design choices:**
-- Auto-save AI-generated commit messages serve as raw material for emotional continuity on resume
+- Auto-save deterministic template commit messages serve as raw material for emotional continuity on resume
 - Agent greeting reconstructs the *thinking* ("we were wrestling with X"), not just the *position* ("you completed section Y")
 - The experience of returning should feel like resuming a conversation with a colleague, not reopening a document
 
@@ -376,7 +374,7 @@ Sarah clicks a completed node in the Journey Map to revise a past decision. The 
 
 ### Design Philosophy: First-Principles UX
 
-Vibe Visualiser occupies a new product category — agentic planning infrastructure delivered as a browser-based terminal UI. No existing product combines conversational AI facilitation, Git-backed state management, Obsidian-native output, and multi-agent collaboration in a single guided experience. Rather than borrowing UX patterns from adjacent products, the design derives from first principles established in earlier sections of this specification.
+Mad Frog occupies a new product category — agentic planning infrastructure delivered as a browser-based terminal UI. No existing product combines conversational AI facilitation, Git-backed state management, Obsidian-native output, and multi-agent collaboration in a single guided experience. Rather than borrowing UX patterns from adjacent products, the design derives from first principles established in earlier sections of this specification.
 
 ### The Journey Map: Signature Interaction
 
@@ -505,7 +503,7 @@ Chat interfaces where important context scrolls away and the user can't find it.
 
 #### Anti-Pattern 2: The Configuration Labyrinth
 
-Products requiring extensive setup before first value. **Solved by:** One-interaction vault validation, three-option welcome screen, agent handles workflow configuration conversationally.
+Products requiring extensive setup before first value. **Solved by:** One-interaction vault validation, two-option welcome screen (guided + resume; creative freeform post-MVP), agent handles workflow configuration conversationally.
 
 #### Anti-Pattern 3: The Anxious Save
 
@@ -562,7 +560,7 @@ This is not a limitation — it is a constraint that enforces consistency. Every
 ### Rationale for Selection
 
 1. **Framework-determined:** Textual is the rendering engine. Rich provides the component primitives. The design system must be built from these — there is no alternative.
-2. **Toad's theme system provides the foundation:** Toad already handles light/dark theme switching, colour token definitions, and style inheritance. Vibe Visualiser extends this with domain-specific semantic colours rather than replacing it.
+2. **Toad's theme system provides the foundation:** Toad already handles light/dark theme switching, colour token definitions, and style inheritance. Mad Frog extends this with domain-specific semantic colours rather than replacing it.
 3. **Consistency through constraint:** A finite set of primitives (Panel, Tree, Rule, Markdown, Button, Footer, Header, ModalScreen) means every screen uses the same visual building blocks. Consistency is structural, not aspirational.
 4. **Zero additional dependencies:** No design system library to install, maintain, or update. The design system is the framework.
 
@@ -591,7 +589,7 @@ The visual tone targets non-technical users (Sarah-first). The UI should feel ap
 | Artifact preview | `Panel` + `Markdown` widget | Output feedback loop | Bordered panel, truncated content, "full doc in vault" note |
 | Stale indicators | Node label with ⚠️ | Causal dependency warning | Yellow/amber text, explanatory label |
 | Error states | `Panel(border_style="red")` | Recovery guidance | Warm red border, "saved" message first |
-| Welcome screen | `Button` grid | Entry point | Three clear options, minimal layout |
+| Welcome screen | `Button` grid | Entry point | Two clear options (guided, resume; creative freeform post-MVP), minimal layout |
 | Status bar | `Header` / `Footer` | Persistent context | Project name, phase, vault indicator, save timestamp |
 | Confirmation dialogs | `ModalScreen` | Irreversible actions only | Clear plain-language explanation, two buttons |
 | Decision counter | `Footer` element | Momentum indicator | Subtle accumulating count |
@@ -664,9 +662,9 @@ This encoding applies to Journey Map nodes, status bar indicators, vault status,
 ### Customization Strategy
 
 **Toad theme inheritance:**
-- Vibe Visualiser defines a custom Textual CSS file that extends (not replaces) Toad's default theme
+- Mad Frog defines a custom Textual CSS file that extends (not replaces) Toad's default theme
 - Semantic colour tokens are defined as CSS variables that reference Toad's theme system
-- Theme switching (light/dark) is handled entirely by Toad — Vibe Visualiser's semantic colours adapt automatically
+- Theme switching (light/dark) is handled entirely by Toad — Mad Frog's semantic colours adapt automatically
 - No hardcoded colour values in widget code — all colours reference semantic tokens
 
 **Custom widget styling:**
@@ -711,7 +709,7 @@ Sarah's current planning toolkit is the Microsoft ecosystem — Word documents, 
 
 **The mental model shift:**
 
-| Microsoft World | Vibe Visualiser |
+| Microsoft World | Mad Frog |
 |----------------|-----------------|
 | Blank document | Guided conversation with an expert agent |
 | "What should I write?" | Agent asks the right questions |
@@ -826,7 +824,7 @@ This is distinct from the Journey Map (which tracks phases and checkpoints). The
 - Sarah clicks "Start a guided project" on the welcome screen
 - Enters a project name
 - Agent greets warmly with an open question: "Tell me about this project. What are you trying to accomplish?"
-- Welcome screen is three buttons, not a form — minimal cognitive load
+- Welcome screen is two buttons (creative freeform post-MVP), not a form — minimal cognitive load
 - No configuration required (vault already validated on first run)
 - Opening question sounds like a colleague, not a form field
 
@@ -884,20 +882,20 @@ The four-input-type cycle IS the visible synthesis struggle from the emotional d
 
 ### Color System
 
-**Foundation:** Toad's theme system provides the base colour tokens, including light/dark theme switching. Vibe Visualiser adds semantic colour mappings on top — no overrides, only extensions.
+**Foundation:** Toad's theme system provides the base colour tokens, including light/dark theme switching. Mad Frog adds semantic colour mappings on top — no overrides, only extensions.
 
 **Semantic colour tokens (extending Toad's theme):**
 
 | Token Name | Semantic Role | Light Theme Direction | Dark Theme Direction |
 |-----------|--------------|----------------------|---------------------|
-| `--vibe-completed` | Completed states, success | Warm green | Soft green |
-| `--vibe-active` | Current position, in-progress | Warm blue | Soft blue |
-| `--vibe-locked` | Unavailable, disabled | Mid grey | Dark grey |
-| `--vibe-stale` | Causal dependency warnings | Amber | Warm yellow |
-| `--vibe-error` | Recovery states | Warm red (not harsh) | Soft red |
-| `--vibe-ceremony` | Phase completion accents | Warm gold or teal | Muted gold or teal |
-| `--vibe-meta` | Facilitator voice, timestamps | Dim from theme | Dim from theme |
-| `--vibe-agent-1` through `--vibe-agent-8` | Party Mode panel borders | 8 warm-palette colours | 8 warm-palette colours (adjusted for dark bg) |
+| `--mf-completed` | Completed states, success | Warm green | Soft green |
+| `--mf-active` | Current position, in-progress | Warm blue | Soft blue |
+| `--mf-locked` | Unavailable, disabled | Mid grey | Dark grey |
+| `--mf-stale` | Causal dependency warnings | Amber | Warm yellow |
+| `--mf-error` | Recovery states | Warm red (not harsh) | Soft red |
+| `--mf-ceremony` | Phase completion accents | Warm gold or teal | Muted gold or teal |
+| `--mf-meta` | Facilitator voice, timestamps | Dim from theme | Dim from theme |
+| `--mf-agent-1` through `--mf-agent-8` | Party Mode panel borders | 8 warm-palette colours | 8 warm-palette colours (adjusted for dark bg) |
 
 **No hardcoded colour values.** All widget code references semantic tokens. When Toad's theme switches between light and dark, the semantic tokens adapt automatically through CSS variable inheritance.
 
@@ -905,7 +903,7 @@ The four-input-type cycle IS the visible synthesis struggle from the emotional d
 - Colour always carries meaning — never decorative
 - State colours (completed/active/locked/stale/error) are consistent across every component
 - Party Mode agent colours are session-scoped assignments, not fixed per-agent
-- Background colours inherit from Toad's theme — Vibe Visualiser never sets its own background
+- Background colours inherit from Toad's theme — Mad Frog never sets its own background
 
 ### Typography System
 
@@ -1017,7 +1015,7 @@ The four-input-type cycle IS the visible synthesis struggle from the emotional d
 
 ### Design Directions Explored
 
-Given that Vibe Visualiser is a terminal UI rendered through Rich/Textual, traditional HTML mockups would misrepresent the rendering constraints. The design direction was established progressively through Steps 2-8, converging on a single coherent vision rather than exploring divergent visual directions. This is appropriate — the framework constrains the design space, and our extensive Party Mode sessions stress-tested the approach from multiple expert perspectives.
+Given that Mad Frog is a terminal UI rendered through Rich/Textual, traditional HTML mockups would misrepresent the rendering constraints. The design direction was established progressively through Steps 2-8, converging on a single coherent vision rather than exploring divergent visual directions. This is appropriate — the framework constrains the design space, and our extensive Party Mode sessions stress-tested the approach from multiple expert perspectives.
 
 **The unified design direction:** A warm, inviting, sidebar-plus-conversation layout with the Journey Map as the signature interaction, built entirely from Rich/Textual primitives, inheriting Toad's theme system.
 
@@ -1161,8 +1159,7 @@ flowchart LR
         T[Timer fires] --> G[git add .]
         G --> D{Changes?}
         D -->|No| S[Skip silently]
-        D -->|Yes| H[Pipe diff to Haiku]
-        H --> C[Commit with session-auto prefix]
+        D -->|Yes| C[Commit with deterministic template message]
         C --> U[Update vault status timestamp]
     end
 
@@ -1224,7 +1221,7 @@ The design direction is a direct consequence of five converging constraints:
 
 ```mermaid
 flowchart TD
-    VA[VibeApp] --> H[Header]
+    VA[MadFrogApp] --> H[Header]
     VA --> HS[Horizontal Split]
     VA --> F[Footer]
 
@@ -1251,12 +1248,9 @@ flowchart TD
 ```
 
 **Textual CSS structure:**
-- `vibe.tcss` — extends Toad's default theme with semantic colour tokens
-- `journey_map.tcss` — styles for BMADJourneyMap node states
-- `party_mode.tcss` — agent panel border colour assignments
-- `ceremony.tcss` — phase completion banner styling
+- `mad_frog.tcss` — extends Toad's default theme with semantic colour tokens (`--mf-completed`, `--mf-active`, `--mf-stale`, `--mf-error`, `--mf-ceremony`). ~50 lines total covering Journey Map states, agent panel colours, and ceremony styling.
 
-All CSS files use Toad's theme variables as base — no hardcoded values.
+The CSS file uses Toad's theme variables as base — no hardcoded values.
 
 ## User Journey Flows
 
@@ -1284,10 +1278,9 @@ flowchart TD
     ObsHelp --> ShowPath
     CleanTest --> Welcome
 
-    Welcome --> ThreeButtons{Sarah chooses}
-    ThreeButtons -->|Start guided project| ProjectName[Enter project name]
-    ThreeButtons -->|Resume project| ProjectList[Show project list]
-    ThreeButtons -->|Creative session| PostMVP[Post-MVP]
+    Welcome --> TwoButtons{Sarah chooses}
+    TwoButtons -->|Start guided project| ProjectName[Enter project name]
+    TwoButtons -->|Resume project| ProjectList[Show project list]
 
     ProjectName --> DupCheck{Name unique?}
     DupCheck -->|No| NameGuidance[Suggest unique name]
@@ -1635,7 +1628,7 @@ flowchart TD
 - Vault issues are surfaced by the agent conversationally AND by the status indicator (dual-signal)
 - Container crash recovery specifies: check for `.git/index.lock`, reset to last complete commit, then load state
 - Network disconnect has automatic retry before showing failure
-- **Auto-save fallback:** When the AI provider is unreachable during auto-save, the system falls back to a timestamp-based commit message (`[session-auto] 2026-03-08T14:32:00 — AI unavailable`) — never skips the commit itself
+- **Auto-save resilience:** Auto-save uses a deterministic template (`[session-auto] {timestamp} | {files_changed} files | Step: {current_step}`) that requires no external service — commits never depend on AI availability
 - **Tab-close scenario (most common error):** Container keeps running, auto-save continues. On browser reload, system loads from last commit. If more than 30 seconds have passed, the agent acknowledges the potential gap and offers to recap.
 - Every error has a single clear recovery action — no multi-step troubleshooting without guidance
 
@@ -1663,7 +1656,7 @@ flowchart TD
 
 3. **Cognitive load budget:** Each screen/state shows only what's relevant to the current action. The Journey Map collapses completed phases. The footer shows passive indicators. The conversation is the focus. Stale notifications cascade rather than dumping all at once.
 
-4. **Graceful degradation:** If the AI provider is down, conversation pauses but data is safe. If the vault is unreachable, conversation continues but artifact writes queue. If the browser tab closes, the container keeps running and auto-save continues. Auto-save falls back to timestamp-based commit messages when AI is unavailable. Nothing catastrophic ever happens.
+4. **Graceful degradation:** If the AI provider is down, conversation pauses but data is safe. If the vault is unreachable, conversation continues but artifact writes queue. If the browser tab closes, the container keeps running and auto-save continues. Auto-save uses deterministic template commit messages that require no external service. Nothing catastrophic ever happens.
 
 ## Component Strategy
 
@@ -1702,7 +1695,7 @@ All content appended to the `RichLog` conversation panel uses a typed entry syst
 | `LandmarkEntry` | Topic transition marker | `Rule(style="dim")` with label |
 | `CeremonyEntry` | Phase completion celebration | `Rule` + `Panel` composition |
 | `ArtifactEntry` | Artifact preview (draft or complete) | `Panel` + `Markdown` |
-| `ErrorEntry` | Error display with recovery action | `Panel` with `--vibe-error` border |
+| `ErrorEntry` | Error display with recovery action | `Panel` with `--mf-error` border |
 | `PartyEntry` | Party Mode agent response | `Panel` with coloured border |
 
 This hierarchy prevents string-parsing the conversation log and enables future features (filtering by type, export, search).
@@ -1728,11 +1721,11 @@ JourneyNode:
 
 | State | Icon | Colour Token | Interaction |
 |-------|------|-------------|-------------|
-| Completed | ✅ | `--vibe-completed` | `Space` to activate — triggers click-back flow (Journey 3) |
-| In-progress | 🔵 | `--vibe-active` | Current position — not activatable |
-| Locked | 🔒 | `--vibe-locked` | No interaction — dim text |
-| Stale | ⚠️ | `--vibe-stale` | `Space` to activate — label shows cause |
-| Fork (revised) | 📝 | `--vibe-active` | Nested child of original node |
+| Completed | ✅ | `--mf-completed` | `Space` to activate — triggers click-back flow (Journey 3) |
+| In-progress | 🔵 | `--mf-active` | Current position — not activatable |
+| Locked | 🔒 | `--mf-locked` | No interaction — dim text |
+| Stale | ⚠️ | `--mf-stale` | `Space` to activate — label shows cause |
+| Fork (revised) | 📝 | `--mf-active` | Nested child of original node |
 
 **Keyboard bindings:**
 - `Up/Down` arrow keys: navigate between nodes (Textual `Tree` default)
@@ -1779,7 +1772,7 @@ CeremonyData:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**States:** Single state — always celebratory. Border uses `--vibe-ceremony` token.
+**States:** Single state — always celebratory. Border uses `--mf-ceremony` token.
 
 **Spacing:** 1 blank line above and below. Full main-panel width.
 
@@ -1805,10 +1798,10 @@ ArtifactData:
 
 | State | Border Token | Footer Text | Usage |
 |-------|-------------|-------------|-------|
-| Draft | `--vibe-active` | "[Draft — will evolve as we discuss]" | Micro-artifact echo (Act 1) |
-| Writing | `--vibe-active` | "Saving to vault..." | During vault write |
-| Saved | `--vibe-completed` | "📂 Saved to ~/vault/path.md" | After successful write |
-| Error | `--vibe-error` | "Queued — vault unreachable" | Vault write failed |
+| Draft | `--mf-active` | "[Draft — will evolve as we discuss]" | Micro-artifact echo (Act 1) |
+| Writing | `--mf-active` | "Saving to vault..." | During vault write |
+| Saved | `--mf-completed` | "📂 Saved to ~/vault/path.md" | After successful write |
+| Error | `--mf-error` | "Queued — vault unreachable" | Vault write failed |
 
 **Lifecycle:** Draft → Writing → Saved (normal) or Draft → Writing → Error (vault issue).
 
@@ -1836,9 +1829,9 @@ VaultStatus:
 
 | State | Icon | Colour | Behaviour |
 |-------|------|--------|-----------|
-| Healthy | ✓ | `--vibe-completed` | Updates timestamp text on each auto-save |
-| Unreachable | ❌ | `--vibe-error` | Triggers agent conversational warning |
-| Pending | ? | `--vibe-stale` | Before vault validation completes |
+| Healthy | ✓ | `--mf-completed` | Updates timestamp text on each auto-save |
+| Unreachable | ❌ | `--mf-error` | Triggers agent conversational warning |
+| Pending | ? | `--mf-stale` | Before vault validation completes |
 
 **Simplification:** No timed bold highlight on save. The timestamp text changing from "Saved 2 min ago" to "Saved just now" is sufficient visual feedback without async timer management.
 
@@ -1896,7 +1889,7 @@ PartyResponse:
 ╰──────────────────────────────────────╯
 ```
 
-**Colour assignment:** 8 pre-defined `--vibe-agent-1` through `--vibe-agent-8` tokens, assigned per-session based on participation order. No two adjacent panels share the same colour.
+**Colour assignment:** 8 pre-defined `--mf-agent-1` through `--mf-agent-8` tokens, assigned per-session based on participation order. No two adjacent panels share the same colour.
 
 **Word limit:** Soft limit of ~150 words per panel. If an agent response exceeds this, it splits into the initial panel + a "continues..." expansion that the user can click to reveal. Keeps the conversation feeling like dialogue, not lectures.
 
@@ -1953,7 +1946,7 @@ ProjectListData:
 
 **Purpose:** Reassurance-first error display with single clear recovery action.
 
-**Composed from:** `Panel(border_style=--vibe-error)` + action text (wrapped as `ErrorEntry`)
+**Composed from:** `Panel(border_style=--mf-error)` + action text (wrapped as `ErrorEntry`)
 
 **Data contract:**
 ```
@@ -1968,7 +1961,7 @@ ErrorData:
 **Rule:** First line is ALWAYS what's safe. Second line is what happened. Third line is the action.
 
 **Recovery transition:** On successful retry, the panel transitions from `active` to `recovered`:
-- Border changes from `--vibe-error` to `--vibe-completed`
+- Border changes from `--mf-error` to `--mf-completed`
 - Text updates to "Recovered — continuing where we left off"
 - Panel remains in conversation history but no longer demands attention
 
@@ -2245,8 +2238,8 @@ How components move between states — consistency across all custom widgets:
 | Locked → In-progress | 🔒 dim grey → 🔵 warm blue, text becomes normal weight | Immediate on phase unlock |
 | In-progress → Completed | 🔵 warm blue → ✅ warm green | Immediate + ceremony banner |
 | Completed → Stale | ✅ green → ⚠️ amber + causal label appears | Immediate on parent revision |
-| Draft → Saved (ArtifactPanel) | `--vibe-active` → `--vibe-completed` border, vault path appears | On vault write confirmation |
-| Active → Recovered (ErrorPanel) | `--vibe-error` → `--vibe-completed` border, text softens | On successful retry |
+| Draft → Saved (ArtifactPanel) | `--mf-active` → `--mf-completed` border, vault path appears | On vault write confirmation |
+| Active → Recovered (ErrorPanel) | `--mf-error` → `--mf-completed` border, text softens | On successful retry |
 | Hidden → Visible (DecisionCounter) | Counter appears in footer | On reaching 5 decisions |
 
 **Rule:** All transitions are immediate — no animations in the terminal UI. State changes are communicated through icon + colour + text changes simultaneously (triple-encoding for accessibility).
@@ -2257,7 +2250,7 @@ How components move between states — consistency across all custom widgets:
 
 ### Terminal Width Adaptation
 
-Vibe Visualiser is a browser-delivered terminal UI via Textual Web. There are no mobile breakpoints, touch targets, or media queries. "Responsive" means adapting to the browser viewport width, which Textual translates into character columns.
+Mad Frog is a browser-delivered terminal UI via Textual Web. There are no mobile breakpoints, touch targets, or media queries. "Responsive" means adapting to the browser viewport width, which Textual translates into character columns.
 
 #### Layout Behaviour by Terminal Width
 
@@ -2325,11 +2318,11 @@ Textual Web requires a modern browser with WebSocket support. A minimal HTML shi
   if ('WebSocket' in window && window.innerWidth >= 480) {
     // Boot Textual Web application
   } else if (!('WebSocket' in window)) {
-    // Show: "Vibe Visualiser requires a modern browser
+    // Show: "Mad Frog requires a modern browser
     // with WebSocket support. Please use Chrome, Firefox,
     // Safari, or Edge."
   } else {
-    // Show: "Vibe Visualiser is designed for desktop browsers.
+    // Show: "Mad Frog is designed for desktop browsers.
     // For the best experience, open this link on a laptop
     // or desktop computer."
   }
@@ -2463,7 +2456,7 @@ No information is conveyed by colour alone.
 
 #### Automated Testing
 
-- **Contrast validation tooling (Phase 1 dependency):** Custom script that parses Textual CSS files, extracts colour values from `--vibe-*` tokens, resolves against both light and dark theme backgrounds, and checks WCAG 4.5:1 ratios. Standard web tools (axe-core, Lighthouse) cannot test Textual CSS.
+- **Contrast validation tooling (Phase 1 dependency):** Custom script that parses Textual CSS files, extracts colour values from `--mf-*` tokens, resolves against both light and dark theme backgrounds, and checks WCAG 4.5:1 ratios. Standard web tools (axe-core, Lighthouse) cannot test Textual CSS.
 - **Textual `pilot` tests:** Widget state testing for all custom components, run at 120/80/60 column widths
 - **Keyboard navigation integration tests:** Verify tab order, shortcut bindings, and focus return behaviour
 - **Layout threshold tests:** Verify sidebar show/hide and view toggle at boundary widths
