@@ -21,6 +21,20 @@ inputDocuments:
   - docs/bmad-toad-integration-spec.md
 date: 2026-03-08
 author: Linus
+lastEdited: 2026-03-09
+editHistory:
+  - date: 2026-03-09
+    scope: Architecture alignment
+    changes:
+      - Replaced Codespaces references with Dev Container / Docker Desktop
+      - Replaced vault validation first-run flow with WorkspaceSetupScreen modal
+      - Updated platform strategy and deployment model to stateless peer tool
+      - Changed toad serve to mad_frog command
+      - Updated auto-save mechanism to MCP server ownership (asyncio timer, zero token cost)
+      - Rewrote Sarah first-run journey mermaid diagram for workspace setup flow
+      - Updated UI Mode Transitions mermaid (FirstRunVault → WorkspaceSetup)
+      - Updated trust checkpoints, critical success moments, and emotional journey tables
+      - Fixed stale vault validation references in micro-emotions and component states
 ---
 
 # UX Design Specification mad_frog
@@ -40,7 +54,7 @@ Mad Frog is a browser-served guided experience that democratises the BMAD method
 
 ### Target Users
 
-**Sarah — Non-Technical Planner (Primary UX Filter):** Project manager who needs rigorous planning without methodology overhead. Zero terminal experience. Entry via GitHub Codespaces one-click setup. Values guided hand-holding, Party Mode stress-testing, and the peace of mind that every decision is traceable. Every UX decision must pass the "Does Sarah understand this without help?" test.
+**Sarah — Non-Technical Planner (Primary UX Filter):** Project manager who needs rigorous planning without methodology overhead. Zero terminal experience. Entry via Dev Container with Docker Desktop — clone the repo, open in VS Code, `make start`. Values guided hand-holding, Party Mode stress-testing, and the peace of mind that every decision is traceable. Every UX decision must pass the "Does Sarah understand this without help?" test.
 
 **Alex — Technical Builder:** Developer who skips planning and pays for it later. Wants a fast, efficient path from idea to actionable backlog. Responds tersely — expects the agent to adapt pacing. Values artifact traceability and structured output he can act on immediately.
 
@@ -150,41 +164,31 @@ This cycle repeats at multiple scales: micro (a section of a document), medium (
 
 ### Platform Strategy
 
-**Primary deployment: Local Docker Desktop with Dev Container.** This is where most users will run Mad Frog. The bind mount connects the container to the user's local filesystem, placing artifacts directly into their Obsidian vault.
+**Primary deployment: Local Docker Desktop with Dev Container.** Mad Frog is a stateless peer tool — the tool repo (`mad_frog/`) sits alongside project repos as sibling directories within the user's workspace. All durable state lives in project repositories. The tool is independently upgradeable without affecting any project.
 
 **Platform matrix:**
 
 | Platform | Vault Location | Bind Mount Path | Setup |
 |----------|---------------|-----------------|-------|
-| macOS (Docker Desktop) | User's Obsidian vault | Configured in `devcontainer.json` | `make start` |
+| macOS (Docker Desktop) | User's Obsidian vault | Workspace root configured via first-run modal | `make start` |
 | Windows (Docker Desktop) | User's Obsidian vault | WSL/VirtioFS path mapping (translated for user display) | `make start` |
 | Linux (Docker native) | User's Obsidian vault | Direct bind mount | `make start` |
-| GitHub Codespaces | `_bmad-output/` in workspace | No bind mount — container-local | One-click launch |
 
-**Dual configuration model:**
-- **Pre-launch (devcontainer level):** Vault path set in `devcontainer.json` bind mount configuration before the container starts. This is where the actual filesystem mapping happens.
-- **Runtime (Toad UI):** Settings UI allows verification and display of the mapped vault path. Users see their host-side OS-native path, never container-internal paths.
+**Configuration model:**
+- **First-run (browser modal):** On first launch, a `WorkspaceSetupScreen` modal asks "Where are your projects?" — user enters their workspace root path. Stored in `.vibe/config.yaml`, never asked again.
+- **Runtime:** Projects are sibling directories within the workspace root. Vault detection is automatic via `.obsidian/` parent walk — zero-config Obsidian integration.
 
-**Codespaces-aware messaging:** System detects Codespaces environment and adjusts messaging: "You're running in Codespaces. Artifacts are saved to your workspace. You can download them or connect a vault when running locally."
-
-**Browser requirements:** Desktop browser at localhost:8000 via `toad serve`. Minimum window: 120 columns x 40 rows equivalent. Mobile/tablet not supported — desktop-first, keyboard-and-mouse interaction model.
+**Browser requirements:** Desktop browser at localhost:8000 via `mad_frog`. Minimum window: 120 columns x 40 rows equivalent. Mobile/tablet not supported — desktop-first, keyboard-and-mouse interaction model.
 
 ### Vault Trust Model
 
 Trust is the foundation of the entire user experience. Users must feel confident their work is being saved correctly, in the right place, on their actual filesystem, at all times.
 
-#### First-Run Vault Validation (Human-in-the-Loop)
+#### First-Run Workspace Setup
 
-Before any workflow begins, the system validates the vault connection with user confirmation:
+On first launch, the `WorkspaceSetupScreen` modal asks "Where are your projects?" — the user enters their workspace root path (e.g., `~/Documents/Projects`). The path is stored in `.vibe/config.yaml` and never asked again. Projects are sibling directories within this workspace root.
 
-1. System detects first run (no existing projects)
-2. Displays the configured vault path in the user's OS-native format
-3. Writes a test file (`vibe-test.md`) to the vault
-4. Asks the user: "I've saved a test file to `[host-path]/vibe-test.md`. Can you see it in Obsidian? (yes/no)"
-5. User confirms the file appeared — closing the trust loop with human verification
-6. System removes the test file and proceeds to the welcome screen
-
-This human-in-the-loop validation is essential because the container cannot verify that Obsidian (a separate host application) has picked up the file. Only the user can confirm the full chain works.
+Vault detection is automatic: `VaultHealthMonitor` walks parent directories looking for `.obsidian/`. If found, the project is flagged as "vault-resident" and vault-aware features are activated (wikilinks relative to vault root, `.obsidianignore` proposals, vault-aware frontmatter).
 
 #### Vault Status Indicator
 
@@ -211,8 +215,8 @@ The UI must never display container-internal paths. All path references are tran
 
 | Moment | Sarah's Question | UI Response |
 |--------|-----------------|-------------|
-| First run | "Where will my files be saved?" | Vault path in her OS format + test file confirmation |
-| First run confirmed | "Did it actually work?" | She checks Obsidian, sees the file, confirms in the UI |
+| First run | "Where will my files be saved?" | Workspace setup modal — user enters their project directory path |
+| First artifact | "Did it actually work?" | She checks Obsidian, sees the file — vault auto-detected via `.obsidian/` parent walk |
 | During session | "Is my work being captured?" | Inline artifact preview + vault status indicator |
 | Mid-session pause | "What if I close the browser?" | "Saved 2 min ago" indicator; auto-save guarantees max 2 min loss |
 | Container crash | "What if something goes wrong?" | Recovery message: "All auto-saved work is preserved. Last save: [time]" |
@@ -222,13 +226,13 @@ The UI must never display container-internal paths. All path references are tran
 
 ### Auto-Save Mechanism
 
-**Auto-save** runs as a background process during active sessions:
+**Auto-save** runs inside the MCP server process (no AI agent involvement, zero token cost):
 
-1. Timer fires every 2 minutes
-2. Stages all workspace changes (`git add .`)
+1. Internal asyncio timer fires every 2 minutes
+2. Checks `git status` for uncommitted changes
 3. Commits with deterministic message template: `[session-auto] {timestamp} | {files_changed} files | Step: {current_step}`
 4. Skips silently if no changes detected
-5. File lock prevents collision with intentional checkpoint commits
+5. `StateOperationQueue` serialises all Git-mutating operations — intentional checkpoints pre-empt auto-save
 
 **Two-tier commit model:**
 
@@ -251,8 +255,8 @@ Agent-suggested named checkpoints are **pacing devices, not safety devices.** Th
 
 ### Critical Success Moments
 
-**Moment 1 — First-run vault validation (0-2 minutes):**
-Sarah's first interaction is confirming where her files will be saved. She sees a path she recognises, confirms the test file appeared in Obsidian, and the vault indicator turns green. If this feels clear and trustworthy, she relaxes into the experience.
+**Moment 1 — First-run workspace setup (0-2 minutes):**
+Sarah's first interaction is telling the system where her projects live. The workspace setup modal asks one question: "Where are your projects?" She enters her Documents folder path. The vault indicator appears once she creates her first project inside an Obsidian vault. If this feels clear and effortless, she relaxes into the experience.
 
 **Moment 2 — First artifact emergence (10-15 minutes):**
 Sarah finishes discussing her project vision. The agent generates the first section of her Product Brief. The inline preview appears. She opens Obsidian — and the file is there, formatted, with frontmatter. This is the "aha" moment.
@@ -291,7 +295,7 @@ Sarah clicks a completed node in the Journey Map to revise a past decision. The 
 
 | Stage | Target Emotion | UX Mechanism |
 |-------|---------------|--------------|
-| **First launch** | Curiosity → Confidence | Clean welcome screen, vault validation confirms setup works, no overwhelming options |
+| **First launch** | Curiosity → Confidence | Clean welcome screen, workspace setup confirms project path works, no overwhelming options |
 | **First conversation** | Control → Engagement | User drives the discussion, agent adapts to their pace, clear "where am I" indicators |
 | **Agent needs the user** | Importance → Ownership | Agent surfaces tensions and asks user to resolve: "You mentioned two conflicting priorities — help me resolve this" |
 | **First artifact emerges** | Surprise → Pride | Inline preview appears, user recognises their own words and decisions in the document |
@@ -312,7 +316,7 @@ Sarah clicks a completed node in the Journey Map to revise a past decision. The 
 | **Agency** | Passivity | User's choices visibly shape output; artifacts differ based on user input |
 | **Ownership** | Imposter syndrome | User's voice preserved in artifacts; attribution phrasing ("Based on your description...") |
 | **Confidence** | Confusion | Persistent spatial anchors (Journey Map, status bar, conversation landmarks) |
-| **Trust** | Anxiety | Vault indicator always visible, auto-save timestamp, human-in-the-loop vault validation |
+| **Trust** | Anxiety | Vault indicator always visible, auto-save timestamp, workspace setup confirms project path |
 | **Momentum** | Fatigue | Engagement cadence — tangible output every 10-15 minutes, phase ceremonies as energy resets |
 | **Energy** | Exhaustion | Pacing variation (open questions → structured choices → confirmation beats → surprises), session-end cliffhangers |
 | **Continuity** | Disorientation | Agent resumes with conversational context from deterministic template commit messages, not status reports |
@@ -503,7 +507,7 @@ Chat interfaces where important context scrolls away and the user can't find it.
 
 #### Anti-Pattern 2: The Configuration Labyrinth
 
-Products requiring extensive setup before first value. **Solved by:** One-interaction vault validation, two-option welcome screen (guided + resume; creative freeform post-MVP), agent handles workflow configuration conversationally.
+Products requiring extensive setup before first value. **Solved by:** One-question workspace setup modal ("Where are your projects?"), two-option welcome screen (guided + resume; creative freeform post-MVP), agent handles workflow configuration conversationally.
 
 #### Anti-Pattern 3: The Anxious Save
 
@@ -825,7 +829,7 @@ This is distinct from the Journey Map (which tracks phases and checkpoints). The
 - Enters a project name
 - Agent greets warmly with an open question: "Tell me about this project. What are you trying to accomplish?"
 - Welcome screen is two buttons (creative freeform post-MVP), not a form — minimal cognitive load
-- No configuration required (vault already validated on first run)
+- No configuration required (workspace path already set on first run)
 - Opening question sounds like a colleague, not a form field
 
 #### 2. Interaction — Four Input Types
@@ -1028,8 +1032,8 @@ Given that Mad Frog is a terminal UI rendered through Rich/Textual, traditional 
 ```mermaid
 stateDiagram-v2
     [*] --> Welcome
-    Welcome --> FirstRunVault: First launch (no projects)
-    FirstRunVault --> Welcome: Vault confirmed
+    Welcome --> WorkspaceSetup: First launch (no config)
+    WorkspaceSetup --> Welcome: Path saved to .vibe/config.yaml
     Welcome --> GuidedConversation: Start guided project
     Welcome --> GuidedConversation: Resume project
     Welcome --> CreativeFreeform: Launch creative session (Post-MVP)
@@ -1261,22 +1265,16 @@ The most critical journey — if this fails, nothing else matters.
 ```mermaid
 flowchart TD
     Start[Sarah opens browser at localhost:8000] --> Detect{First run?}
-    Detect -->|Yes| Vault[Vault Configuration Screen]
+    Detect -->|Yes| WSModal[WorkspaceSetupScreen modal]
     Detect -->|No| Welcome[Welcome Screen]
 
-    Vault --> ShowPath[Display vault path in OS-native format]
-    ShowPath --> TestWrite[System writes vibe-test.md to vault]
-    TestWrite --> AskConfirm[Ask Sarah: Can you see vibe-test.md in Obsidian?]
-    AskConfirm --> Confirmed{Sarah confirms?}
-    Confirmed -->|Yes| CleanTest[Remove test file]
-    Confirmed -->|No| DiagnoseVault{Diagnose failure}
-    DiagnoseVault -->|Path not found| PathHelp[Directory doesn't exist — guide creation]
-    DiagnoseVault -->|Not writable| PermHelp[Permissions issue — OS-specific fix steps]
-    DiagnoseVault -->|Obsidian doesn't see it| ObsHelp[Vault not registered — guide Obsidian setup]
-    PathHelp --> ShowPath
-    PermHelp --> ShowPath
-    ObsHelp --> ShowPath
-    CleanTest --> Welcome
+    WSModal --> AskPath["Where are your projects?"]
+    AskPath --> EnterPath[Sarah enters workspace root path]
+    EnterPath --> ValidPath{Path exists and writable?}
+    ValidPath -->|Yes| SaveConfig[Store in .vibe/config.yaml]
+    ValidPath -->|No| PathHelp[Guide: create directory or fix permissions]
+    PathHelp --> AskPath
+    SaveConfig --> Welcome
 
     Welcome --> TwoButtons{Sarah chooses}
     TwoButtons -->|Start guided project| ProjectName[Enter project name]
@@ -1330,16 +1328,14 @@ flowchart TD
 ```
 
 **Key design decisions in this flow:**
-- Vault validation is a hard gate — no workflow begins until vault is confirmed
-- Human-in-the-loop confirmation (Sarah checks Obsidian) closes the trust gap
-- Vault troubleshooting branches into three distinct failure modes: path not found, not writable, Obsidian doesn't recognise vault — each with specific recovery guidance
+- Workspace setup is a one-time gate — one question ("Where are your projects?"), never asked again
+- Vault detection is automatic via `.obsidian/` parent walk — zero-config Obsidian integration
 - The five-act teaching narrative is embedded in the flow sequence
 - Auto-save ensures closing the browser is always safe
 
 **Error paths:**
-- Vault path not found → guide directory creation with OS-specific instructions
-- Vault path not writable → permissions troubleshooting (different for macOS/Windows/Linux)
-- Obsidian doesn't see vault → guide vault registration in Obsidian settings
+- Workspace path not found → guide directory creation with OS-specific instructions
+- Workspace path not writable → permissions troubleshooting (different for macOS/Windows/Linux)
 - Duplicate project name → gentle redirect with suggestion
 - Agent response failure → "Your progress is saved. Click to retry" (inline, not modal)
 - Browser disconnect mid-conversation → reconnect picks up from last auto-save
@@ -1831,7 +1827,7 @@ VaultStatus:
 |-------|------|--------|-----------|
 | Healthy | ✓ | `--mf-completed` | Updates timestamp text on each auto-save |
 | Unreachable | ❌ | `--mf-error` | Triggers agent conversational warning |
-| Pending | ? | `--mf-stale` | Before vault validation completes |
+| Pending | ? | `--mf-stale` | Before workspace setup completes |
 
 **Simplification:** No timed bold highlight on save. The timestamp text changing from "Saved 2 min ago" to "Saved just now" is sufficient visual feedback without async timer management.
 
