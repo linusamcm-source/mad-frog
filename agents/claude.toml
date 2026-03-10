@@ -1,0 +1,15 @@
+identity = "claude.com"
+name = "Claude Code"
+short_name = "claude"
+url = "https://claude.ai"
+protocol = "acp"
+type = "coding"
+author_name = "Anthropic"
+author_url = "https://anthropic.com"
+publisher_name = "Anthropic"
+publisher_url = "https://anthropic.com"
+description = "Claude Code agent for BMAD-guided planning"
+tags = ["ai", "coding", "bmad"]
+help = "Requires Claude Code CLI with ACP support"
+run_command."*" = "claude-code-acp"
+actions = {}

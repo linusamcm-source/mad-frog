@@ -1,0 +1,16 @@
+/* Mad Frog semantic colour tokens */
+/* Inherit from Toad's theme system */
+
+$mf-completed: $success;
+$mf-active: $accent;
+$mf-stale: $text-muted;
+$mf-error: $error;
+$mf-ceremony: $warning;
+
+#sidebar-placeholder {
+    width: 30;
+    dock: left;
+    padding: 1 2;
+    background: $surface;
+    border-right: solid $border;
+}
