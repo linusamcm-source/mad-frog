@@ -4,7 +4,19 @@ version = "0.1.0"
 description = "A Toad app for guided BMAD planning"
 requires-python = ">=3.14"
 license = "MIT"
-dependencies = ["batrachian-toad>=0.5.35"]
+dependencies = [
+    "bandit>=1.9.4",
+    "batrachian-toad>=0.5.35",
+    "desloppify[full]>=0.9.3",
+    "loguru>=0.6.0",
+    "pre-commit>=4.5.1",
+    "pydantic>=2.12.5",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.15.5",
+    "safety>=3.7.0",
+    "vulture>=2.15",
+]
 
 [dependency-groups]
 dev = [

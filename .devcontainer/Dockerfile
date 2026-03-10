@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # ── System packages ──────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl wget unzip git xclip fontconfig \
+    ca-certificates curl wget unzip git gh xclip fontconfig \
     build-essential software-properties-common \
     sudo locales \
     usbutils \
@@ -41,8 +41,10 @@ RUN ln -sf /usr/bin/python3.14 /usr/bin/python3 && \
     ln -sf /usr/bin/python3.14 /usr/bin/python
 
 
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Install uv (to shared location so non-root user can access it)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && cp /root/.local/bin/uv /usr/local/bin/uv \
+    && cp /root/.local/bin/uvx /usr/local/bin/uvx
 
 # ── OpenJDK ──────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -101,8 +103,5 @@ RUN EXISTING_USER=$(getent passwd ${USER_UID} | cut -d: -f1) \
 RUN chown -R ${USER_UID}:${USER_GID} ${ANDROID_HOME}
 
 ENV PATH="/usr/local/bin:$HOME/.local/bin:$PATH"
-
-USER ${USERNAME}
-WORKDIR /workspace
 
 CMD ["/bin/bash"]

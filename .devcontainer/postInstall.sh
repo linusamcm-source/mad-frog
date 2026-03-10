@@ -27,12 +27,12 @@ if ! git config --global user.name &>/dev/null || ! git config --global user.ema
 fi
 
 # ── Claude  ────────
-curl -fsSL https://claude.ai/install.sh | bash
+curl -fsSL https://claude.ai/install.sh | bash || echo "  WARNING: Claude install failed, continuing..."
 
 # ── Bun (needed by ccstatusline) ────────
 if ! command -v bun &>/dev/null; then
   echo "Installing Bun..."
-  curl -fsSL https://bun.sh/install | bash
+  curl -fsSL https://bun.sh/install | bash || echo "  WARNING: Bun install failed, continuing..."
   export PATH="$HOME/.bun/bin:$PATH"
   for rc in "$HOME/.bashrc" "$HOME/.profile"; do
     if ! grep -q '\.bun/bin' "$rc" 2>/dev/null; then
@@ -46,19 +46,21 @@ echo "Installing ccstatusline..."
 mkdir -p "$HOME/.config/ccstatusline"
 cp "$(dirname "$0")/ccstatusline-settings.json" "$HOME/.config/ccstatusline/settings.json"
 
-# ── Toad  ──────── 
+# ── Toad  ────────
 echo "Installing Toad ..."
-curl -fsSL https://batrachian.ai/install | sh
+curl -fsSL https://batrachian.ai/install | sh || echo "  WARNING: Toad install failed, continuing..."
 
-# ── Fancy-git shell integration  ────────
+# ── Fancy-git  ────────
 echo "Installing Fancy-git..."
-curl -sS https://raw.githubusercontent.com/diogocavilha/fancy-git/master/install.sh | sh
+curl -sS https://raw.githubusercontent.com/diogocavilha/fancy-git/master/install.sh | sh || echo "  WARNING: Fancy-git install failed, continuing..."
 
 
 echo "Installing Python Packages with UV..."
-#uv init
-#uv add ruff bandit safety vulture pydantic desloppify[full] loguru pytest pytest-cov pre-commit
-#uv lock
+if [ ! -f "pyproject.toml" ]; then
+  uv init
+fi
+uv add ruff bandit safety vulture pydantic desloppify[full] loguru pytest pytest-cov pre-commit
+uv lock
 uv sync
 
 # Ensure ~/.local/bin is on PATH for uv-installed tools
@@ -69,12 +71,11 @@ for rc in "$HOME/.bashrc" "$HOME/.profile"; do
   fi
 done
 # ── Desloppify ───────────────────────────────────────────────────────
-# if [ ! -d "$HOME/desloppify" ]; then
-#   git clone https://github.com/peteromallet/desloppify.git "$HOME/desloppify"
-# fi
-# echo "Installing Desloppify dependencies..."
+if [ ! -d "$HOME/desloppify" ]; then
+  git clone https://github.com/peteromallet/desloppify.git "$HOME/desloppify" || echo "  WARNING: Desloppify clone failed, continuing..."
+fi
 
-# ── Fancy-git shell integration (optional — only if mounted) ────────
+# ── Fancy-git shell integration (source prompt if installed) ────────
 FANCY_GIT_DIR="$HOME/.fancy-git"
 if [ -d "$FANCY_GIT_DIR" ]; then
   FANCY_GIT_SOURCE='[ -f "$HOME/.fancy-git/prompt.sh" ] && source "$HOME/.fancy-git/prompt.sh"'
@@ -87,7 +88,7 @@ if [ -d "$FANCY_GIT_DIR" ]; then
     fi
   done
 else
-  echo "  fancy-git: not mounted, skipping"
+  echo "  fancy-git: not installed, skipping prompt integration"
 fi
 
 # ── BMAD ──────────────────────────────────────────────────────────
@@ -111,6 +112,9 @@ fi
 
 repomix --remote https://github.com/batrachianai/toad.git --compress -o _bmad-output/implementation-artifacts/repos/toad.xml 
 repomix --remote https://github.com/bmad-code-org/BMAD-METHOD.git --compress -o _bmad-output/implementation-artifacts/repos/bmad-method.xml 
+
+unzip -o /workspaces/mad-frog/.devcontainer/fancy-git.zip -d ~ 
+
 # ── Summary ──────────────────────────────────────────────────────────
 echo "Final - Verifying toolchain..."
 echo ""
@@ -121,12 +125,6 @@ echo "  uv:         $(uv --version)"
 echo "  toad:       $(toad --version)"
 echo "  Java:       $(java -version 2>&1 | head -1)"
 echo ""
-
-
-
-
-
-
 # ── ADB hint ─────────────────────────────────────────────────────────
 cat <<'MSG'
 ──────────────────────────────────────────
