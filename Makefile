@@ -53,7 +53,7 @@ create-story:
 	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-sm  CS"
 
 dev-story:
-	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev DS" _bmad-output/implementation-artifacts/repos/toad.xml
+	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev DS"
 
 code-review:
 	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev CR"

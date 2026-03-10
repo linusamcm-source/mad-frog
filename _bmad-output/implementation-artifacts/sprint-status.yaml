@@ -43,7 +43,7 @@ development_status:
   # Epic 1: Launch App & Create First Project
   epic-1: in-progress
   1-1-toad-integration-spike-and-walking-skeleton: done
-  1-2-create-project-and-write-first-artifact: backlog
+  1-2-create-project-and-write-first-artifact: ready-for-dev
   1-3-project-list-resume-and-switch: backlog
   1-4-startup-health-checks-and-observability: backlog
   epic-1-retrospective: optional
