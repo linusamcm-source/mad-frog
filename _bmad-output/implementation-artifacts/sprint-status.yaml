@@ -34,15 +34,15 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-10
-project: vibe_visualiser
+project: mad-frog
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 
 development_status:
   # Epic 1: Launch App & Create First Project
-  epic-1: backlog
-  1-1-toad-integration-spike-and-walking-skeleton: backlog
+  epic-1: in-progress
+  1-1-toad-integration-spike-and-walking-skeleton: done
   1-2-create-project-and-write-first-artifact: backlog
   1-3-project-list-resume-and-switch: backlog
   1-4-startup-health-checks-and-observability: backlog

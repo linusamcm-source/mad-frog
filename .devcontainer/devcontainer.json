@@ -1,5 +1,5 @@
 {
-	"name": "vibe_visualiser_desloper",
+	"name": "mad-frog",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"args": {
@@ -7,6 +7,11 @@
 		}
 	},
 	"remoteUser": "vscode",
+	"remoteEnv": {
+		"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+		"VIBE_WORKSPACE": "${localEnv:VIBE_WORKSPACE}"
+	},
+	"forwardPorts": [8000],
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -26,19 +31,18 @@
 			}
 		}
 	},
-	  "features": {
-      "ghcr.io/devcontainers/features/common-utils:2": {}
-  },
-  "containerEnv": {
-    "GIT_USER_NAME": "${localEnv:GIT_USER_NAME}",
-    "GIT_USER_EMAIL": "${localEnv:GIT_USER_EMAIL}"
-  },
-  "mounts": [
-    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.claude.json,target=/home/vscode/.claude.json,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached",
-	"source=${localEnv:HOME}/.claude,target=/home/linus/.claude,type=bind,readonly"
-  ],
-  "postCreateCommand": "bash .devcontainer/postInstall.sh"
-
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {}
+	},
+	"containerEnv": {
+		"GIT_USER_NAME": "${localEnv:GIT_USER_NAME}",
+		"GIT_USER_EMAIL": "${localEnv:GIT_USER_EMAIL}"
+	},
+	"mounts": [
+		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.claude.json,target=/home/vscode/.claude.json,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.claude,target=/home/linus/.claude,type=bind,readonly"
+	],
+	"postCreateCommand": "bash .devcontainer/postInstall.sh"
 }

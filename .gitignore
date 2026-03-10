@@ -1,41 +1,14 @@
-# Dependencies
-node_modules/
-# Expo
-.expo/
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
 dist/
-web-build/
-expo-env.d.ts
+.venv/
+.coverage
+.ruff_cache/
+*.db
 
-# Generated native directories (Expo managed workflow)
-/ios/
-/android/
-
-# Metro bundler
-.metro-health-check*
-
-# Native build artifacts
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.pem
-credentials.json
-
-# TypeScript
-*.tsbuildinfo
-
-# Testing
-coverage/
-
-# Debug logs
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-logs/
-
-# Environment files
+# Environment
 .env
 .env*.local
 
@@ -46,37 +19,11 @@ logs/
 .idea/
 .vscode/
 
+# Node
+node_modules/
+
 # Claude Code tooling
 .claude-trace/
 .claude-logs/
-
-# Device logs
-.logs/
-logs
-# Design token sync snapshots
-design_template/pen-snapshot.json
-design_template/logs/
-
 .gemini
 .claude
-
-docs
-
-Claude configuration file not found at: /home/vscode/.claude.json
-A backup file exists at: /home/vscode/.claude/backups/.claude.json.backup.1772927500208
-You can manually restore it by running: cp "/home/vscode/.claude/backups/.claude.json.backup.1772927500208" "/home/vscode/.claude.json"
-
-
-Installing Python Packages with UV...
-Resolved 71 packages in 0.80ms
-Audited 68 packages in 6ms
-  fancy-git: sourced in .zshrc
-Installing BMAD...
-  BMAD already installed, running quick-update...
-Need to install the following packages:
-bmad-method@6.0.4
-Ok to proceed? (y)  source /workspaces/vibe_visualiser/.venv/bin/activate
-
-npm error canceled
-npm error A complete log of this run can be found in: /home/vscode/.npm/_logs/2026-03-08T00_05_09_403Z-debug-0.log
-[51210 ms] postCreateCommand from devcontainer.json failed with exit code 1. Skipping any further user-provided commands.

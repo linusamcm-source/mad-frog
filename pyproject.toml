@@ -1,18 +1,40 @@
 [project]
-name = "vibe-visualiser"
+name = "mad-frog"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "A Toad app for guided BMAD planning"
 requires-python = ">=3.14"
-dependencies = [
-    "bandit>=1.9.4",
-    "desloppify[full]>=0.9.1",
-    "loguru>=0.7.3",
-    "pre-commit>=4.5.1",
-    "pydantic>=2.12.5",
-    "pytest>=9.0.2",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.15.5",
-    "safety>=3.7.0",
-    "vulture>=2.15",
+license = "MIT"
+dependencies = ["batrachian-toad>=0.5.35"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=7.0",
+    "textual-dev>=1.0",
+    "ruff>=0.15",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+mad_frog = "mad_frog.__main__:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.coverage.run]
+source = ["src/mad_frog"]
+
+[tool.coverage.report]
+fail_under = 85

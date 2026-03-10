@@ -1,7 +1,24 @@
-.PHONY: g_session claude_session sonnet opus haiku deslopp
+.PHONY: dev start test lint fmt deslopp sonnet opus haiku g_session bmad create-story dev-story code-review
 
-# Desloppify — AI-driven code quality loop
-# Override the agent with: make deslopp AGENT=cursor
+# === Core targets ===
+
+dev:
+	uv sync
+
+start:
+	uv run mad_frog
+
+test:
+	uv run pytest --cov --cov-report=term-missing
+
+lint:
+	uv run ruff check src/ tests/
+
+fmt:
+	uv run ruff format src/ tests/
+
+# === AI agent shortcuts ===
+
 AGENT ?= claude
 MODEL ?= opus
 
@@ -32,19 +49,11 @@ g_session:
 bmad:
 	@npx bmad-method install
 
-start:
-	@echo "Starting development process..."
-	@toad
-
 create-story:
 	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-sm  CS"
 
 dev-story:
-	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev DS"
+	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev DS" _bmad-output/implementation-artifacts/repos/toad.xml
 
 code-review:
 	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev CR"
-#   1. Validate the PRD — run /bmad-bmm-validate-prd to check for gaps, anti-patterns, and implementation readiness
-#   2. Create UX Design — run /bmad-bmm-create-ux-design to translate user journeys into interaction flows
-#   3. Create Architecture — run /bmad-bmm-create-architecture to make technical design decisions informed by FRs and NFRs
-#   4. Check Implementation Readiness — run /bmad-bmm-check-implementation-readiness to verify all artifacts are complete before breaking into epics
