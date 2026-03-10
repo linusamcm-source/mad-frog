@@ -36,7 +36,14 @@ start:
 	@echo "Starting development process..."
 	@toad
 
+create-story:
+	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-sm  CS"
 
+dev-story:
+	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev DS"
+
+code-review:
+	@claude --dangerously-skip-permissions --model opus "/bmad-agent-bmm-dev CR"
 #   1. Validate the PRD — run /bmad-bmm-validate-prd to check for gaps, anti-patterns, and implementation readiness
 #   2. Create UX Design — run /bmad-bmm-create-ux-design to translate user journeys into interaction flows
 #   3. Create Architecture — run /bmad-bmm-create-architecture to make technical design decisions informed by FRs and NFRs

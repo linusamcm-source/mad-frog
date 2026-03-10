@@ -1,0 +1,121 @@
+# generated: 2026-03-10
+# project: vibe_visualiser
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-03-10
+project: vibe_visualiser
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # Epic 1: Launch App & Create First Project
+  epic-1: backlog
+  1-1-toad-integration-spike-and-walking-skeleton: backlog
+  1-2-create-project-and-write-first-artifact: backlog
+  1-3-project-list-resume-and-switch: backlog
+  1-4-startup-health-checks-and-observability: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Guided Conversation & Phase Progression
+  epic-2: backlog
+  2-1-workflow-state-and-phase-advancement: backlog
+  2-2-phase-completion-with-structured-commits: backlog
+  2-3-wikilink-generation-and-obsidian-graph-view: backlog
+  2-4-vault-detection-and-setup: backlog
+  2-5-artifact-import-and-phase-unlock: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Session Persistence & Safe Recovery
+  epic-3: backlog
+  3-1-auto-save-and-state-operation-queue: backlog
+  3-2-session-lock-manager: backlog
+  3-3-container-recovery-and-state-rebuild: backlog
+  3-4-context-recall-on-resume: backlog
+  3-5-browser-disconnect-and-network-loss-recovery: backlog
+  3-6-pre-emptive-context-save: backlog
+  3-7-state-format-migration: backlog
+  3-8-chaos-test-suite: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Journey Map & Time Travel
+  epic-4: backlog
+  4-1-journey-map-sidebar-widget: backlog
+  4-2-temporal-labels-and-local-timezone: backlog
+  4-3-click-back-navigation-with-confirmation: backlog
+  4-4-version-preservation-on-click-back: backlog
+  4-5-version-history-for-completed-nodes: backlog
+  4-6-manual-checkpoints: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Polished Workflow Experience
+  epic-5: backlog
+  5-1-adaptive-pacing-and-agent-communication: backlog
+  5-2-in-session-help-and-project-status: backlog
+  5-3-in-session-answer-revision: backlog
+  5-4-decision-context-access: backlog
+  5-5-error-handling-and-agent-failure-recovery: backlog
+  5-6-keyboard-navigation-and-accessibility: backlog
+  5-7-unwritten-artifact-detection: backlog
+  5-8-project-completion-summary: backlog
+  5-9-on-demand-health-check: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Solutioning & Implementation Planning
+  epic-6: backlog
+  6-1-architecture-decision-records: backlog
+  6-2-epic-generation-from-prd: backlog
+  6-3-story-generation-with-acceptance-criteria: backlog
+  6-4-traceability-links: backlog
+  6-5-sprint-plan-and-project-completion: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Bidirectional Workspace & Party Mode
+  epic-7: backlog
+  7-1-workspace-file-detection-and-ingestion: backlog
+  7-2-agent-file-referencing: backlog
+  7-3-optimistic-vault-wikilinks: backlog
+  7-4-party-mode-agent-roster-and-selection: backlog
+  7-5-party-mode-visual-identity-and-interaction: backlog
+  7-6-party-mode-user-flow-and-exit: backlog
+  epic-7-retrospective: optional
+
+  # Epic 8: Advanced Onboarding & Community Extensions
+  epic-8: backlog
+  8-1-existing-git-repo-onboarding: backlog
+  8-2-brownfield-artifact-detection: backlog
+  8-3-method-version-upgrade-and-mismatch: backlog
+  8-4-project-archiving: backlog
+  8-5-community-workflow-templates-and-runtime-discovery: backlog
+  epic-8-retrospective: optional
