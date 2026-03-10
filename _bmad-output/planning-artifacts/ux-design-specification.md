@@ -21,8 +21,16 @@ inputDocuments:
   - docs/bmad-toad-integration-spec.md
 date: 2026-03-08
 author: Linus
-lastEdited: 2026-03-09
+lastEdited: 2026-03-10
 editHistory:
+  - date: 2026-03-10
+    scope: Align UX spec with architecture per implementation readiness review
+    changes:
+      - Added Ctrl+S keyboard binding for manual checkpoint creation (FR33)
+      - Added ProjectCompletionSummary component for project-level completion view (FR79)
+      - Added on-demand Health Check UI triggered from sidebar (FR88)
+      - Added Archive Project interaction to ProjectListItem with confirmation modal (FR5)
+      - Added version history interaction for completed Journey Map nodes (FR32)
   - date: 2026-03-09
     scope: Architecture alignment
     changes:
@@ -1772,6 +1780,47 @@ CeremonyData:
 
 **Spacing:** 1 blank line above and below. Full main-panel width.
 
+#### 2a. ProjectCompletionSummary (FR79)
+
+**Purpose:** Project-level completion screen shown when the final phase is completed — aggregates the full project journey into a single summary view.
+
+**Composed from:** `Panel` + `Markdown` (wrapped as `CompletionSummaryEntry`)
+
+**Data contract:**
+```
+ProjectCompletionData:
+  project_name: str
+  total_artifacts: int
+  artifact_list: list[str]       # names + vault paths
+  total_decisions: int
+  decision_depth: int            # max branching depth across all phases
+  phase_summaries: list[PhaseSummary]
+  project_graph_link: str | None # deep link to full project graph view
+```
+
+**Example rendering:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+╭─ ✓ Project Complete ────────────────╮
+│                                      │
+│ Acme Digital Transformation          │
+│                                      │
+│ 8 artifacts created                  │
+│ 47 decisions captured (3 revisions)  │
+│                                      │
+│ Artifacts:                           │
+│  · Product Brief         📂 saved   │
+│  · PRD                   📂 saved   │
+│  · Architecture          📂 saved   │
+│  · ... [5 more]                      │
+│                                      │
+│ [View full project graph]            │
+╰──────────────────────────────────────╯
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Behaviour:** Rendered inline in conversation after the final CeremonyBanner. "View full project graph" opens a modal overlay showing the complete Journey Map with all phases expanded and version forks visible. Uses `--mf-ceremony` border token.
+
 #### 3. ArtifactPanel
 
 **Purpose:** Unified component for artifact display — from the first "it's listening" micro-echo (Act 1) through full artifact previews (Act 2) and beyond. Single component, multiple states.
@@ -1937,6 +1986,21 @@ ProjectListData:
 ```
 
 **Behaviour:** Clickable — loads the selected project (Journey 2 flow). Status icon uses the standard state encoding (🔵 in-progress, ✅ completed, ⏸ paused).
+
+**Archive interaction (FR5):** Right-click (or long-press on touch) on a ProjectListItem opens a context menu with "Archive project". Archived projects are hidden from the default list. A toggle at the bottom of the project list ("Show archived") reveals them with a dimmed visual treatment (`style="dim"`). Unarchiving is available via the same context menu on archived items.
+
+**Archive confirmation modal:**
+```
+╭─ Archive Project ────────────────────╮
+│                                       │
+│ "Acme Digital Transformation" will   │
+│ be hidden from your project list.    │
+│ All data is preserved — you can      │
+│ unarchive at any time.               │
+│                                       │
+│        [Cancel]    [Archive]          │
+╰───────────────────────────────────────╯
+```
 
 #### 9. ErrorRecoveryPanel
 
@@ -2124,7 +2188,11 @@ From most to least intrusive:
 | Toggle sidebar | `Ctrl+B` | Sidebar appears/disappears |
 | View full node label | Focus any node | Full label + date shown in footer |
 
+| View version history | Right-click or long-press on completed node | Version list panel with timestamps and summaries (FR32) |
+
 **Rule:** The Journey Map is read-only for locked (🔒) and in-progress (🔵) nodes. Only completed (✅) and stale (⚠️) nodes are activatable. This prevents users from accidentally jumping to incomplete states.
+
+**Version history interaction (FR32):** Right-click (or long-press) on a completed (✅) node opens a version list overlay anchored to the node. Each entry shows a timestamp, one-line summary, and artifact name. Selecting a version navigates to that checkpoint (triggering the standard click-back confirmation modal if it would create a branch). The list is ordered newest-first. If only one version exists, the overlay shows "Current version (no prior revisions)" with no selectable items.
 
 #### Secondary Navigation: Conversation Landmarks
 
@@ -2180,6 +2248,40 @@ Open → Guided → Guided → Structured Choice → Confirmation → [Landmark]
 | Exit Party Mode | ❌ No | Guided conversation resumes |
 | Close browser | ❌ No | Auto-save handles it |
 | Delete project | ✅ Yes | Destructive, irreversible |
+| Archive project | ✅ Yes | Hides from list, reversible but intentional |
+| Trigger health check | ❌ No | Read-only diagnostic, no state change |
+
+#### On-Demand Health Check (FR88)
+
+**Trigger:** A "Health Check" action in the sidebar footer area (below the Journey Map). Rendered as a subtle text button: `[🔍 Health Check]`. Also accessible via `Ctrl+H` keyboard shortcut.
+
+**Display:** Opens a `ModalScreen` overlay with a read-only diagnostic panel.
+
+**Data contract:**
+```
+HealthCheckData:
+  total_checkpoints: int
+  total_artifacts: int
+  git_status: str          # e.g., "Clean", "Uncommitted changes"
+  sqlite_consistency: str  # e.g., "Consistent", "2 orphaned entries"
+  orphaned_files: list[str]
+```
+
+**Example rendering:**
+```
+╭─ Health Check ───────────────────────╮
+│                                       │
+│ Checkpoints:    14                    │
+│ Artifacts:       8                    │
+│ Git status:     Clean ✓              │
+│ SQLite index:   Consistent ✓         │
+│ Orphaned files: None ✓               │
+│                                       │
+│              [Close]                  │
+╰───────────────────────────────────────╯
+```
+
+**Behaviour:** Read-only — no actions beyond closing. If issues are detected, affected rows display `⚠️` with a brief explanation. Single "Close" button; `Escape` dismisses.
 
 #### Modal Content Pattern
 
@@ -2360,6 +2462,7 @@ Every primary interaction is keyboard-accessible. No interaction requires a mous
 | Navigate Journey Map | `Up/Down` arrows | When sidebar/Map view focused |
 | Expand/collapse phase | `Enter` | Journey Map node focused |
 | Activate node (click-back) | `Space` | Completed/stale Journey Map node focused |
+| Create manual checkpoint | `Ctrl+S` | Global — triggers manual checkpoint creation (FR33) |
 | Dismiss modal | `Escape` | Modal open |
 | Return to input | `Escape` | Sidebar or other widget focused |
 
@@ -2378,6 +2481,8 @@ Every primary interaction is keyboard-accessible. No interaction requires a mous
 | `Up/Down` | Normal typing | Navigate nodes | Navigate buttons | No action |
 | `Enter` | Submit message | Expand/collapse node | Confirm action | No action |
 | `Space` | Normal typing (space char) | Activate node | No action | No action |
+| `Ctrl+S` | Create checkpoint | Create checkpoint | Blocked | Create checkpoint |
+| `Ctrl+H` | Open health check | Open health check | Blocked | Open health check |
 | `Escape` | No action | Return to input | Dismiss modal | No action |
 | `Tab` | Move to sidebar | Move to header | Cycle modal buttons | Move to input |
 

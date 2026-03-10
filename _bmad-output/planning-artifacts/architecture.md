@@ -22,7 +22,7 @@ project_name: 'mad_frog'
 user_name: 'Linus'
 date: '2026-03-09'
 partyModeInsights:
-  - 'Tool-use architecture: agent is the orchestrator, engine provides 15 tool functions'
+  - 'Tool-use architecture: agent is the orchestrator, engine provides 18 tool functions'
   - 'Multi-repo model: each project is an independent Git repo, graduates to development repo'
   - 'Stateless tool: all durable state in project repos, SQLite is ephemeral, tool is independently upgradeable'
   - 'Vault detection via .obsidian/ parent walk, zero-config Obsidian integration'
@@ -31,7 +31,7 @@ partyModeInsights:
   - 'Method snapshot per-project: _bmad/ copied at project creation, portable provenance'
   - 'Two-tier state model: Tier 1 (Git, artifacts) durable, Tier 2 (conversation, position) rebuilt from Tier 1'
   - 'Safety nets not guardrails: auto-save, unwritten artifact detection, state rebuild — catch agent mistakes without constraining agent behaviour'
-  - '~2000 lines of Python, 15 tool functions, 7 infrastructure services, 3 UI concerns, 65 tests in 2 minutes'
+  - '~2000 lines of Python, 18 tool functions, 7 infrastructure services, 3 UI concerns, 65 tests in 2 minutes'
   - 'Decision: rename project from vibe_visualiser to mad_frog (to be applied in dedicated rename pass)'
   - 'Python 3.14 (GIL on) — Toad requires >=3.14, no-GIL deferred to post-MVP'
   - 'Single production dependency: batrachian-toad>=0.5.35 — GitPython and aiosqlite are transitive'
@@ -70,7 +70,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 
 ### What Is Mad Frog?
 
-**Mad Frog is a Toad app that gives an LLM agent 15 tools to manage BMAD planning projects.**
+**Mad Frog is a Toad app that gives an LLM agent 18 tools to manage BMAD planning projects.**
 
 The agent reads BMAD step files and facilitates guided conversations. When the agent has content ready, it calls `artifact.write()` to save it to the user's project repo with full Obsidian integration. Git provides the state engine. SQLite provides fast queries. Auto-save provides the safety net. Toad provides the UI. The entire Mad Frog codebase is under 2000 lines of Python. Everything else — the methodology, the facilitation, the adaptation — lives in the agent, where it improves for free with every model upgrade.
 
@@ -84,7 +84,7 @@ The agent reads BMAD step files and facilitates guided conversations. When the a
 - **Security:** No credential logging/display, filesystem sandboxing (tools validate paths within project root), network traffic limited to LLM provider via Toad
 - **Reliability:** Zero data loss guarantee, atomic checkpoint operations, chaos test suite (5 scenarios), graceful disconnect recovery, atomic session lock
 - **Accessibility:** WCAG AA contrast via Toad theme, keyboard-accessible interactions, non-colour state encoding (icons + text labels)
-- **Integration:** Obsidian-native markdown validation (frontmatter, wikilinks, graph view), CommonMark compliance, platform-agnostic Docker/Codespaces
+- **Integration:** Obsidian-native markdown validation (frontmatter, wikilinks, graph view), CommonMark compliance, platform-agnostic Docker
 - **Observability:** Structured JSON logs via tool function logging decorator, error classification (recoverable/fatal)
 - **Maintainability:** State format versioning with non-destructive migration, 90%+ coverage on ~2000 lines, 80%+ widget pilot coverage
 
@@ -129,8 +129,7 @@ Mad Frog provides **tools** (safe, atomic, deterministic) and **safety nets** (c
     └── .git/
 ```
 
-- **Local Docker Desktop:** Workspace root mounted via `VIBE_WORKSPACE` env var (defaults to parent of tool directory). Projects are sibling directories nominated by the user.
-- **GitHub Codespaces:** Projects created under `/workspaces/` alongside the tool repo.
+- **Local Docker Desktop:** Workspace root collected via first-run modal, stored in `.vibe/config.yaml`. Projects are sibling directories nominated by the user.
 - **Multi-repo model:** Each project is an independent Git repo. Projects graduate to development repos at Implementation phase — the same repo that holds planning artifacts receives source code. One `git log` tells the story from idea to code.
 - **Stateless tool:** All durable state lives in project repositories. Cross-project config is a lightweight path registry in `.vibe/config.yaml`. SQLite index is ephemeral — rebuilt on startup from scanning registered project repos. The tool is independently upgradeable without affecting any project.
 
@@ -142,7 +141,7 @@ Mad Frog provides **tools** (safe, atomic, deterministic) and **safety nets** (c
 │  (reads BMAD step files, facilitates convo,      │
 │   calls tools, adapts to user)                   │
 ├─────────────────────────────────────────────────┤
-│              Tool Interface (15 functions)        │
+│              Tool Interface (18 functions)        │
 │  project.*  artifact.*  state.*  workspace.*     │
 ├─────────────────────────────────────────────────┤
 │           Infrastructure Services                │
@@ -161,7 +160,7 @@ Mad Frog provides **tools** (safe, atomic, deterministic) and **safety nets** (c
 
 Five layers. Agent at top. Tools in the middle. Infrastructure below. Toad as the platform. UI as the presentation.
 
-### Tool Interface (15 Functions)
+### Tool Interface (18 Functions)
 
 **Project Management:**
 - `project.create(name, path)` — creates directory, `git init`, copies `_bmad/` method snapshot from tool
@@ -207,7 +206,7 @@ Each tool function: validates inputs, performs operation, returns structured res
 
 ### UI Layer (3 Concerns)
 
-**`MadFrogApp(ToadApp)` (~100 lines):** Overrides `compose()` to add Journey Map sidebar and Welcome Screen. Watches `.mad_frog/state.json` via watchdog for MCP server state changes. Registers `Ctrl+S` keybinding for manual checkpoint (FR33). Credential pre-flight check on mount — redirects to `CredentialSetupScreen` if no API key found. Tools are exposed via a separate MCP server process (see Step 4 decisions), not registered directly on the app.
+**`MadFrogApp(ToadApp)` (~100 lines):** Overrides `compose()` to add Journey Map sidebar and Welcome Screen. Watches `.mad_frog/state.json` via watchdog for MCP server state changes. Registers `Ctrl+S` keybinding for manual checkpoint (FR33). First-run check on mount — redirects to `WorkspaceSetupScreen` if no `.vibe/config.yaml` found. Tools are exposed via a separate MCP server process (see Step 4 decisions), not registered directly on the app.
 
 **`BMADJourneyMap(Tree)` (~150 lines):** Sidebar widget reading from `state.get_history()`. Renders phase nodes with state icons (✅ completed, 🔵 in-progress, 🔒 locked, ⚠️ stale). Temporal labels (dates, descriptions — never Git identifiers). Expand/collapse (current phase expanded by default). Click events translated to agent messages: "User wants to navigate to checkpoint X" — the agent handles confirmation and context switching conversationally.
 
@@ -215,7 +214,7 @@ Each tool function: validates inputs, performs operation, returns structured res
 
 **Ceremony/landmark TCSS (~50 lines):** Minimal styling extensions to Toad's theme. Semantic colour tokens (`--mf-completed`, `--mf-active`, `--mf-stale`, `--mf-error`, `--mf-ceremony`). Phase completion banner styling. Topic transition divider styling. All colours inherit from Toad's theme system.
 
-**`CredentialSetupScreen` (~50 lines):** Shown when no API key detected. Provider selection, step-by-step setup guidance, Codespaces secrets link. Redirects to WelcomeScreen on completion.
+**`WorkspaceSetupScreen` (~50 lines):** First-run modal asking workspace root path, saved to `.vibe/config.yaml`. Redirects to WelcomeScreen on completion.
 
 ### Core Data Structures
 
@@ -335,7 +334,7 @@ User types in Toad's prompt
 
 ```
 User opens browser → MadFrogApp starts
-  → Credential check (redirect to setup if missing)
+  → Workspace config check (redirect to WorkspaceSetupScreen if no .vibe/config.yaml)
   → WelcomeScreen shows projects from project.list()
   → User clicks a project
   → project.open(path):
@@ -351,7 +350,7 @@ User opens browser → MadFrogApp starts
 
 1. **Intelligence in the agent, infrastructure in the code.** The agent reads step files, facilitates conversations, and decides when to call tools. Our code provides tools that are safe, atomic, and fast. As models improve, the product improves — without code changes.
 
-2. **15 tools, not 15 engines.** Every capability Mad Frog adds is a tool function the agent can call. Tools are thin wrappers around infrastructure. If a capability can be agent behaviour instead of a tool, it should be.
+2. **18 tools, not 18 engines.** Every capability Mad Frog adds is a tool function the agent can call. Tools are thin wrappers around infrastructure. If a capability can be agent behaviour instead of a tool, it should be.
 
 3. **Lean into Toad.** Subclass `ToadApp`. Use Toad's agent protocol, settings, theme, sidebar, prompt. Extend minimally. Our TCSS is under 50 lines. Accept framework coupling as a feature — it's what gives us the UI for free.
 
@@ -397,7 +396,7 @@ User opens browser → MadFrogApp starts
 - Acceptance test: resume project → Journey Map shows history → auto-save running
 
 **Week 3 — Polish & Safety:**
-- `WelcomeScreen` with `project.list()` + `CredentialSetupScreen`
+- `WelcomeScreen` with `project.list()` + `WorkspaceSetupScreen`
 - `SessionLockManager`
 - `VaultHealthMonitor` + vault-aware `artifact.write()`
 - `ArtifactValidator` integrated into write pipeline
@@ -704,7 +703,7 @@ User runs: mad_frog ~/my-project
 │              ┌────────▼─┐   ┌────────▼──────────┐     │
 │              │  Toad     │   │  Mad Frog         │     │
 │              │  built-in │   │  MCP Server       │ P3  │
-│              │  RPC      │   │  (15 tools)       │     │
+│              │  RPC      │   │  (18 tools)       │     │
 │              └───────────┘   │  git state,       │     │
 │                              │  state file       │     │
 │                              └───────────────────┘     │
@@ -714,7 +713,7 @@ User runs: mad_frog ~/my-project
 **Three processes:**
 1. **MadFrogApp** (Process 1) — Textual UI: sidebar navigation, welcome screen, conversation panel. Watches `state.json` for MCP server state changes via `watchdog`.
 2. **AI Agent** (Process 2) — Claude or any ACP-compliant agent. Launched by Toad. Speaks ACP to Toad (file I/O, terminal) and MCP to our server (BMAD tools).
-3. **Mad Frog MCP Server** (Process 3) — stdio MCP server launched by the AI agent. Exposes 15 BMAD tools via `tools/list`. Manages git state, writes state file for UI sync.
+3. **Mad Frog MCP Server** (Process 3) — stdio MCP server launched by the AI agent. Exposes 18 BMAD tools via `tools/list`. Manages git state, writes state file for UI sync.
 
 **Key data flows:**
 - User clicks sidebar → synthetic prompt → AI agent responds with BMAD guidance
@@ -832,13 +831,13 @@ class MadFrogConfig:
 **MCP lifecycle:**
 1. AI agent launches our server as subprocess: `python -m mad_frog.mcp_server`
 2. Agent sends `initialize` → we respond with `{"capabilities": {"tools": {"listChanged": false}}}`
-3. Agent sends `tools/list` → we respond with 15 tool definitions (name, description, inputSchema)
+3. Agent sends `tools/list` → we respond with 18 tool definitions (name, description, inputSchema)
 4. Agent sends `tools/call` with `name` + `arguments` → we execute and return `CallToolResult`
 5. Agent closes stdin → we exit
 
 **Transport:** stdio — newline-delimited JSON-RPC over stdin/stdout. No HTTP, no SSE. Matches ACP's McpServer transport (`command` + `args`).
 
-**Tool definitions (15 tools):**
+**Tool definitions (18 tools):**
 
 | Tool Name | Description | Key Parameters |
 |-----------|-------------|----------------|
@@ -857,6 +856,9 @@ class MadFrogConfig:
 | `bmad_get_agent_persona` | Get BMAD agent persona data | `agent_name` |
 | `bmad_list_agents` | List available BMAD agents | — |
 | `bmad_auto_save_status` | Get auto-save timer status | — |
+| `bmad_update_method` | Update BMAD method in project via npx bmad update | `project_path` |
+| `bmad_detect_changes` | Detect new/modified/deleted files since last checkpoint | — |
+| `bmad_report_context` | Report agent context window size for pre-emptive save | `context_window_tokens` |
 
 **Tool return format (MCP CallToolResult):**
 
@@ -930,6 +932,9 @@ async def main():
         "summary": "Product brief complete",
         "timestamp": "2026-03-09T12:00:00Z"
     },
+    "checkpoint_history": [
+        {"git_sha": "abc123f", "summary": "Product brief complete", "phase": "analysis", "type": "checkpoint", "timestamp": "2026-03-09T12:00:00Z"}
+    ],
     "auto_save": {
         "last_save": "2026-03-09T12:02:00Z",
         "interval_seconds": 120,
@@ -1018,14 +1023,17 @@ The AI agent receives this as a normal user message. Because it has access to ou
 # Entry point: mad_frog
 # pyproject.toml: [project.scripts] mad_frog = "mad_frog.cli:main"
 
-@click.command()
-@click.argument("project_dir", default=".", type=click.Path(exists=True))
-@click.option("--agent", default="claude.com", help="AI agent identity")
-def main(project_dir: str, agent: str):
-    """Mad Frog — guided BMAD planning in your terminal."""
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description="Mad Frog - BMAD Planning Tool")
+    parser.add_argument("project_dir", nargs="?", default=".", help="Project directory")
+    parser.add_argument("--agent", default="claude.com", help="AI agent identity")
+    args = parser.parse_args()
+
     app = MadFrogApp(
-        project_dir=Path(project_dir).resolve(),
-        agent_identity=agent,
+        project_dir=Path(args.project_dir).resolve(),
+        agent_identity=args.agent,
     )
     app.run()
 ```
@@ -1129,7 +1137,7 @@ mad_frog/
 ├── src/mad_frog/
 │   ├── __init__.py
 │   ├── py.typed
-│   ├── cli.py                     # Click CLI entry point
+│   ├── cli.py                     # CLI entry point (argparse)
 │   ├── app.py                     # MadFrogApp(ToadApp) — UI only
 │   ├── agent.py                   # MadFrogAgent(Agent) — overrides acp_new_session
 │   ├── constants.py
@@ -1157,7 +1165,7 @@ mad_frog/
 │       ├── __init__.py
 │       ├── welcome_screen.py
 │       ├── journey_map.py
-│       └── credential_screen.py
+│       └── workspace_setup.py
 ├── tests/
 │   ├── conftest.py
 │   ├── test_mcp_server.py         # MCP protocol compliance tests
@@ -1188,7 +1196,7 @@ Replaces the previous 5-layer diagram:
 ```
 ┌─────────────────────────────────────────────────┐
 │              MadFrogApp (ToadApp)                │
-│  BMADJourneyMap  WelcomeScreen  CredentialScreen │
+│  BMADJourneyMap  WelcomeScreen  WorkspaceSetup   │
 │  Watches state.json via watchdog                 │
 ├─────────────────────────────────────────────────┤
 │              Toad Framework                       │
@@ -1199,7 +1207,7 @@ Replaces the previous 5-layer diagram:
 │  Calls BMAD tools (bmad_*) via MCP               │
 ├─────────────────────────────────────────────────┤
 │         Mad Frog MCP Server (stdio)              │
-│  15 tools: project, artifact, state, workflow    │
+│  18 tools: project, artifact, state, workflow    │
 │  Auto-save timer, state file writer              │
 ├─────────────────────────────────────────────────┤
 │         Infrastructure Services                  │
@@ -1232,7 +1240,7 @@ Replaces the previous 5-layer diagram:
 |---|----------|--------|---------------|
 | 1 | Integration model | MCP Server + ToadApp subclass | Agent-agnostic, protocol-compliant, guided UX preserved |
 | 2 | Data models | TypedDict + dataclass (stdlib) | Matches Toad patterns, zero added deps |
-| 3 | MCP server | Custom stdio JSON-RPC | 15 tools, standard MCP lifecycle, auto-save timer |
+| 3 | MCP server | Custom stdio JSON-RPC | 18 tools, standard MCP lifecycle, auto-save timer |
 | 4 | State sync (MCP ↔ UI) | Atomic state file + watchdog | Observable, debuggable, uses existing Toad dep |
 | 5 | Auto-save | MCP server internal timer | No token cost, no conversation interruption |
 | 6 | Sidebar ↔ conversation | Synthetic user input | Uses Toad's existing flow, agent-agnostic |
@@ -1537,7 +1545,7 @@ Mad Frog is a **stateless tool** that operates on **sibling project directories*
 - The tool repo may have its own `_bmad/` (for bootstrapping), but projects get independent installs.
 - The MCP server receives **one path**: the project path. No tool root needed.
 
-### BMAD Method Management (16th Tool)
+### BMAD Method Management
 
 Two project lifecycle operations handle BMAD installation:
 
@@ -1572,7 +1580,7 @@ mad_frog/                                          # Tool repo
 │   ├── __init__.py                                # Version string only
 │   ├── __main__.py                                # from mad_frog.cli import main; main()
 │   ├── py.typed                                   # PEP 561 marker
-│   ├── cli.py                                     # Click entry point — wires MadFrogApp + MadFrogAgent
+│   ├── cli.py                                     # CLI entry point (argparse) — wires MadFrogApp + MadFrogAgent
 │   ├── app.py                                     # MadFrogApp(ToadApp) — compose(), watchdog, keybindings
 │   ├── agent.py                                   # MadFrogAgent(Agent) — overrides acp_new_session
 │   ├── constants.py                               # DEFAULT_WORKSPACE, AUTO_SAVE_INTERVAL
@@ -1581,7 +1589,7 @@ mad_frog/                                          # Tool repo
 │   ├── mcp_server.py                              # MadFrogMCPServer — stdio JSON-RPC, dispatch, auto-save
 │   ├── tools/
 │   │   ├── __init__.py                            # Empty
-│   │   ├── definitions.py                         # All 16 tool schemas (name, description, inputSchema)
+│   │   ├── definitions.py                         # All 18 tool schemas (name, description, inputSchema)
 │   │   ├── project.py                             # bmad_create_project, bmad_open_project, bmad_list_projects,
 │   │   │                                          # bmad_health_check, bmad_update_method
 │   │   ├── artifact.py                            # bmad_write_artifact, bmad_read_artifact, bmad_list_artifacts
@@ -1604,7 +1612,7 @@ mad_frog/                                          # Tool repo
 │       ├── __init__.py                            # Empty
 │       ├── welcome_screen.py                      # Project list, new/open/resume actions (~100 lines)
 │       ├── journey_map.py                         # BMADJourneyMap(Tree) sidebar widget (~150 lines)
-│       └── credential_screen.py                   # API key setup guidance (~50 lines)
+│       └── workspace_setup.py                     # First-run modal: workspace path (~50 lines)
 ├── tests/
 │   ├── conftest.py                                # tmp_git_repo, tmp_db, tmp_project, mock_mcp_server
 │   ├── test_mcp_server.py                         # MCP protocol: initialize, tools/list, tools/call
@@ -1630,7 +1638,7 @@ mad_frog/                                          # Tool repo
 │       ├── conftest.py                            # Textual App pilot fixtures
 │       ├── test_welcome_screen.py
 │       ├── test_journey_map.py
-│       └── test_credential_screen.py
+│       └── test_workspace_setup.py
 ├── .gitignore                                     # __pycache__, .venv, *.egg-info, dist, .coverage,
 │                                                  # .ruff_cache, *.db, .env, .mad_frog/
 ├── .python-version                                # 3.14
@@ -1692,9 +1700,9 @@ fail_under = 85
 
 | Process | Entry Point | Responsibility | Communicates With |
 |---------|-------------|----------------|-------------------|
-| MadFrogApp | `mad_frog` CLI → `app.py` | UI: sidebar, welcome, credentials, watchdog | AI Agent (ACP via Toad) |
+| MadFrogApp | `mad_frog` CLI → `app.py` | UI: sidebar, welcome, workspace setup, watchdog | AI Agent (ACP via Toad) |
 | AI Agent | Launched by Toad | Conversation, BMAD facilitation | Toad (ACP), MCP Server (MCP) |
-| MCP Server | `python -m mad_frog.mcp_server` | 16 tools, git state, auto-save | AI Agent (MCP stdio) |
+| MCP Server | `python -m mad_frog.mcp_server` | 18 tools, git state, auto-save | AI Agent (MCP stdio) |
 
 #### MCP Server Internal Boundaries
 
@@ -1709,7 +1717,7 @@ services/*.py (pure business logic, typed Python args, raises exceptions, no MCP
 #### UI Internal Boundaries
 
 ```
-cli.py (wires MadFrogApp + MadFrogAgent, Click argument parsing)
+cli.py (wires MadFrogApp + MadFrogAgent, argparse argument parsing)
     ↓ creates
 app.py (MadFrogApp — Textual lifecycle, compose, keybindings, watchdog)
     ↓ composes
@@ -1766,9 +1774,9 @@ class MadFrogApp creates MadFrogAgent, not default Agent
 | State Persistence (FR37-45) | `tools/state.py`, `services/git_state_engine.py`, `services/state_operation_queue.py`, `services/auto_save_service.py` | `bmad_checkpoint`, auto-save |
 | Obsidian Integration (FR46-52) | `services/vault_health_monitor.py`, `services/artifact_validator.py` | Vault detection, wikilinks |
 | Conversation (FR53-55) | Toad built-in (conversation panel) | Deferred to post-MVP |
-| File Workspace (FR56-60) | `tools/project.py` | `bmad_list_projects`, `bmad_health_check` |
+| File Workspace (FR56-60) | `tools/project.py` | `bmad_detect_changes`, Toad ACP `fs_read`/`fs_list` |
 | Party Mode (FR61-68) | `tools/session.py` | `bmad_get_agent_persona`, `bmad_list_agents` |
-| Container & Access (FR69-88) | `.devcontainer/`, `cli.py`, `ui/credential_screen.py` | Dev Container config |
+| Container & Access (FR69-88) | `.devcontainer/`, `cli.py`, `ui/workspace_setup.py` | Dev Container config |
 
 ### Data Flow
 
@@ -1808,7 +1816,7 @@ User clicks sidebar phase
 | `services/test_state_file.py` | atomic write, concurrent read | 3 |
 | `ui/test_welcome_screen.py` | render, project list, actions | 3 |
 | `ui/test_journey_map.py` | render, state update, click events | 3 |
-| `ui/test_credential_screen.py` | render, setup flow | 2 |
+| `ui/test_workspace_setup.py` | render, setup flow | 2 |
 | **Total** | | **~71** |
 
 ### constants.py
@@ -1931,7 +1939,7 @@ if self.session_tokens > self.context_save_at and not self._context_saved:
 | Artifact (3) | `bmad_write_artifact`, `bmad_read_artifact`, `bmad_list_artifacts` |
 | State (3) | `bmad_checkpoint`, `bmad_restore`, `bmad_history` |
 | Workflow (3) | `bmad_advance_workflow`, `bmad_get_workflow_state`, `bmad_get_step_prompt` |
-| Session (3) | `bmad_session_info`, `bmad_lock_session`, `bmad_unlock_session`, `bmad_get_agent_persona`, `bmad_list_agents`, `bmad_auto_save_status`, `bmad_report_context` |
+| Session (7) | `bmad_session_info`, `bmad_lock_session`, `bmad_unlock_session`, `bmad_get_agent_persona`, `bmad_list_agents`, `bmad_auto_save_status`, `bmad_report_context` |
 
 Note: Session category has 7 tools but 4 are lightweight metadata queries.
 

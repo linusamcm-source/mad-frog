@@ -27,8 +27,15 @@ classification:
   domain: 'Workflow Automation / Agentic Tooling'
   complexity: 'medium-high'
   projectContext: 'greenfield'
-lastEdited: '2026-03-09'
+lastEdited: '2026-03-10'
 editHistory:
+  - date: '2026-03-10'
+    reason: 'Align PRD with architecture source of truth per implementation readiness review'
+    changes:
+      - 'DD5: Removed ConversationPanel from custom widget list — uses Toad built-in conversation panel as-is'
+      - 'Creative freeform mode: Clarified as post-MVP (Phase 2) throughout journeys, requirements summary, and innovation section'
+      - 'NFR-MNT: Renumbered MNT-04 through MNT-06 to MNT-03 through MNT-05 (MNT-03 was missing)'
+      - 'FR85: Already defined — no change needed (deferred telemetry definition was present)'
   - date: '2026-03-09'
     reason: 'Align PRD with architecture decisions'
     inputDocument: '_bmad-output/planning-artifacts/architecture.md'
@@ -75,7 +82,7 @@ partyModeInsights:
   - 'Bind mount persistence (default for non-technical), git remote (opt-in for technical users)'
   - 'Obsidian-native artifact output (frontmatter + wikilinks baked into templates, zero extra code via agent write)'
   - 'Web-first delivery via toad serve (localhost:8000, browser-based, no terminal knowledge required)'
-  - 'Toad widget mapping: BMADJourneyMap (Tree-based sidebar), WelcomeScreen, WorkspaceSetupScreen, ConversationPanel; 18 tool functions across project/artifact/state/workflow/session categories'
+  - 'Toad widget mapping: BMADJourneyMap (Tree-based sidebar), WelcomeScreen, WorkspaceSetupScreen; conversation panel provided by Toad built-in; 18 tool functions across project/artifact/state/workflow/session categories'
   - 'MVP scope shift: click-back navigation and stale detection pulled into V1 (cheap with Git); auto-reprocessing deferred to V2'
 workflowType: 'prd'
 date: 2026-03-06
@@ -246,7 +253,7 @@ She clicks back to the Product Brief in the Journey Map — she wants to revise 
 
 **Resolution:** Two weeks later, Sarah presents to the client. Her plan has Epics, User Stories with acceptance criteria, an architecture overview, and a risk analysis. When the client asks "why did you scope it this way?", she opens her Obsidian vault and walks them through the decision trail. The client has never seen this level of traceability from a PM. Sarah's new reality: she never starts a project without Mad Frog.
 
-**Requirements revealed:** Dev Container setup (Docker Desktop), browser-based access, welcome screen with three entry modes, bidirectional file workspace, real-time Obsidian output, Party Mode at any phase, click-back navigation, stale detection, version preservation, Journey Map sidebar.
+**Requirements revealed:** Dev Container setup (Docker Desktop), browser-based access, welcome screen with two MVP entry modes (guided project + resume; creative freeform is post-MVP), bidirectional file workspace, real-time Obsidian output, Party Mode at any phase, click-back navigation, stale detection, version preservation, Journey Map sidebar.
 
 ### Journey 2: Alex — The Technical Builder
 
@@ -343,10 +350,10 @@ This context recall works because every Git commit includes structured metadata 
 | Capability | Revealed By | Acceptance Test |
 |-----------|-------------|-----------------|
 | Dev Container setup (Docker Desktop) | Sarah | User opens in Dev Container, reaches welcome screen in under 60 seconds |
-| Welcome screen with three entry modes | Sarah, River, Returning User | Welcome screen displays guided, creative, and resume options; each navigates to correct flow |
+| Welcome screen with two MVP entry modes (guided + resume) | Sarah, Returning User | Welcome screen displays guided and resume options; each navigates to correct flow. Creative freeform mode is post-MVP (see Phase 2) |
 | Full guided workflow mode | Sarah, Kai | User completes Analysis to Planning with all phase-gate prompts and CIS suggestions |
 | Adaptive pacing mode | Alex | Agent detects confident responses and reduces follow-ups; total session time under 3 hours for Brief + PRD |
-| Creative freeform mode | River | User launches CIS session without creating a BMAD project; artifacts checkpointed in Git |
+| Creative freeform mode (post-MVP) | River | User launches CIS session without creating a BMAD project; artifacts checkpointed in Git |
 | Freeform-to-BMAD upgrade | River | Freeform project converts to guided mode; existing sessions become Analysis phase inputs |
 | Browser-based access (`mad_frog`) | Sarah, Kai, River | `make start` launches browser; full UI functional with no terminal interaction |
 | Bidirectional file workspace | Sarah, Kai | Drop markdown file into project folder; agent references file content within first 3 interactions of next session |
@@ -384,8 +391,8 @@ Existing planning tools produce final documents — a PRD, a backlog, a strategy
 **Distribution — Integration by Convention (Obsidian-Native Output)**
 Rather than building plugins, APIs, or sync layers, Mad Frog writes Obsidian-native markdown (frontmatter + wikilinks) directly to the filesystem via bind mount. The agent's file-write capability IS the integration. Zero dependencies, zero integration code, full Obsidian compatibility including graph view, backlinks, and tag search. This pattern — "integration by convention" — is transferable to any markdown-based tool (Logseq, Dendron, plain filesystem). It reaches Obsidian's 1M+ users without a single line of plugin code.
 
-**Growth — Creative Freeform as a Methodology On-Ramp**
-The three-mode welcome screen (guided project, creative session, resume) isn't just a UX pattern — it's a distribution strategy. Non-software users who would never adopt "BMAD methodology" enter through brainstorming and design thinking tools. Over time, they discover that their creative sessions can be upgraded into structured planning workflows. The methodology finds them, not the other way around. This inverts the typical adoption funnel for structured methodologies.
+**Growth — Creative Freeform as a Methodology On-Ramp (Post-MVP)**
+The two-mode MVP welcome screen (guided project, resume) ships first; creative freeform is added in Phase 2 as a distribution strategy. Non-software users who would never adopt "BMAD methodology" enter through brainstorming and design thinking tools. Over time, they discover that their creative sessions can be upgraded into structured planning workflows. The methodology finds them, not the other way around. This inverts the typical adoption funnel for structured methodologies.
 
 **Experience — Multi-Persona Agentic Facilitation in a Browser**
 Party Mode — where distinct specialist agents with unique personalities debate, challenge, and build on each other's perspectives in real time — is a new interaction paradigm. It's not a chatbot. It's a simulated expert panel that stress-tests ideas from multiple angles simultaneously. Delivered via `mad_frog` in a browser, accessible to non-technical users, with the full session checkpointed in Git.
@@ -661,7 +668,7 @@ State follows a two-tier model: **Tier 1 (durable)** — Git commits, artifact f
 - DD2: Search is delegated to Obsidian — Mad Frog does not duplicate search functionality
 - DD3: Agent introduces concepts naturally during conversation rather than a separate onboarding tutorial
 - DD4: Conversation transcripts stored as separate markdown files, not loaded into agent context by default — agent searches them on demand
-- DD5: Widget components (BMADJourneyMap, WelcomeScreen, WorkspaceSetupScreen, ConversationPanel) are designed as independently testable units via Textual's pilot testing framework — this is an architectural constraint, not a runtime quality attribute
+- DD5: Widget components (BMADJourneyMap, WelcomeScreen, WorkspaceSetupScreen) are designed as independently testable units via Textual's pilot testing framework — this is an architectural constraint, not a runtime quality attribute. Conversation panel uses Toad's built-in implementation as-is (not a custom widget)
 
 ## Non-Functional Requirements
 
@@ -724,9 +731,9 @@ State follows a two-tier model: **Tier 1 (durable)** — Git commits, artifact f
 
 - NFR-MNT-01: State format includes a version identifier — system detects version mismatches on startup and performs automated migrations
 - NFR-MNT-02: Workflow templates follow documented conventions — `bmad validate-workflow` catches structural errors before runtime
-- NFR-MNT-04: State format migrations are non-destructive — original state preserved via Git tag before migration. Migration completes within 30 seconds for projects with up to 200 checkpoints. Migration failures roll back cleanly with user-facing error message
-- NFR-MNT-05: Core state operations (checkpoint creation, branch management, index queries, atomic commits, rollback) maintain 90%+ branch coverage. Journey Map widget and workspace panel maintain 80%+ line coverage via Textual pilot tests. Coverage thresholds enforced in CI — PRs that drop below threshold are blocked
-- NFR-MNT-06: New frontmatter fields added in future versions are additive only — V1 artifacts render correctly in V2 without migration. Tested via backwards compatibility test suite that validates all V1 fixture artifacts against current version
+- NFR-MNT-03: State format migrations are non-destructive — original state preserved via Git tag before migration. Migration completes within 30 seconds for projects with up to 200 checkpoints. Migration failures roll back cleanly with user-facing error message
+- NFR-MNT-04: Core state operations (checkpoint creation, branch management, index queries, atomic commits, rollback) maintain 90%+ branch coverage. Journey Map widget and workspace panel maintain 80%+ line coverage via Textual pilot tests. Coverage thresholds enforced in CI — PRs that drop below threshold are blocked
+- NFR-MNT-05: New frontmatter fields added in future versions are additive only — V1 artifacts render correctly in V2 without migration. Tested via backwards compatibility test suite that validates all V1 fixture artifacts against current version
 
 ### User Experience Quality
 
