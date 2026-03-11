@@ -118,6 +118,26 @@ This section details the rebuild of the runner to fully integrate the `desloppif
 
 ## Python Architecture Specifications
 
+### Component Architecture (Class Structure)
+To manage the complexity of asynchronous orchestration, state recovery, and git manipulation, the application **must be broken down into distinct modules/classes** rather than a single monolithic script.
+
+**Recommended Structure:**
+- `sprint_runner.py` (Entrypoint)
+- `orchestrator/`
+  - `__init__.py`
+  - `runner.py` (`SprintOrchestrator`: Main state machine loop, lifecycle routing)
+  - `state.py` (`StateManager`: Reads/writes `sprint-status.yaml`)
+- `agents/`
+  - `__init__.py`
+  - `base.py` (`BaseAgentRunner`: Async subprocess management, concurrency limits)
+  - `bmad.py` (`BMadAgentRunner`: Specializes in `/bmad-agent-*` invocations)
+  - `desloppify.py` (`DesloppifyRunner`: Specific logic for Triage, Review, and Remediate loops)
+- `vcs/`
+  - `__init__.py`
+  - `git_manager.py` (`GitManager`: Async git operations, commit formatting, conflict abortion, git history parsing for idempotency checks)
+- `utils/`
+  - `logger.py` (Structured logging setup for `stderr` and specific log files)
+
 ### Async Orchestration
 The orchestrator must be built using `asyncio` to natively handle parallel processes (especially for Desloppify Phase 2). Sync blocks (like file writes or Git operations) should be wrapped appropriately, but all agent (`claude`) subprocesses must be asynchronous.
 
@@ -126,13 +146,13 @@ The orchestrator must be built using `asyncio` to natively handle parallel proce
 - The orchestrator strips `CLAUDECODE` from the environment before spawning subprocesses to allow nested CLI usage.
 
 ### Git Operation Encapsulation
-To support the rigorous commit requirements, the orchestrator will need robust asynchronous wrappers for Git operations (`git add -A`, `git diff --stat`, `git commit -m`) to generate the detailed commit bodies required for each phase. Also requires an explicit Git operation agent to handle the stateful branching, commit message formatting, and safe abort logic for merge conflicts.
+To support the rigorous commit requirements, the `GitManager` class will need robust asynchronous wrappers for Git operations (`git add -A`, `git diff --stat`, `git commit -m`) to generate the detailed commit bodies required for each phase. It must also handle the stateful branching, commit message formatting, and safe abort logic for merge conflicts.
 
 ### Idempotency & Restart Recovery
 - The state in `sprint-status.yaml` combined with the git commit history represents the ultimate source of truth.
 - If the runner crashes mid-process or after a successful stage but before a status update, upon restart it will:
-  1. Read the current status from `sprint-status.yaml`.
-  2. Evaluate the **Pre-flight (Restart Recovery)** checks utilizing git commit history (`git log --grep`) or file existence checks.
+  1. Read the current status from `sprint-status.yaml` via `StateManager`.
+  2. Evaluate the **Pre-flight (Restart Recovery)** checks utilizing `GitManager` to inspect commit history (`git log --grep`) or file existence checks.
   3. Resume precisely where it left off, advancing to the next logical gate without repeating expensive agent executions.
 
 ### Logging Architecture
